@@ -1,0 +1,43 @@
+{
+  "name": "classmatch",
+  "version": "1.0.0",
+  "description": "ClassMatch es una aplicación que permite a los estudiantes de una universidad específica conectarse con sus compañeros en función de horarios disponibles y sus gustos.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arojaspe/ClassMatch.git"
+  },
+  "author": "starkteam",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/arojaspe/ClassMatch/issues"
+  },
+  "homepage": "https://github.com/arojaspe/ClassMatch#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.7",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react": "^7.37.2",
+    "globals": "^15.13.0",
+    "tslint": "^6.1.3",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1"
+  },
+  "dependencies": {
+    "@web-std/file": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.11.5",
+    "sequelize": "^6.37.5",
+    "uuid": "^11.0.3"
+  }
+}
