@@ -37,10 +37,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const Connection_1 = __importDefault(require("./Connection"));
+const Func = __importStar(require("./Functions"));
 const Rout = __importStar(require("./Routes"));
 const cors_1 = __importDefault(require("cors"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
-//import * as Funcs from "./Functions/Funcs"
 class Server {
     constructor() {
         this.apiPaths = {
@@ -70,6 +70,9 @@ class Server {
             try {
                 yield Connection_1.default.authenticate();
                 console.log("Database Online");
+                //Run code here to test
+                console.log("Hello There");
+                Func.createCollege("Universidad Nacional de Colombia", "unal.edu.co", "Bogota");
             }
             catch (error) {
                 console.error("Error connecting to the database:", error);

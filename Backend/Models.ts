@@ -50,7 +50,7 @@ export const USERS_MOD= db.define("USER_MOD", {
         type: DataTypes.ENUM("M", "F", "NB"),
     }
 }, {
-    updatedAt: false,
+    timestamps: false,
     freezeTableName: true,
     tableName: 'USERS'
 })
@@ -64,10 +64,12 @@ export const COLLEGES_MOD= db.define("COLLEGES_MOD", {
     },
     COLLEGE_DOMAIN: {
         type: DataTypes.STRING
-    }
-
+    },
+    COLLEGE_CITY: {
+        type: DataTypes.STRING
+    }    
 }, {
-    updatedAt: false,
+    timestamps: false,
     freezeTableName: true,
     tableName: 'COLLEGES'
 })

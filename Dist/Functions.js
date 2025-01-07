@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findCollege = exports.isLoggedIn = exports.authUser = exports.logIn = exports.updateUser = exports.createUser = exports.str2hsh = void 0;
+exports.getCollege = exports.createCollege = exports.isLoggedIn = exports.authUser = exports.logIn = exports.updateUser = exports.createUser = exports.str2hsh = void 0;
 const Models = __importStar(require("./Models"));
 const uuid_1 = require("uuid");
 const jsonwebtoken_1 = require("jsonwebtoken");
@@ -172,7 +172,37 @@ let findUser = function (id, email) {
     });
 };
 //Colleges
-const findCollege = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+function createCollege(name, domain, city) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let college = yield findCollege(undefined, domain, city);
+        if (college) {
+            return ("College already exists!");
+        }
+        else {
+            let id = (0, uuid_1.v4)();
+            yield Models.USERS_MOD.create({
+                COLLEGE_ID: id,
+                COLLEGE_NAME: name,
+                COLLEGE_DOMAIN: domain,
+                COLLEGE_CITY: city
+            });
+            return ([id]);
+        }
+    });
+}
+exports.createCollege = createCollege;
+let findCollege = function (id, domain, city) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (id) {
+            let college = yield Models.COLLEGES_MOD.findByPk(id);
+            return college;
+        }
+        let college = yield Models.USERS_MOD.findOne({ where: { COLLEGE_DOMAIN: domain, COLLEGE_CITY: city } });
+        return college;
+    });
+};
+//Colleges unsure!!!
+const getCollege = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { college_id } = req.params;
     const college = yield Models.COLLEGES_MOD.findByPk(college_id);
     res.status(200).send({
@@ -182,4 +212,4 @@ const findCollege = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         }
     });
 });
-exports.findCollege = findCollege;
+exports.getCollege = getCollege;

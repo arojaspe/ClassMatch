@@ -122,7 +122,33 @@ let findUser = async function (id?: string, email?: string) {
 }
 
 //Colleges
-export const findCollege = async (req: Request, res: Response) => {
+export async function createCollege(name: string, domain: string, city: string) {
+    let college = await findCollege(undefined, domain, city)
+    if (college) {
+        return ("College already exists!")
+    } else {
+        let id: string = uuidv4()
+        await Models.COLLEGES_MOD.create({
+            COLLEGE_ID: id,
+            COLLEGE_NAME: name,
+            COLLEGE_DOMAIN: domain,
+            COLLEGE_CITY: city            
+        })
+        return ([id])
+    }
+}
+let findCollege = async function (id?: string, domain?: string, city?: string) {
+    if (id) {
+        let college = await Models.COLLEGES_MOD.findByPk(id)
+        return college
+    }
+    let college = await Models.COLLEGES_MOD.findOne({ where: { COLLEGE_DOMAIN: domain, COLLEGE_CITY: city } })
+    return college
+
+}
+
+//Colleges unsure!!!
+export const getCollege = async (req: Request, res: Response) => {
 
     const { college_id } = req.params;
 

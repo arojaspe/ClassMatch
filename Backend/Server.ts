@@ -1,9 +1,9 @@
 import express, {Application} from "express";
 import db from "./Connection";
+import * as Func from "./Functions";
 import * as Rout from "./Routes";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-//import * as Funcs from "./Functions/Funcs"
 
 class Server {
     private app: Application;
@@ -37,6 +37,11 @@ class Server {
         try {
             await db.authenticate();
             console.log("Database Online");
+
+            //Run code here to test
+            console.log("Hello There")
+            //Func.createCollege("Universidad Nacional de Colombia", "unal.edu.co", "Palmira")
+
         } catch (error) {
             console.error("Error connecting to the database:", error);
         };
