@@ -326,21 +326,107 @@ export const REPORT_MOD= db.define("REPORT_MOD", {
 
 //Relations
 
-
-//user-college
+//User-College
 COLLEGES_MOD.hasMany(USERS_MOD, {
-    foreignKey: 'COLLEGE_ID',
+    foreignKey: 'USER_COLLEGE_ID',
 });
 USERS_MOD.belongsTo(COLLEGES_MOD);
 
-//interest-user_interest
+// Interest-User_Interest 
 INTERESTS_MOD.hasMany(USER_INTERESTS_MOD, {
     foreignKey: 'UINTEREST_INTEREST',
 });
 USER_INTERESTS_MOD.belongsTo(INTERESTS_MOD);
 
-//user-user_interest
+// User-User_Interest 
 USERS_MOD.hasMany(USER_INTERESTS_MOD, {
     foreignKey: 'UINTEREST_USER',
 });
-USERS_MOD.belongsTo(INTERESTS_MOD);
+USER_INTERESTS_MOD.belongsTo(USERS_MOD);
+
+// User-Card 
+USERS_MOD.hasMany(CARDS_MOD, {
+    foreignKey: 'CARD_USER',
+});
+CARDS_MOD.belongsTo(USERS_MOD);
+
+// User-Event 
+USERS_MOD.hasMany(EVENTS_MOD, {
+    foreignKey: 'EVENT_ADMIN',
+});
+EVENTS_MOD.belongsTo(USERS_MOD);
+
+// User-User_Images 
+USERS_MOD.hasMany(USER_IMAGES_MOD, {
+    foreignKey: 'IMAGE_USER',
+});
+USER_IMAGES_MOD.belongsTo(USERS_MOD);
+
+// Event-Event_Images 
+EVENTS_MOD.hasMany(EVENT_IMAGES_MOD, {
+    foreignKey: 'IMAGE_EVENT',
+});
+EVENT_IMAGES_MOD.belongsTo(EVENTS_MOD);
+
+// Report-Report_Images 
+REPORT_MOD.hasMany(REPORT_IMAGES_MOD, {
+    foreignKey: 'IMAGE_REPORT',
+});
+REPORT_IMAGES_MOD.belongsTo(REPORT_MOD);
+
+// Event-User_Events 
+EVENTS_MOD.hasMany(USER_EVENTS_MOD, {
+    foreignKey: 'UEVENTS_EVENT',
+});
+USER_EVENTS_MOD.belongsTo(EVENTS_MOD);
+
+// User-User_Events 
+USERS_MOD.hasMany(USER_EVENTS_MOD, {
+    foreignKey: 'UEVENTS_ATTENDEE',
+});
+USER_EVENTS_MOD.belongsTo(USERS_MOD);
+
+// User-Chats_Users 
+USERS_MOD.hasMany(CHATS_USERS_MOD, {
+    foreignKey: 'CHAT_SENDER',
+});
+CHATS_USERS_MOD.belongsTo(USERS_MOD);
+
+USERS_MOD.hasMany(CHATS_USERS_MOD, {
+    foreignKey: 'CHAT_RECEIVER',
+});
+CHATS_USERS_MOD.belongsTo(USERS_MOD);
+
+// Event-Chats_Events 
+EVENTS_MOD.hasMany(CHATS_EVENTS_MOD, {
+    foreignKey: 'CHAT_EVENT',
+});
+CHATS_EVENTS_MOD.belongsTo(EVENTS_MOD);
+
+// User-Chats_Events 
+USERS_MOD.hasMany(CHATS_EVENTS_MOD, {
+    foreignKey: 'CHAT_SENDER',
+});
+CHATS_EVENTS_MOD.belongsTo(USERS_MOD);
+
+// User-Matches 
+USERS_MOD.hasMany(MATCHES_MOD, {
+    foreignKey: 'MATCHING_USER',
+});
+MATCHES_MOD.belongsTo(USERS_MOD);
+
+USERS_MOD.hasMany(MATCHES_MOD, {
+    foreignKey: 'MATCHED_USER',
+});
+MATCHES_MOD.belongsTo(USERS_MOD);
+
+// User-Report 
+USERS_MOD.hasMany(REPORT_MOD, {
+    foreignKey: 'REPORTING_USER',
+});
+REPORT_MOD.belongsTo(USERS_MOD);
+
+USERS_MOD.hasMany(REPORT_MOD, {
+    foreignKey: 'REPORTED_USER',
+});
+REPORT_MOD.belongsTo(USERS_MOD);
