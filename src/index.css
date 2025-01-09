@@ -1,0 +1,38 @@
+@import "tailwindcss/base";
+
+@import "tailwindcss/components";
+
+@import "tailwindcss/utilities";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Khand-Regular";
+  src: local(Khand-Regular),
+    url("./assets/fonts/Khand-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Khand-Bold";
+  src: local(Khand-Bold),
+    url("./assets/fonts/Khand-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Khand-Light";
+  src: local(Khand-Light),
+    url("./assets/fonts/Khand-Light.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Khand-Medium";
+  src: local(Khand-Medium),
+    url("./assets/fonts/Khand-Medium.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Khand-SemiBold";
+  src: local(Khand-SemiBold),
+    url("./assets/fonts/Khand-SemiBold.ttf") format("truetype");
+}
