@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 export default function Appheader() {
   return (
-    <header className="py-4 bg-headClassMatch text-white shadow-md">
+    <header className="py-4 bg-headClassMatch text-white shadow-md fixed top-0 w-full h-auto">
       <div className="mx-auto px-10">
         <div className="flex justify-start items-center">
           <div>

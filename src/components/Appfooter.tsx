@@ -8,19 +8,19 @@ export default function Appfooter() {
           {/* Navigation */}
           <nav className="flex space-x-10">
             <Link
-              to="/busqueda"
+              to="/contacto"
               className="px-4  font-KhandMedium text-lg text-white hover:text-black transition"
             >
               Contacto
             </Link>
             <Link
-              to="/mismatch"
+              to="/terminosycondiciones"
               className="px-4  font-KhandMedium text-lg text-white hover:text-black transition"
             >
               Términos y condiciones
             </Link>
             <Link
-              to="/eventos"
+              to="/acercaDe"
               className="px-4  font-KhandMedium text-lg text-white hover:text-black transition"
             >
               Acerca de
