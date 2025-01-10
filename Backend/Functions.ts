@@ -23,7 +23,7 @@ export function str2hsh(str: string): string {
 export async function createUser(firstname: string, lastname: string, email: string, password:string, gender: string, birthdate: Date, college: string, bio: string, filter_age: string, filter_gender: string) {
     let usuario = await findUser(undefined, email)
     if (usuario) {
-        return ("User with that email already exists")
+        throw new Error("User with that email already exists")
     } else {
         let id: string = uuidv4()
         await Models.USERS_MOD.create({
@@ -36,7 +36,7 @@ export async function createUser(firstname: string, lastname: string, email: str
             USER_GENDER: gender,
             USER_BIRTHDATE: birthdate,
             USER_BIO: bio,
-            USER_LAST_LOG: Date.now(),
+            USER_LAST_LOG: new Date(),
             USER_RATING: 0,
             USER_FILTER_AGE: filter_age,
             USER_SUPERMATCHES: 5,
@@ -58,7 +58,7 @@ export async function updateUser(req: Request, bio?: Text, last_log?: Date, stat
         })
         usuario.save();
 }
-export async function logIn(email: string, password: string) {
+export async function logIn(email: string, password: string){
     try {
         let usuario = await findUser(undefined, email)
         if (usuario) {
@@ -66,16 +66,16 @@ export async function logIn(email: string, password: string) {
                 let tokens = await updateToken(usuario)
                 return ([tokens.data[0], tokens.data[1], await authUser(usuario.getDataValue("USER_ID"))])
             } else {
-                return ("Not the correct password")
+                throw new Error("Not the correct password")
             }
         } else {
-            return ("No user with that email")
+            throw new Error("No user with that email")
         }
-    } catch (error) {
-        throw new Error("Could not Log In")
+    } catch (error: any) {
+        return(error.message)
     }
 }
-export async function authUser(uuid: string) {
+export async function authUser(uuid: string){
     try {
         const usuario = await Models.USERS_MOD.findOne({
             where: { USER_ID: uuid },
@@ -84,7 +84,7 @@ export async function authUser(uuid: string) {
                     ["USER_PASSWORD"]
             }
         })
-        return { data: usuario }
+        return {message: "Success Logging in", data: usuario}
     } catch (error: any) {
         throw new Error("User not logged in");
     }
@@ -112,7 +112,7 @@ let updateToken = async function (user: Model<any, any>) {
         throw new Error("Unable to update credentials");
     }
 }
-let findUser = async function (id?: string, email?: string) {
+export let findUser = async function (id?: string, email?: string) {
     if (id) {
         let usuario = await Models.USERS_MOD.findByPk(id)
         return usuario

@@ -40,8 +40,7 @@ class Server {
 
             //Run code here to test
             console.log("Hello There")
-            //Func.createCollege("Universidad Nacional de Colombia", "unal.edu.co", "Palmira")
-
+            //Func.createUser("John Spartan", "Test", "john@unal.edu.co", "password", "M", new Date("2000-10-03"), "f639a03f-2496-4b7d-8665-d2c748cd837f", "Bio", "18-25", "F")
         } catch (error) {
             console.error("Error connecting to the database:", error);
         };

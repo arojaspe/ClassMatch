@@ -4,6 +4,65 @@ import * as Funcs from "./Functions";
 import { sign, verify } from "jsonwebtoken";
 
 //User Management
+export const getListaUsuarios = async (req: Request, res: Response) => {
+    
+    const users= await Models.USERS_MOD.findAll({
+        attributes: {exclude:  ["USER_EMAIL", "USER_PASSWORD", "USER_LAST_LOG", "USER_FILTER_AGE", "USER_SUPERMATCHES", "USER_FILTER_GENDER"]},
+        include: [
+            {
+                model: Models.USER_IMAGES_MOD,
+                attributes: ["IMAGE_LINK", "IMAGE_ORDER"]}]
+        });
+    users ? res.status(201).json(
+        {
+            message: "Lista de Perfiles",
+            data: users
+        }
+    ) : res.status(404).json({
+        errors: [{
+            message: "No fue posible obtener los perfiles",
+            extensions: {
+                code: "Conts.getListaUsuarios"
+            }
+        }]
+    })
+}
+export const getUsuario = async (req: Request, res: Response) => {
+    
+    const {id} = req.params;
+
+    const user= await Models.USERS_MOD.findByPk(id, {
+        attributes: {exclude: ["USER_GENDER", "USER_PASSWORD"]}
+    });
+
+    user ? res.status(201).json(
+        {
+            message: "Usuario encontrado",
+            data: user
+        }
+    ) : res.status(404).json({
+        errors: [{
+            message: "No existe usuario con ID: " +id,
+            extensions: {
+                code: "Conts.getUsuario - No user found"
+            }
+        }]
+    })
+}
+export const postUsuario = async (req: Request, res: Response) => {
+    
+    const {body}= req;
+    try {
+        const user= Models.USERS_MOD.build(body);
+        await user.save();
+        res.json(user);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            msg: "Error al crear Usuario",
+        })
+    }
+}
 export const putUsuario = async (req: Request, res: Response) => {
     const data = req.body;
     try {
@@ -56,17 +115,14 @@ export const putUsuario = async (req: Request, res: Response) => {
 export const postLogin = async (req: Request, res: Response) => {
     const data = req.body;
     try {
-        Funcs.logIn(data.user, data.password).then((value) => {
+        Funcs.logIn(data.email, data.password).then((value) => {
             if (typeof(value) != "object") {
                 res.status(401).json({
                     errors: [{
                         message: value,
-                        errors: [{
-                            message: "value",
-                            extensions: {
-                                code: "Funcs.logIn - Checking DB info"
-                            }
-                        }]
+                        extensions: {
+                            code: "Funcs.logIn - Checking DB info"
+                        }
                     }]
                 }) 
             } else {
@@ -80,15 +136,7 @@ export const postLogin = async (req: Request, res: Response) => {
                     secure: true,
                     maxAge: 7000 * 60 * 60 * 24
                 })
-                res.status(200).send({
-                    message: "Success Logging in",
-                    data: {
-                        access_token: value[0],
-                        expires_in: 7000 * 60 * 60 * 24,
-                        refresh_token: value[1],
-                        user: value[2]
-                    }
-                })
+                res.status(200).send(value[2])
             }
         })
     } catch (error) {
@@ -97,7 +145,7 @@ export const postLogin = async (req: Request, res: Response) => {
             errors: [{
                 message: "Error al hacer Log In",
                 extensions: {
-                    code: "Funcs.logIn"
+                    code: "Funcs.logIn- All"
                 }
             }]
         })
@@ -138,6 +186,7 @@ export const getAuthenticate= async (req: Request, res: Response)=> {
             throw new Error("No auth")
         }
         res.status(200).send({
+            message: "User is logged in",
             data: {
                 user: user
             }
@@ -231,17 +280,17 @@ export const postRegister = async (req: Request, res: Response) => {
 export const getColleges = async (req: Request, res: Response) => {
     
     const colleges= await Models.COLLEGES_MOD.findAll({
-        attributes: ["college_id", "college_name"]
+        attributes: ["college_name", "college_city"]
     });
     
     colleges? res.status(200).send({
+        message: "Lista de Universidades",
         data: {
-            colleges: colleges,
-            msg: "Succesful"
+            colleges: colleges
         }
     }) : res.status(401).send({
+        message: "Error al obtener Universidades",
         data: {
-            msg: "Unsuccesful",
             error: "Funcs.getColleges"
         }
     }) 
