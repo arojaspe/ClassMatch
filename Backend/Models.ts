@@ -349,8 +349,8 @@ USERS_MOD.hasMany(EVENTS_MOD, {foreignKey: 'EVENT_ADMIN'});
 EVENTS_MOD.belongsTo(USERS_MOD, {foreignKey: 'EVENT_ADMIN'});
 
 // User-User_Images
-USERS_MOD.hasMany(USER_IMAGES_MOD, {foreignKey: 'IMAGE_USER'});
-USER_IMAGES_MOD.belongsTo(USERS_MOD, {foreignKey: 'IMAGE_USER'});
+USERS_MOD.hasMany(USER_IMAGES_MOD, {foreignKey: 'IMAGE_USER', as: 'USER_IMAGES'});
+USER_IMAGES_MOD.belongsTo(USERS_MOD, {foreignKey: 'IMAGE_USER', as: 'USER_IMAGES'});
 
 // Event-Event_Images
 EVENTS_MOD.hasMany(EVENT_IMAGES_MOD, {foreignKey: 'IMAGE_EVENT'});

@@ -8,10 +8,13 @@ export const getListaUsuarios = async (req: Request, res: Response) => {
     
     const users= await Models.USERS_MOD.findAll({
         attributes: {exclude:  ["USER_EMAIL", "USER_PASSWORD", "USER_LAST_LOG", "USER_FILTER_AGE", "USER_SUPERMATCHES", "USER_FILTER_GENDER"]},
-        include: [
-            {
-                model: Models.USER_IMAGES_MOD,
-                attributes: ["IMAGE_LINK", "IMAGE_ORDER"]}]
+        include: [{ 
+                model: Models.USER_IMAGES_MOD, as: 'USER_IMAGES', 
+                attributes: ["IMAGE_LINK", "IMAGE_ORDER"], 
+            }], 
+            order: [[{ 
+                model: Models.USER_IMAGES_MOD, as: 'USER_IMAGES' }, 'IMAGE_ORDER', 'ASC'] 
+            ]
         });
     users ? res.status(201).json(
         {
