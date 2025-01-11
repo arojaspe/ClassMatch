@@ -11,6 +11,10 @@ import Eventos from "./pages/Eventos.tsx";
 import Premium from "./pages/Premium.tsx";
 import Contacto from "./pages/Contacto.tsx";
 import TerminosYCondiciones from "./pages/TerminosYCondiciones.tsx";
+import MiPerfil from "./pages/MiPerfil.tsx";
+import CrearCuenta from "./pages/CrearCuenta.tsx";
+import LogIn from "./pages/LogIn.tsx";
+import RestablecerContraseña from "./pages/RestablecerContraseña.tsx";
 
 export const Layout = () => {
   return (
@@ -64,8 +68,20 @@ const router = createBrowserRouter([
         element: <AcercaDe />,
       },
       {
-        path: "/a",
-        element: <AcercaDe />,
+        path: "/miperfil",
+        element: <MiPerfil />,
+      },
+      {
+        path: "/crearcuenta",
+        element: <CrearCuenta />,
+      },
+      {
+        path: "/login",
+        element: <LogIn />,
+      },
+      {
+        path: "/recuperarcontrasena",
+        element: <RestablecerContraseña />,
       },
     ],
   },
