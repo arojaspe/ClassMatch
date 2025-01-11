@@ -18,6 +18,7 @@ export default {
         accentButtonClassMatch: "#00BEC9",
         cardClassMatch: "#a2bfc4",
         backgroundClassMatch: "#c2d3d6",
+        accentClassMatch: "#aec5c9",
       },
     },
   },
