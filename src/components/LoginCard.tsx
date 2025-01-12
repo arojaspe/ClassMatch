@@ -26,19 +26,16 @@ export default function LoginCard() {
   const handleLogin = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/auth/login/",
-        {
-          email: email,
-          password: password,
-        }
-      );
+      const response = await axios.post("http://127.0.0.1:5000/api/login", {
+        email: email,
+        password: password,
+      });
       const token = response.data.access;
       console.log(token);
       if (response.status === 200) {
         setMessage("Datos correctos");
         cookies.set("token", token);
-        navigate("/admin");
+        navigate("/busqueda");
         window.location.reload();
       }
     } catch {
@@ -99,7 +96,11 @@ export default function LoginCard() {
                 Ingresar
               </button>
             </form>
-            {message && <p className="text-center mt-4">{message}</p>}
+            {message && (
+              <p className="text-center mt-4 font-KhandRegular text-red-900">
+                {message}
+              </p>
+            )}
             <a
               className="text-black font-KhandRegular text-center text-lg"
               href="/register"

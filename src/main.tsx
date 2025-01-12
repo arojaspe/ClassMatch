@@ -15,7 +15,10 @@ import MiPerfil from "./pages/MiPerfil.tsx";
 import CrearCuenta from "./pages/CrearCuenta.tsx";
 import LogIn from "./pages/LogIn.tsx";
 import RestablecerContraseña from "./pages/RestablecerContraseña.tsx";
+import { useEffect, useState } from "react";
+import Cookies from "universal-cookie";
 
+const cookies = new Cookies();
 export const Layout = () => {
   return (
     <div>
@@ -25,6 +28,17 @@ export const Layout = () => {
     </div>
   );
 };
+
+const [isAuthenticated, setIsAuthenticated] = useState(true);
+
+useEffect(() => {
+  const verifyToken = () => {
+    const token = cookies.get("token");
+    setIsAuthenticated(!!token);
+  };
+
+  verifyToken();
+}, []);
 
 const router = createBrowserRouter([
   {
