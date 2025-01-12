@@ -15,7 +15,7 @@ export default function Contacto() {
     </div>
 
     {/* Sección derecha: Formulario */}
-    <div className="flex-1 p-6 mr-10 bg-mainClassMatch bg-opacity-40 shadow-lg rounded-xl">
+    <div className="flex-1 p-6 mr-10 bg-mainClassMatch bg-opacity-30 shadow-lg rounded-xl">
       
       {/* Formulario */}
       <form className="space-y-6">

@@ -3,7 +3,7 @@ export default function AcercaDe() {
   {/* Contenedor de las tres tarjetas con grid */}
   <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8 p-8">
     {/* Sobre nosotros */}
-    <div className="p-6 bg-mainClassMatch bg-opacity-40 shadow-lg rounded-xl flex flex-col transition-transform duration-300 transform hover:scale-105 hover:shadow-2xl">
+    <div className="p-6 bg-mainClassMatch bg-opacity-25 shadow-lg rounded-xl flex flex-col transition-transform duration-300 transform hover:scale-105 hover:shadow-2xl">
       <h1 className="font-KhandBold text-8xl text-headClassMatch font-semibold">Sobre nosotros</h1>
       <p className="font-KhandRegular text-2xl text-justify leading-9">
         En ClassMatch, creemos que las conexiones significativas son clave para una experiencia universitaria
@@ -16,7 +16,7 @@ export default function AcercaDe() {
     </div>
 
     {/* Visión */}
-    <div className="p-6 bg-mainClassMatch bg-opacity-40 shadow-lg rounded-xl flex flex-col transition-transform duration-300 transform hover:scale-105 hover:shadow-2xl">
+    <div className="p-6 bg-mainClassMatch bg-opacity-25 shadow-lg rounded-xl flex flex-col transition-transform duration-300 transform hover:scale-105 hover:shadow-2xl">
       <h1 className="font-KhandBold text-8xl text-headClassMatch font-bold">Visión</h1>
       <p className="font-KhandRegular text-2xl text-justify leading-9">
         Nuestra visión es convertirnos en la plataforma líder de conexión social en universidades de Colombia para 2030,
@@ -26,7 +26,7 @@ export default function AcercaDe() {
     </div>
 
     {/* Misión */}
-    <div className="p-6 bg-mainClassMatch bg-opacity-40 shadow-lg rounded-xl flex flex-col transition-transform duration-300 transform hover:scale-105 hover:shadow-2xl">
+    <div className="p-6 bg-mainClassMatch bg-opacity-25 shadow-lg rounded-xl flex flex-col transition-transform duration-300 transform hover:scale-105 hover:shadow-2xl">
       <h1 className="font-KhandBold text-8xl text-headClassMatch font-extrabold">Misión</h1>
       <p className="font-KhandRegular text-2xl text-justify leading-9">
         Nuestra misión es facilitar conexiones auténticas y fomentar la interacción social significativa y segura entre

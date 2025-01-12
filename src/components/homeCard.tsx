@@ -19,7 +19,7 @@ export default function HomeCard({
   return (
     <div className="flex flex-col items-center py-6">
       <div
-        className={`bg-mainClassMatch bg-opacity-40 h-min w-[45rem] p-6 rounded-xl ${containerClassName}`}
+        className={`bg-mainClassMatch bg-opacity-25 h-min w-[45rem] p-6 rounded-xl ${containerClassName}`}
       >
         <section
           className={`flex h-30 items-center mx-8 justify-between mb-5 w-auto ${sectionClassName}`}
