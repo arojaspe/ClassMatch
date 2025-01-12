@@ -12,7 +12,7 @@ export default {
       },
       colors: {
         headClassMatch: "#004954",
-        mainClassMatch: "#336D76",
+        mainClassMatch: "#72A2A9",
         buttonClassMatch: "#00252A",
         premiumButtonClassMatch: "#00874D",
         accentButtonClassMatch: "#00BEC9",

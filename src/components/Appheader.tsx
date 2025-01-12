@@ -25,7 +25,7 @@ export default function Appheader() {
               <img
                 src="/img/ClassmatchTextWhite.png"
                 alt="Logo"
-                className="h-14 hover:opacity-25 duration-200 rounded-xl"
+                className="h-14 w-auto object-contain hover:opacity-25 duration-200 rounded-xl"
               />
             </Link>
           </div>

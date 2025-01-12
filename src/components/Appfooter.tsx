@@ -9,19 +9,19 @@ export default function Appfooter() {
           <nav className="flex space-x-10">
             <Link
               to="/contacto"
-              className="px-4  font-KhandMedium text-lg text-white hover:text-black transition"
+              className="px-4  font-KhandMedium text-lg text-gray-400 hover:text-white transition"
             >
               Contacto
             </Link>
             <Link
               to="/terminosycondiciones"
-              className="px-4  font-KhandMedium text-lg text-white hover:text-black transition"
+              className="px-4  font-KhandMedium text-lg text-gray-400 hover:text-white transition"
             >
               Términos y condiciones
             </Link>
             <Link
               to="/acercaDe"
-              className="px-4  font-KhandMedium text-lg text-white hover:text-black transition"
+              className="px-4  font-KhandMedium text-lg text-gray-400 hover:text-white transition"
             >
               Acerca de
             </Link>

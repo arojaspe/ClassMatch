@@ -1,4 +1,4 @@
-import HomeCard from "./components/HomeCard";
+import HomeCard from "./components/homeCard";
 
 export default function App() {
   return (
@@ -8,9 +8,9 @@ export default function App() {
           <HomeCard containerClassName="w-[80%]" />
         </div>
         <img
-          src="/img/Home.jpg"
-          alt="Logo"
-          className="h-[45rem] w-[60%] overflow-y-hidden min-h-screen "
+          src="/img/Hometest.png"
+          alt="HomeImage"
+          className="h-[89vh]"
         />
       </div>
     </>
