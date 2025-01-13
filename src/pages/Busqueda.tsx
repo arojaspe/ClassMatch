@@ -24,7 +24,7 @@ export default function Busqueda() {
 
   // Usuario actual basado en el índice
   const currentUser = usuarios[currentIndex];
-  console.log(currentIndex);
+  console.log(currentUser);
 
   // Función para avanzar al siguiente usuario
   const handleNext = () => {

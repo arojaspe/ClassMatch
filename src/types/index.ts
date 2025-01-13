@@ -13,4 +13,8 @@ export interface UsuarioClassmatch {
   USER_FILTER_AGE: string | null; // Example "18-25"
   USER_SUPERMATCHES: number | null; // Integer value
   USER_FILTER_GENDER: "M" | "F" | "NB" | null; // ENUM values
+  USER_IMAGES: Array<{
+    IMAGE_LINK: string;
+    IMAGE_ORDER: number;
+  }> | null;
 }
