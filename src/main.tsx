@@ -15,10 +15,10 @@ import MiPerfil from "./pages/MiPerfil.tsx";
 import CrearCuenta from "./pages/CrearCuenta.tsx";
 import LogIn from "./pages/LogIn.tsx";
 import RestablecerContraseña from "./pages/RestablecerContraseña.tsx";
-import { useEffect, useState } from "react";
-import Cookies from "universal-cookie";
+//import { useEffect, useState } from "react";
+//import Cookies from "universal-cookie";
+import PrivateRoute from "./middleware/PrivateRoute.tsx";
 
-const cookies = new Cookies();
 export const Layout = () => {
   return (
     <div>
@@ -29,16 +29,16 @@ export const Layout = () => {
   );
 };
 
-const [isAuthenticated, setIsAuthenticated] = useState(true);
+// const [isAuthenticated, setIsAuthenticated] = useState(true);
 
-useEffect(() => {
-  const verifyToken = () => {
-    const token = cookies.get("token");
-    setIsAuthenticated(!!token);
-  };
+// useEffect(() => {
+//   const verifyToken = () => {
+//     const token = cookies.get("token");
+//     setIsAuthenticated(!!token);
+//   };
 
-  verifyToken();
-}, []);
+//   verifyToken();
+// }, []);
 
 const router = createBrowserRouter([
   {
@@ -51,11 +51,19 @@ const router = createBrowserRouter([
       },
       {
         path: "/busqueda",
-        element: <Busqueda />,
+        element: (
+          <PrivateRoute>
+            <Busqueda />
+          </PrivateRoute>
+        ),
       },
       {
         path: "/mismatch",
-        element: <MisMatch />,
+        element: (
+          <PrivateRoute>
+            <MisMatch />
+          </PrivateRoute>
+        ),
       },
       {
         path: "/acercaDe",
@@ -63,7 +71,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/eventos",
-        element: <Eventos />,
+        element: (
+          <PrivateRoute>
+            <Eventos />
+          </PrivateRoute>
+        ),
       },
       {
         path: "/premium",
@@ -83,7 +95,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/miperfil",
-        element: <MiPerfil />,
+        element: (
+          <PrivateRoute>
+            <MiPerfil />
+          </PrivateRoute>
+        ),
       },
       {
         path: "/crearcuenta",

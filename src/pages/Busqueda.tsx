@@ -1,13 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import UserCard from "../components/UserCard";
-import { usuarios } from "../data/usuarios";
+//import { usuarios } from "../data/usuarios";
+import axios from "axios";
+import { UsuarioClassmatch } from "../types";
 
 export default function Busqueda() {
+  const [usuarios, setUsuarios] = useState<UsuarioClassmatch[]>([]);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/us")
+      .then((response) => {
+        setUsuarios(response.data.data);
+        console.log(response.data.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching personas:", error);
+        window.location.reload();
+      });
+  }, []);
   // Estado para rastrear el índice actual del usuario
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Usuario actual basado en el índice
   const currentUser = usuarios[currentIndex];
+  console.log(currentIndex);
 
   // Función para avanzar al siguiente usuario
   const handleNext = () => {
