@@ -94,10 +94,10 @@ export default function LoginCard() {
 
               <a
                 className="text-black font-KhandRegular text-right text-xl mb-6"
-                href="/register"
+                href="/recuperarcontrasena"
               >
                 <Link
-                  className="text-black hover:text-mainClassMatch"
+                  className="text-black hover:text-mainClassMatch "
                   to="/recuperarcontrasena"
                 >
                   ¿Has olvidado la contraseña?
@@ -117,7 +117,7 @@ export default function LoginCard() {
             )}
             <a
               className="text-black font-KhandRegular text-center text-lg"
-              href="/register"
+              href="/crearcuenta"
             >
               ¿No tienes una cuenta?
               <Link
