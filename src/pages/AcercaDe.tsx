@@ -54,3 +54,6 @@ export default function AcercaDe() {
     </div>
   );
 }
+
+
+// Las tarjetas se sobreponen arriba y abajo en pantallas pequeñas, corregir eso

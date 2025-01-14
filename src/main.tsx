@@ -15,9 +15,11 @@ import MiPerfil from "./pages/MiPerfil.tsx";
 import CrearCuenta from "./pages/CrearCuenta.tsx";
 import LogIn from "./pages/LogIn.tsx";
 import RestablecerContraseña from "./pages/RestablecerContraseña.tsx";
+import RestablecerContraseñaCodigo from "./pages/RestablecerContraseñaCodigo.tsx";
 //import { useEffect, useState } from "react";
 //import Cookies from "universal-cookie";
 import PrivateRoute from "./middleware/PrivateRoute.tsx";
+import NuevaContraseña from "./pages/NuevaContraseña.tsx";
 
 export const Layout = () => {
   return (
@@ -112,6 +114,14 @@ const router = createBrowserRouter([
       {
         path: "/recuperarcontrasena",
         element: <RestablecerContraseña />,
+      },
+      {
+        path: "/recuperarcontrasenacodigo",
+        element: <RestablecerContraseñaCodigo />,
+      },
+      {
+        path: "/nuevacontraseña",
+        element: <NuevaContraseña />,
       },
     ],
   },
