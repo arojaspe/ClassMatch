@@ -11,13 +11,13 @@ export default function Appheader() {
   const buttonRef = useRef<HTMLDivElement | null>(null); // Referencia al área que activa el menú (nombre + foto)
 
   useEffect(() => {
-  /*  const verifyToken = () => {
+    const verifyToken = () => {
       const token = cookies.get("token");
       setIsAuthenticated(!!token);
     };
 
     verifyToken();
-*/
+
     // Detectar clics fuera del menú para cerrarlo
     const handleClickOutside = (event: MouseEvent) => {
       // Verifica si el clic fue fuera del botón o el menú
