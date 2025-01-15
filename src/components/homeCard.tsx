@@ -1,6 +1,8 @@
+import Cookies from "universal-cookie";
 import Logo from "./Logo";
 import { Link } from "react-router-dom";
 
+const cookies = new Cookies();
 interface HomeCardProps {
   containerClassName?: string;
   sectionClassName?: string;
@@ -43,20 +45,22 @@ export default function HomeCard({
           </p>
         </section>
       </div>
-      <nav className="flex w-[80%] justify-center space-x-4 mt-6">
-        <Link
-          to="/login"
-          className="px-12 py-4 bg-buttonClassMatch font-KhandMedium text-3xl text-white rounded-md hover:bg-gray-100 hover:text-black transition font-Khand-Regular"
-        >
-          Ingresar
-        </Link>
-        <Link
-          to="/crearcuenta"
-          className="px-12 py-4 bg-accentButtonClassMatch font-KhandMedium text-3xl text-white rounded-md hover:bg-gray-100 hover:text-black transition"
-        >
-          Crear cuenta
-        </Link>
-      </nav>
-</div>
+      {cookies.get("token") ? null : (
+        <nav className="flex w-[80%] justify-center space-x-4 mt-6">
+          <Link
+            to="/login"
+            className="px-12 py-4 bg-buttonClassMatch font-KhandMedium text-3xl text-white rounded-md hover:bg-gray-100 hover:text-black transition font-Khand-Regular"
+          >
+            Ingresar
+          </Link>
+          <Link
+            to="/crearcuenta"
+            className="px-12 py-4 bg-accentButtonClassMatch font-KhandMedium text-3xl text-white rounded-md hover:bg-gray-100 hover:text-black transition"
+          >
+            Crear cuenta
+          </Link>
+        </nav>
+      )}
+    </div>
   );
 }
