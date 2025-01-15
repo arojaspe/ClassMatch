@@ -164,12 +164,12 @@ export const EVENTS_MOD= db.define("EVENTS_MOD", {
     freezeTableName: true,
     tableName: 'EVENTS'
 })
-export const USER_IMAGES_MOD= db.define("USER_IMAGES_MOD", {
+export const IMAGES_MOD= db.define("IMAGES_MOD", {
     IMAGE_ID: {
         type: DataTypes.CHAR(36),
         primaryKey: true
     },
-    IMAGE_USER: {
+    IMAGE_RELATION: {
         type: DataTypes.CHAR(36),
     },
     IMAGE_LINK: {
@@ -177,49 +177,14 @@ export const USER_IMAGES_MOD= db.define("USER_IMAGES_MOD", {
     },
     IMAGE_ORDER: {
         type: DataTypes.TINYINT,
+    },
+    IMAGE_TYPE: {
+        type: DataTypes.ENUM("USER", "EVENT", "REPORT"),
     }
 }, {
     timestamps: false,
     freezeTableName: true,
-    tableName: 'USER_IMAGES'
-})
-export const EVENT_IMAGES_MOD= db.define("EVENT_IMAGES_MOD", {
-    IMAGE_ID: {
-        type: DataTypes.CHAR(36),
-        primaryKey: true
-    },
-    IMAGE_EVENT: {
-        type: DataTypes.CHAR(36),
-    },
-    IMAGE_LINK: {
-        type: DataTypes.TEXT,
-    },
-    IMAGE_ORDER: {
-        type: DataTypes.TINYINT,
-    }
-}, {
-    timestamps: false,
-    freezeTableName: true,
-    tableName: 'EVENT_IMAGES'
-})
-export const REPORT_IMAGES_MOD= db.define("REPORT_IMAGES_MOD", {
-    IMAGE_ID: {
-        type: DataTypes.CHAR(36),
-        primaryKey: true
-    },
-    IMAGE_REPORT: {
-        type: DataTypes.CHAR(36),
-    },
-    IMAGE_LINK: {
-        type: DataTypes.TEXT,
-    },
-    IMAGE_ORDER: {
-        type: DataTypes.TINYINT,
-    }
-}, {
-    timestamps: false,
-    freezeTableName: true,
-    tableName: 'REPORT_IMAGES'
+    tableName: 'IMAGES'
 })
 export const USER_EVENTS_MOD= db.define("USER_EVENTS_MOD", {
     UEVENTS_ID: {
@@ -349,16 +314,16 @@ USERS_MOD.hasMany(EVENTS_MOD, {foreignKey: 'EVENT_ADMIN'});
 EVENTS_MOD.belongsTo(USERS_MOD, {foreignKey: 'EVENT_ADMIN'});
 
 // User-User_Images
-USERS_MOD.hasMany(USER_IMAGES_MOD, {foreignKey: 'IMAGE_USER', as: 'USER_IMAGES'});
-USER_IMAGES_MOD.belongsTo(USERS_MOD, {foreignKey: 'IMAGE_USER', as: 'USER_IMAGES'});
+USERS_MOD.hasMany(IMAGES_MOD, {foreignKey: 'IMAGE_RELATION', as: 'USER_IMAGES'});
+IMAGES_MOD.belongsTo(USERS_MOD, {foreignKey: 'IMAGE_RELATION', as: 'USER_IMAGES'});
 
 // Event-Event_Images
-EVENTS_MOD.hasMany(EVENT_IMAGES_MOD, {foreignKey: 'IMAGE_EVENT'});
-EVENT_IMAGES_MOD.belongsTo(EVENTS_MOD, {foreignKey: 'IMAGE_EVENT'});
+EVENTS_MOD.hasMany(IMAGES_MOD, {foreignKey: 'IMAGE_RELATION', as: "EVENT_IMAGES"});
+IMAGES_MOD.belongsTo(EVENTS_MOD, {foreignKey: 'IMAGE_RELATION', as: "EVENT_IMAGES"});
 
 // Report-Report_Images
-REPORT_MOD.hasMany(REPORT_IMAGES_MOD, {foreignKey: 'IMAGE_REPORT'});
-REPORT_IMAGES_MOD.belongsTo(REPORT_MOD, {foreignKey: 'IMAGE_REPORT'});
+REPORT_MOD.hasMany(IMAGES_MOD, {foreignKey: 'IMAGE_RELATION', as: "REPORT_IMAGES"});
+IMAGES_MOD.belongsTo(REPORT_MOD, {foreignKey: 'IMAGE_RELATION', as: "REPORT_IMAGES"});
 
 // Event-User_Events
 EVENTS_MOD.hasMany(USER_EVENTS_MOD, {foreignKey: 'UEVENTS_EVENT'});

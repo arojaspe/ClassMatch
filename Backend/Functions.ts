@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import * as Models from "./Models";
 import { v4 as uuidv4 } from 'uuid';
 import { sign, verify } from "jsonwebtoken";
-import { FloatDataType, Model, Op, Sequelize } from 'sequelize';
+import { FloatDataType, Model} from 'sequelize';
 
 //Error showing
 interface Result<T> { data: any, error?: string }
@@ -20,7 +20,8 @@ export function str2hsh(str: string): string {
 }
 
 //Users
-export async function createUser(firstname: string, lastname: string, email: string, password:string, gender: string, birthdate: Date, college: string, bio: string, filter_age: string, filter_gender: string) {
+export async function createUser(firstname: string, lastname: string, email: string, password:string, gender: string, 
+    birthdate: Date, college: string, bio: string, filter_age: string, filter_gender: string) {
     let usuario = await findUser(undefined, email)
     if (usuario) {
         throw new Error("User with that email already exists")
@@ -45,9 +46,9 @@ export async function createUser(firstname: string, lastname: string, email: str
         return ([id])
     }
 }
-export async function updateUser(req: Request, bio?: Text, last_log?: Date, status?: Boolean, rating?: FloatDataType, filter_age?: string, filter_gender?: string) {
+export async function updateUser(req: Request, bio?: Text, last_log?: Date, status?: 
+    Boolean, rating?: FloatDataType, filter_age?: string, filter_gender?: string) {
         let usuario: Model<any, any> = await isLoggedIn(req)
-
         usuario.set({
             USER_BIO: bio ?? usuario.getDataValue("USER_BIO"),
             USER_LAST_LOG: last_log ?? usuario.getDataValue("USER_LAST_LOG"),
@@ -57,6 +58,7 @@ export async function updateUser(req: Request, bio?: Text, last_log?: Date, stat
             USER_FILTER_GENDER: filter_gender?? usuario.getDataValue("USER_FILTER_GENDER")
         })
         usuario.save();
+        return usuario
 }
 export async function logIn(email: string, password: string){
     try {
@@ -75,6 +77,14 @@ export async function logIn(email: string, password: string){
         return(error.message)
     }
 }
+export async function isLoggedIn(req: Request) {
+    if (!req.cookies["refresh_token"]) {
+        throw new Error("User signed out")
+    }
+    const payload: any = verify(req.cookies["access_token"], "access_secret")
+    const user: Result<any> = await authUser(payload.id)
+    return user.data
+}
 export async function authUser(uuid: string){
     try {
         const usuario = await Models.USERS_MOD.findOne({
@@ -84,19 +94,25 @@ export async function authUser(uuid: string){
                     ["USER_PASSWORD"]
             }
         })
-        return {message: "Success Logging in", data: usuario}
+        return {
+            message: "Success Logging in", 
+            data: usuario
+        }
     } catch (error: any) {
         throw new Error("User not logged in");
     }
 }
-export async function isLoggedIn(req: Request) {
-        const payload: any = verify(req.cookies["access_token"], "access_secret")
-
-        const user: Result<any> = await authUser(payload.id)
-        if (user.error) {
-            console.error(user.error)
-        }
-        return (user?.data)
+export function  refreshToken(req: Request, res: Response, redirect: string) {
+        const refresh_token= req.cookies["refresh_token"]
+        const payload: any = verify(refresh_token, "refresh_secret")
+        let access_token= sign({
+            id: payload.id
+        },"access_secret", {expiresIn: "15m"});
+        res.cookie("access_token", access_token, {
+            httpOnly: true,
+            secure: true,
+            maxAge: 60 * 15 * 1000
+        }).redirect(redirect)
 }
 let updateToken = async function (user: Model<any, any>) {
     try {
@@ -160,4 +176,33 @@ export const getCollege = async (req: Request, res: Response) => {
             msg: "Succesful"
         }
     })
+}
+
+//Images
+export async function addImage2DB (image_id: string, relation: string, type: string): Promise<{IMAGE_LINK: string, IMAGE_ORDER: number}> {
+    try {
+        let order= await findAllImages(relation)
+        let path : string= `https://storage.googleapis.com/classmatch/${type}/${image_id}_post.jpg`
+        
+        await Models.IMAGES_MOD.create({
+            IMAGE_ID: image_id,
+            IMAGE_RELATION: relation,
+            IMAGE_LINK: path,
+            IMAGE_ORDER: order,
+            IMAGE_TYPE: type
+        })
+        return {IMAGE_LINK: path, IMAGE_ORDER: order}  
+    } catch (error: any) {
+        console.log(error)
+        throw new Error(error)
+    }
+}
+let findAllImages= async function (uuid: string): Promise<number> {
+    let order= await Models.IMAGES_MOD.count({
+        where: { IMAGE_RELATION: uuid }
+    })
+    if (order == 8) {
+        throw new Error("Max number of images reached")
+    }
+    return order+1
 }

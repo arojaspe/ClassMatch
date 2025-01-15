@@ -1,6 +1,5 @@
 import express, {Application} from "express";
 import db from "./Connection";
-import * as Func from "./Functions";
 import * as Rout from "./Routes";
 import cors from "cors";
 import cookieParser from "cookie-parser";

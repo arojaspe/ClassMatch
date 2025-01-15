@@ -3,26 +3,26 @@ import * as Conts from "./Controller";
 
 const router= Router();
 
-//User Management
+//User Management: u
 router.get("/us", Conts.getListaUsuarios);
-router.get("/u/:id", Conts.getUsuario);
+router.get("/u/:id", Conts.getUsuario); //Backend
 router.post("/u/:id", Conts.postUsuario);
-router.put("/u/:id", Conts.putUsuario);
+router.put("/u", Conts.putUsuario);
 
-//Profiles
-router.get("/profiles", Conts.getUsuario);
+//Profiles: p
+router.get("/p", Conts.getUsuario);
 
 //Login and Register
 router.post("/login", Conts.postLogin);
 router.post("/logout", Conts.postLogOut);
 router.get("/auth", Conts.getAuthenticate);
-router.post("/refresh", Conts.postRefreshToken);
 router.post("/register", Conts.postRegister);
 
-//College Management
-router.get("/colleges", Conts.getColleges)
+//College Management: c
+router.get("/c", Conts.getColleges)
+router.post("/c", Conts.postColleges)
 
 //Images WIP!!!!
-//router.get("/u/pics", Conts.getUserImages)
+router.post("/upload", Conts.postImage)
 
 export default router;
