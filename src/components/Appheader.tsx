@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
@@ -9,6 +9,7 @@ export default function Appheader() {
   const [menuVisible, setMenuVisible] = useState(false); // Estado para mostrar/ocultar el menú
   const menuRef = useRef<HTMLDivElement | null>(null); // Referencia al menú desplegable
   const buttonRef = useRef<HTMLDivElement | null>(null); // Referencia al área que activa el menú (nombre + foto)
+  const navigate = useNavigate();
 
   useEffect(() => {
     const verifyToken = () => {
@@ -22,8 +23,10 @@ export default function Appheader() {
     const handleClickOutside = (event: MouseEvent) => {
       // Verifica si el clic fue fuera del botón o el menú
       if (
-        menuRef.current && !menuRef.current.contains(event.target as Node) &&
-        buttonRef.current && !buttonRef.current.contains(event.target as Node)
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
       ) {
         setMenuVisible(false);
       }
@@ -45,6 +48,7 @@ export default function Appheader() {
   const handleLogout = () => {
     cookies.remove("token"); // Eliminar el token de la cookie
     setIsAuthenticated(false); // Actualizar el estado de autenticación
+    navigate("/"); // Redirigir al inicio
   };
 
   return (
@@ -96,7 +100,7 @@ export default function Appheader() {
                 onClick={toggleMenu} // Alterna la visibilidad del menú
               >
                 <div className="flex items-center space-x-1">
-                    Nombre
+                  Nombre
                   <img
                     className="img-fluid h-16 rounded-full"
                     src={`/img/Profile.png`}
@@ -109,7 +113,7 @@ export default function Appheader() {
                   <div
                     ref={menuRef} // Referencia al menú
                     className="absolute right-0 mt-2 bg-white text-black rounded-md shadow-lg w-40 z-20"
-                    style={{ top: '140%', left: '-28%' }} // Esto asegura que el menú se muestre hacia abajo
+                    style={{ top: "140%", left: "-28%" }} // Esto asegura que el menú se muestre hacia abajo
                   >
                     <Link
                       to="/configuracion"
@@ -125,7 +129,6 @@ export default function Appheader() {
                     </button>
                   </div>
                 )}
-
               </div>
             </>
           ) : (

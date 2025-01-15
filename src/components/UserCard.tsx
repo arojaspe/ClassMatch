@@ -1,4 +1,5 @@
-import { UsuarioClassmatch } from "../types";
+import { UsuarioClassmatch, UserImageGalleryProps } from "../types";
+import UserImageGallery from "./UserImageGallery";
 
 type UserCardProps = UsuarioClassmatch;
 
@@ -23,16 +24,17 @@ export default function UserCard(props: UserCardProps) {
       <div className=" bg-mainClassMatch bg-opacity-15 rounded-lg w-[80%] h-[85%] flex p-4 font-KhandRegular py-5">
         <div className="bg-cardClassMatch flex w-[25%] ml-9 rounded-lg">
           {/* tarjeta foto y datos */}
-          <div className="image-gallery">
-            {USER_IMAGES?.map((image, index) => (
+          <div>
+            {/* {USER_IMAGES?.map((image, index) => (
               <img
-                key={index}
-                src={`${image.IMAGE_LINK}?random=${Math.random()}`}
-                alt={`Imagen ${index + 1} de ${USER_FIRSTNAME}`}
-                className="user-image"
+              key={index}
+              src={`${image.IMAGE_LINK}?random=${Math.random()}`}
+              alt={`Imagen ${index + 1} de ${USER_FIRSTNAME}`}
+              className="user-image"
               />
-            ))}
+            ))} */}
           </div>
+          <UserImageGallery images={USER_IMAGES} />
         </div>
         <div className="flex flex-col w-[70%] mx-9 rounded-lg justify-between items-center">
           {/* tarjeta nombre y descripción */}

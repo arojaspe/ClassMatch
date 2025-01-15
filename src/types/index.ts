@@ -18,3 +18,10 @@ export interface UsuarioClassmatch {
     IMAGE_ORDER: number;
   }> | null;
 }
+
+export type UserImageGalleryProps = UserImage[] | null;
+
+export interface UserImage {
+  IMAGE_LINK: string | null;
+  IMAGE_ORDER: number | null;
+}
