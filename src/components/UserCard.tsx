@@ -45,7 +45,7 @@ export default function UserCard(props: UserCardProps) {
           {/* tarjeta foto y datos */}
 
           <UserImageGallery images={USER_IMAGES} />
-          <div className="w-[90%] h-[15%] p-4">
+          <div className="w-[90%] h-[15%] p-4 font-KhandMedium text-xl">
             <p>Fecha de nacimiento: {USER_BIRTHDATE}</p>
 
             <p>Edad: {age}</p>
@@ -63,7 +63,7 @@ export default function UserCard(props: UserCardProps) {
             </section>
           </div>
           <p className="text-lg font-KhandMedium text-headClassMatch">
-            ¡Tú y {USER_FIRSTNAME} coinciden en x franjas horarias!
+            ¡Tú y {USER_FIRSTNAME} coinciden en algunas franjas horarias!
           </p>
           <div className="bg-cardClassMatch w-full h-[35%] rounded-lg"></div>
         </div>

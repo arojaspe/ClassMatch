@@ -100,7 +100,6 @@ export default function Appheader() {
                 onClick={toggleMenu} // Alterna la visibilidad del menú
               >
                 <div className="flex items-center space-x-1">
-                  Nombre
                   <img
                     className="img-fluid h-16 rounded-full"
                     src={`/img/Profile.png`}
@@ -112,8 +111,8 @@ export default function Appheader() {
                 {menuVisible && (
                   <div
                     ref={menuRef} // Referencia al menú
-                    className="absolute right-0 mt-2 bg-white text-black rounded-md shadow-lg w-40 z-20"
-                    style={{ top: "140%", left: "-28%" }} // Esto asegura que el menú se muestre hacia abajo
+                    className="absolute mt-2 bg-white text-black rounded-md shadow-lg w-40 z-20"
+                    style={{ top: "140%", left: "-130%" }} // Esto asegura que el menú se muestre hacia abajo
                   >
                     <Link
                       to="/configuracion"
