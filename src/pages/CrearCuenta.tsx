@@ -74,6 +74,11 @@ export default function CrearCuenta() {
   const togglePasswordVisibility = () => setShowPassword(prev => !prev);
   const toggleConfirmPasswordVisibility = () => setShowConfirmPassword(prev => !prev);
 
+  const openInNewTab = () => {
+    const newTab = window.open("/terminosycondiciones", "_blank");
+    if (newTab) newTab.focus();
+  };
+
   return (
     <main className="text-gray-900 w-lvw bg-backgroundClassMatch">
       <div className="w-full pt-20 pb-14">
@@ -224,8 +229,8 @@ export default function CrearCuenta() {
               >
                 He leído y acepto los{" "}
                 <Link
-                  to="/terminos"
                   className="text-headClassMatch hover:text-mainClassMatch"
+                  onClick={openInNewTab}
                 >
                   términos y condiciones de ClassMatch
                 </Link>.
