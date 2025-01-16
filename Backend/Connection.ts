@@ -16,7 +16,7 @@ const db = new Sequelize(dbName, dbUser, dbPass, {
 export default db;
 
 const storage = new Storage({
-    keyFilename: "GCP Secret.json",
+    keyFilename: "GCP_Secret.json",
 });
 export const bucket = storage.bucket("classmatch");
 
