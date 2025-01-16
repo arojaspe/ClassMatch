@@ -197,9 +197,10 @@ export const getAuthenticate= async (req: Request, res: Response)=> {
     }}
 } //Copy and Paste REDIRECT!
 export const postRegister = async (req: Request, res: Response) => {
-    const data = req.body;
+    let [firstname, lastname, email, password, college_id, gender, birthdate, bio, filter_age, filter_gender] = [req.body.firstname, req.body.lastname, req.body.email, req.body.password,
+        req.body.college_id, req.body.gender, req.body.birthdate, req.body.bio, req.body.filter_age, req.body.filter_gender];
     try {
-        Funcs.createUser(data.firstname, data.lastname, data.email, data.password, data.college_id, data.gender, data.birthdate, data.bio, data.filter_age, data.filter_gender).then((value) => {
+        Funcs.createUser(firstname, lastname, email, password, gender, birthdate, college_id,  bio, filter_age, filter_gender).then((value) => {
             if (typeof(value) == "string") {
                 res.status(401).json({
                     errors: [{
