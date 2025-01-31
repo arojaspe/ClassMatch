@@ -6,21 +6,21 @@ import { v4 as uuidv4 } from 'uuid';
 
 //User Management
 export const getListaUsuarios = async (req: Request, res: Response) => {
-    const users= await Models.USERS_MOD.findAll({
-        attributes: {exclude:  ["USER_EMAIL", "USER_PASSWORD", "USER_LAST_LOG", "USER_FILTER_AGE", "USER_SUPERMATCHES", "USER_FILTER_GENDER"]},
-        include: [{ 
-                model: Models.IMAGES_MOD, as: 'USER_IMAGES', 
-                attributes: ["IMAGE_LINK", "IMAGE_ORDER"], 
-            }], 
-            order: [[{ 
-                model: Models.IMAGES_MOD, as: 'USER_IMAGES' }, 'IMAGE_ORDER', 'ASC'] 
-            ]
-        });
+    const users = await Models.USERS_MOD.findAll({
+        attributes: { exclude: ["USER_EMAIL", "USER_PASSWORD", "USER_LAST_LOG", "USER_FILTER_AGE", "USER_SUPERMATCHES", "USER_FILTER_GENDER"] },
+        include: [{
+            model: Models.IMAGES_MOD, as: 'USER_IMAGES',
+            attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+        }],
+        order: [[{
+            model: Models.IMAGES_MOD, as: 'USER_IMAGES'
+        }, 'IMAGE_ORDER', 'ASC']
+        ]
+    });
     users ? res.status(200).json(
         {
             message: "Lista de Perfiles",
-            data: users,
-            schedules: 9 // WIP! 
+            data: users
         }
     ) : res.status(404).json({
         errors: [{
@@ -32,17 +32,18 @@ export const getListaUsuarios = async (req: Request, res: Response) => {
     })
 } // Add Schedule match
 export const getUsuario = async (req: Request, res: Response) => {
-    
-    const {id} = req.params;
 
-    const user= await Models.USERS_MOD.findByPk(id, {
-        attributes: {exclude: ["USER_GENDER", "USER_PASSWORD"]},
-        include: [{ 
-            model: Models.IMAGES_MOD, as: 'USER_IMAGES', 
-            attributes: ["IMAGE_LINK", "IMAGE_ORDER"], 
-        }], 
-        order: [[{ 
-            model: Models.IMAGES_MOD, as: 'USER_IMAGES' }, 'IMAGE_ORDER', 'ASC'] 
+    const { id } = req.params;
+
+    const user = await Models.USERS_MOD.findByPk(id, {
+        attributes: { exclude: ["USER_GENDER", "USER_PASSWORD"] },
+        include: [{
+            model: Models.IMAGES_MOD, as: 'USER_IMAGES',
+            attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+        }],
+        order: [[{
+            model: Models.IMAGES_MOD, as: 'USER_IMAGES'
+        }, 'IMAGE_ORDER', 'ASC']
         ]
     });
 
@@ -53,35 +54,17 @@ export const getUsuario = async (req: Request, res: Response) => {
         }
     ) : res.status(404).json({
         errors: [{
-            message: "No existe usuario con ID: " +id,
+            message: "No existe usuario con ID: " + id,
             extensions: {
                 code: "Conts.getUsuario - No user found"
             }
         }]
     })
 }
-export const postUsuario = async (req: Request, res: Response) => {
-    
-    try {
-        const info= req.body;
-        let user_id=  Funcs.createUser(info.firstname, info.lastname, info.email, info.password, info.gender, info.birthdate, 
-            info.college_id, info.bio, info.filter_age, info.filter_gender);
-         res.status(200).json({
-            message: "Usuario creado",
-            data: user_id
-        })
-    } catch (error: any) {
-        console.log(error);
-        res.status(500).json({
-            message: "Error al crear Usuario",
-            errors: error.message
-        })
-    }
-}
 export const putUsuario = async (req: Request, res: Response) => {
-    const info= req.body   
+    const info = req.body
     try {
-        let updated = await Funcs.updateUser(req, info.bio, info.last_log, info.status, info.rating, info.filter_age, info.filter_gender)
+        let updated = await Funcs.updateUser(req, res, info.bio, info.last_log, info.status, info.rating, info.filter_age, info.filter_gender)
         res.status(200).send({
             data: {
                 message: "Succesfully updated",
@@ -97,7 +80,7 @@ export const putUsuario = async (req: Request, res: Response) => {
                 }
             }]
         })
-    } 
+    }
 }
 
 //LogIn and Register
@@ -105,7 +88,7 @@ export const postLogin = async (req: Request, res: Response) => {
     const data = req.body;
     try {
         Funcs.logIn(data.email, data.password).then((value) => {
-            if (typeof(value) != "object") {
+            if (typeof (value) != "object") {
                 res.status(401).json({
                     errors: [{
                         message: value,
@@ -113,7 +96,7 @@ export const postLogin = async (req: Request, res: Response) => {
                             code: "Funcs.logIn - Checking DB info"
                         }
                     }]
-                }) 
+                })
             } else {
                 res.cookie("access_token", value[0], {
                     httpOnly: true,
@@ -143,12 +126,12 @@ export const postLogin = async (req: Request, res: Response) => {
                 }
             }]
         })
-    }  
+    }
 }
-export const postLogOut = async (req: Request, res: Response) => {
+export const getLogOut = async (req: Request, res: Response) => {
     try {
-        res.cookie("access_token", "", {maxAge: 0})
-        res.cookie("refresh_token", "", {maxAge: 0})
+        res.cookie("access_token", null, { maxAge: 0 })
+        res.cookie("refresh_token", null, { maxAge: 0 })
         res.status(200).send({
             message: "Succesfully signed out"
         })
@@ -160,48 +143,27 @@ export const postLogOut = async (req: Request, res: Response) => {
                     code: "Conts.postLogOut - Controller issue"
                 }
             }]
-        })   
+        })
     }
 }
-export const getAuthenticate= async (req: Request, res: Response)=> {
+export const getAuthenticate = async (req: Request, res: Response) => {
     try {
-        const current_user = await Funcs.isLoggedIn(req)
-
-        if(typeof(current_user)!= "object") {
-            res.status(401).send({
-                errors: [{
-                    message: current_user,
-                    extensions: {
-                        code: "Funcs.isLoggedIn"
-                    }
-                }]
-            })
-            throw new Error("No auth")
-        }
+        const current_user = await Funcs.isLoggedIn(req, res)
         res.status(200).send({
             message: "User is logged in",
             data: current_user
         })
     } catch (error: any) {
-        if (error.message == "jwt must be provided") {
-            Funcs.refreshToken(req, res, "/api/auth")
-        } else {
-        res.status(401).send({
-            errors: [{
-                message: error.message,
-                extensions: {
-                    code: "Controller issue"
-                }
-            }]
-        })
-    }}
-} //Copy and Paste REDIRECT!
+        console.log(error.message)
+        return
+    }
+}
 export const postRegister = async (req: Request, res: Response) => {
     let [firstname, lastname, email, password, college_id, gender, birthdate, bio, filter_age, filter_gender] = [req.body.firstname, req.body.lastname, req.body.email, req.body.password,
-        req.body.college_id, req.body.gender, req.body.birthdate, req.body.bio, req.body.filter_age, req.body.filter_gender];
+    req.body.college_id, req.body.gender, req.body.birthdate, req.body.bio, req.body.filter_age, req.body.filter_gender];
     try {
-        Funcs.createUser(firstname, lastname, email, password, gender, birthdate, college_id,  bio, filter_age, filter_gender).then((value) => {
-            if (typeof(value) == "string") {
+        Funcs.createUser(firstname, lastname, email, password, gender, birthdate, college_id, bio, filter_age, filter_gender).then((value) => {
+            if (typeof (value) == "string") {
                 res.status(401).json({
                     errors: [{
                         message: value,
@@ -225,19 +187,18 @@ export const postRegister = async (req: Request, res: Response) => {
                 message: error.message,
                 extensions: {
                     code: "Controller issue"
-                }}]
+                }
+            }]
         })
-    }  
+    }
 }
 
 //Colleges
 export const getColleges = async (req: Request, res: Response) => {
-    
-    const colleges= await Models.COLLEGES_MOD.findAll({
-        attributes: ["college_name", "college_city"]
-    });
-    
-    colleges? res.status(200).send({
+
+    const colleges = await Models.COLLEGES_MOD.findAll();
+
+    colleges ? res.status(200).send({
         message: "Lista de Universidades",
         data: {
             colleges: colleges
@@ -247,7 +208,7 @@ export const getColleges = async (req: Request, res: Response) => {
         data: {
             error: "Funcs.getColleges"
         }
-    }) 
+    })
 }
 export const postColleges = async (req: Request, res: Response) => {
     const data = req.body;
@@ -270,37 +231,41 @@ export const postColleges = async (req: Request, res: Response) => {
 }
 
 //Images
-export const postImage= async (req: Request, res: Response) => {
+export const postImage = async (req: Request, res: Response) => {
     try {
-        let current_user= await Funcs.isLoggedIn(req)
+        let current_user = await Funcs.isLoggedIn(req, res)
 
-        var upload = Storage.multer.fields([{name: 'image'}, {name: 'relation'}, {name: "type"}])
+        var upload = Storage.multer.fields([{ name: 'image' }, { name: 'relation' }, { name: "type" }])
         upload(req, res, async function (error) {
             if (error) {
-              res.status(401).send({
-                errors: [{
-                    message: error,
-                    extensions: {
-                        code: "Could not upload image"
-                    }}]
-            })
+                res.status(401).send({
+                    errors: [{
+                        message: error,
+                        extensions: {
+                            code: "Could not upload image"
+                        }
+                    }]
+                })
             } else {
                 try {
                     if (req.files) {
-                        const files= req.files as {[fieldname: string]: Express.Multer.File[]};
-                        const img= files['image'][0];
+                        const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+                        const img = files['image'][0];
                         if (!img.mimetype.startsWith('image/')) {
-                            return res.status(400).send({ 
-                                errors: [{ message: 'Only image files are allowed',
-                                    extensions: { code: 'InvalidFileType' 
-                                }
-                            }]
-                        })}
-                        let img_id= uuidv4()
-                        let relation= req.body.relation?? current_user.getDataValue("USER_ID")
+                            return res.status(400).send({
+                                errors: [{
+                                    message: 'Only image files are allowed',
+                                    extensions: {
+                                        code: 'InvalidFileType'
+                                    }
+                                }]
+                            })
+                        }
+                        let img_id = uuidv4()
+                        let relation = req.body.relation ?? current_user.getDataValue("USER_ID")
                         console.log(relation)
                         let data = await Funcs.addImage2DB(img_id, relation, req.body.type)
-                        const blob = Storage.bucket.file(`${req.body.type+"/"+img_id}_post.jpg`);
+                        const blob = Storage.bucket.file(`${req.body.type + "/" + img_id}_post.jpg`);
                         const blobStream = blob.createWriteStream({
                             resumable: false,
                             gzip: true
@@ -310,35 +275,167 @@ export const postImage= async (req: Request, res: Response) => {
                             res.status(200).send({
                                 message: "Image added to the DB",
                                 data: data
-                        })
+                            })
                         } catch (error) {
                             res.status(401).send({
                                 errors: [{
                                     message: error,
                                     extensions: {
                                         code: "Could not connect to GCP"
-                                    }}]
+                                    }
+                                }]
                             })
                         }
-                        } else throw new Error("Issue with files");
+                    } else throw new Error("Issue with files");
                 } catch (error: any) {
-                        res.status(401).send({
-                            errors: [{
-                                message: error.message,
-                                extensions: {
-                                    code: "Conts.postImage"
-                                }}]
-                        });
+                    res.status(401).send({
+                        errors: [{
+                            message: error.message,
+                            extensions: {
+                                code: "Conts.postImage"
+                            }
+                        }]
+                    });
                 }
             }
-          })
+        })
     } catch (error: any) {
         res.status(401).send({
             errors: [{
                 message: error.message,
                 extensions: {
                     code: "Controller issue"
-                }}]
+                }
+            }]
         });
+    }
+}
+
+//Events
+export const getEvents = async (req: Request, res: Response) => {
+    const events = await Funcs.activeEvents()
+    try {
+        events ? res.status(200).send({
+            message: "Lista de Eventos Activos",
+            data: {
+                events: events
+            }
+        }) : res.status(401).send({
+            message: "Error al obtener Eventos",
+            data: {
+                error: "Funcs.getEvents"
+            }
+        })
+    } catch (error: any) {
+        res.status(401).send({
+            message: "Error al obtener Eventos",
+            data: {
+                error: error.message
+            }
+        })
+    }
+
+}
+export const getEvent = async (req: Request, res: Response) => {
+    const id = req.params.id;
+
+    const event = await Funcs.allEventInfo(id)
+    try {
+        event ? res.status(200).send({
+            message: "Evento encontrado",
+            data: {
+                event: event
+            }
+        }) : res.status(401).send({
+            message: "Error al obtener Evento",
+            data: {
+                error: "Funcs.getEvent"
+            }
+        })
+    } catch (error: any) {
+        res.status(401).send({
+            message: "Error al obtener Evento: " + error.message,
+            data: {
+                error: "Funcs.getEvent"
+            }
+        })
+    }
+}
+export const postEvent = async (req: Request, res: Response) => {
+    let current_user = await Funcs.isLoggedIn(req, res)
+
+    const data = req.body;
+    try {
+        let event = await Funcs.createEvent(current_user.getDataValue("USER_ID"), data.title, data.description, data.date, data.location, data.capacity, data.lock)
+        res.status(200).send({
+            message: "Evento creado",
+            data: {
+                event: event
+            }
+        })
+    } catch (error) {
+        res.status(401).send({
+            message: "Error al crear Evento",
+            data: {
+                error: "Funcs.createEvent"
+            }
+        })
+    }
+}
+export const putEvent = async (req: Request, res: Response) => {
+    let current_user = await Funcs.isLoggedIn(req, res)
+    const data = req.body;
+
+    if (await Funcs.isAdmin(current_user.getDataValue("USER_ID"), data.event_id)) {
+        try {
+            let event = await Funcs.updateEvent(data.id, data.title, data.description, data.date, data.location, data.capacity, data.status)
+            res.status(200).send({
+                message: "Evento actualizado",
+                data: {
+                    event: event
+                }
+            })
+        } catch (error) {
+            res.status(401).send({
+                message: "Error al actualizar Evento: " + error,
+                data: {
+                    error: "Funcs.updateEvent"
+                }
+            })
+        }
+    } else {
+        res.status(401).send({
+            message: "No tienes permisos para actualizar este evento",
+            data: {
+                error: "Funcs.isAdmin"
+            }
+        })
+    }
+
+
+}
+
+//User Events
+export const getMyApplications = async (req: Request, res: Response) => {
+    let current_user = await Funcs.isLoggedIn(req, res)
+    const applications = await Funcs.checkMyApplications(current_user)
+
+    try {
+        applications ? res.status(200).send({
+            message: "Lista de Eventos aplicados",
+            data: applications
+        }) : res.status(404).send({
+            message: "No se ha aplicado a ningun evento",
+            data: {
+                error: "Funcs.checkMyApplications"
+            }
+        })
+    } catch (error: any) {
+        res.status(500).send({
+            message: "Error al obtener Eventos: " + error.message,
+            data: {
+                error: "Funcs.getMyApplicaitons"
+            }
+        })
     }
 }
