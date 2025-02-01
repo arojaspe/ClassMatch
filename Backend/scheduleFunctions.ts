@@ -26,8 +26,6 @@ interface DecodedSchedule{
 function decodeSchedule(codedSchedule: CodedSchedule) : DecodedSchedule{
     let  decodedSchedule = {} as DecodedSchedule;
 
-     
-
     for (let key in codedSchedule) {
         let code = codedSchedule[key as keyof CodedSchedule];
         decodedSchedule[key as keyof DecodedSchedule] = code.toString(2).padStart(4, '0').split("").map(char => char === '1');
@@ -36,5 +34,15 @@ function decodeSchedule(codedSchedule: CodedSchedule) : DecodedSchedule{
     return decodedSchedule;
 }
 
-function codeSchedule(){}
+function codeSchedule(decodedSchedule: DecodedSchedule) : CodedSchedule{
+    let codedSchedule = {} as CodedSchedule;
+
+    for(let key in decodedSchedule) {
+        let decode = decodedSchedule[key as keyof DecodedSchedule].map(bool => (bool) ? '1' : '0').join("");
+        codedSchedule[key as keyof CodedSchedule] = Number("0b".concat(decode));
+    }
+
+    return codedSchedule;
+}
+
 function scheduleFilter(){}
