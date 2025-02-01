@@ -1,5 +1,7 @@
 import * as Models from "./Models";
 
+// 24 bits represented as values
+// 0-33554431
 interface CodedSchedule{
     Monday: number;
     Tueday: number;
@@ -21,6 +23,18 @@ interface DecodedSchedule{
     Sunday: boolean[];
 }
 
-function decodeSchedule(){}
+function decodeSchedule(codedSchedule: CodedSchedule) : DecodedSchedule{
+    let  decodedSchedule = {} as DecodedSchedule;
+
+     
+
+    for (let key in codedSchedule) {
+        let code = codedSchedule[key as keyof CodedSchedule];
+        decodedSchedule[key as keyof DecodedSchedule] = code.toString(2).padStart(4, '0').split("").map(char => char === '1');
+    }
+
+    return decodedSchedule;
+}
+
 function codeSchedule(){}
 function scheduleFilter(){}
