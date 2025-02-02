@@ -327,6 +327,11 @@ export const REPORT_MOD= db.define("REPORT_MOD", {
 
 
 //Relations
+
+// User-Schedule
+USERS_MOD.hasOne(SCHEDULES_MOD, {foreignKey: 'USER_ID'});
+SCHEDULES_MOD.belongsTo(USERS_MOD, {foreignKey: 'USER_ID'});
+
 // User-College
 COLLEGES_MOD.hasMany(USERS_MOD, {foreignKey: 'USER_COLLEGE_ID'});
 USERS_MOD.belongsTo(COLLEGES_MOD, {foreignKey: 'USER_COLLEGE_ID'});
