@@ -54,6 +54,40 @@ export const USERS_MOD= db.define("USER_MOD", {
     freezeTableName: true,
     tableName: 'USERS'
 })
+export const SCHEDULES_MOD= db.define("SCHEDULES_MOD", {
+    SCHEDULES_ID: {
+        type: DataTypes.CHAR(36),
+        primaryKey: true,
+    },
+    USER_ID: {
+        type: DataTypes.CHAR(36)
+    },
+    MONDAY: {
+        type: DataTypes.INT
+    },
+    TUESDAY: {
+        type: DataTypes.INT
+    },
+    WEDNESDAY: {
+        type: DataTypes.INT
+    },
+    THURSDAY: {
+        type: DataTypes.INT
+    },
+    FRIDAY: {
+        type: DataTypes.INT
+    },
+    SATURDAY: {
+        type: DataTypes.INT
+    },
+    SUNDAY: {
+        type: DataTypes.INT
+    }
+}, {
+    timestamps: false,
+    freezeTableName: true,
+    tableName: 'SCHEDULES'
+})
 export const COLLEGES_MOD= db.define("COLLEGES_MOD", {
     COLLEGE_ID: {
         type: DataTypes.CHAR(36),

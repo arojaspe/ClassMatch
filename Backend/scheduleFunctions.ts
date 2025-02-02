@@ -45,4 +45,16 @@ function codeSchedule(decodedSchedule: DecodedSchedule) : CodedSchedule{
     return codedSchedule;
 }
 
-function scheduleFilter(){}
+interface SortedUser{
+    matches: number;
+    schedule: DecodedSchedule;
+    commonSchedule: DecodedSchedule;
+    user: Record<string, any>;
+}
+
+/*function scheduleFilter(otherUsers: Array<Record<string, any>>, currUserSchedule: CodedSchedule) : Array<Record<string, any>>{
+    let sortedArray = [];
+    
+    for(let user in otherUsersSchedules) {
+    }
+}*/
