@@ -178,6 +178,12 @@ export const EVENTS_MOD= db.define("EVENTS_MOD", {
     EVENT_ADMIN: {
         type: DataTypes.CHAR(36),
     },
+    EVENT_TITLE: {
+        type: DataTypes.STRING,
+    },
+    EVENT_LOCATION: {
+        type: DataTypes.STRING,
+    },
     EVENT_CAPACITY: {
         type: DataTypes.TINYINT,
     },

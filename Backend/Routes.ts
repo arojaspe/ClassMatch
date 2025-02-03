@@ -6,15 +6,11 @@ const router= Router();
 //User Management: u
 router.get("/us", Conts.getListaUsuarios);
 router.get("/u/:id", Conts.getUsuario); //Backend
-router.post("/u/:id", Conts.postUsuario);
 router.put("/u", Conts.putUsuario);
-
-//Profiles: p
-router.get("/p", Conts.getUsuario);
 
 //Login and Register
 router.post("/login", Conts.postLogin);
-router.post("/logout", Conts.postLogOut);
+router.get("/logout", Conts.getLogOut);
 router.get("/auth", Conts.getAuthenticate);
 router.post("/register", Conts.postRegister);
 
