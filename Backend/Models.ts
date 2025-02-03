@@ -55,7 +55,7 @@ export const USERS_MOD= db.define("USER_MOD", {
     tableName: 'USERS'
 })
 export const SCHEDULES_MOD= db.define("SCHEDULES_MOD", {
-    SCHEDULES_ID: {
+    SCHEDULE_ID: {
         type: DataTypes.CHAR(36),
         primaryKey: true,
     },
@@ -63,25 +63,25 @@ export const SCHEDULES_MOD= db.define("SCHEDULES_MOD", {
         type: DataTypes.CHAR(36)
     },
     MONDAY: {
-        type: DataTypes.INT
+        type: DataTypes.INTEGER
     },
     TUESDAY: {
-        type: DataTypes.INT
+        type: DataTypes.INTEGER
     },
     WEDNESDAY: {
-        type: DataTypes.INT
+        type: DataTypes.INTEGER
     },
     THURSDAY: {
-        type: DataTypes.INT
+        type: DataTypes.INTEGER
     },
     FRIDAY: {
-        type: DataTypes.INT
+        type: DataTypes.INTEGER
     },
     SATURDAY: {
-        type: DataTypes.INT
+        type: DataTypes.INTEGER
     },
     SUNDAY: {
-        type: DataTypes.INT
+        type: DataTypes.INTEGER
     }
 }, {
     timestamps: false,
@@ -329,8 +329,8 @@ export const REPORT_MOD= db.define("REPORT_MOD", {
 //Relations
 
 // User-Schedule
-USERS_MOD.hasOne(SCHEDULES_MOD, {foreignKey: 'USER_ID'});
-SCHEDULES_MOD.belongsTo(USERS_MOD, {foreignKey: 'USER_ID'});
+USERS_MOD.hasOne(SCHEDULES_MOD, {foreignKey: 'USER_ID', as: 'USER_SCHEDULE'});
+SCHEDULES_MOD.belongsTo(USERS_MOD, {foreignKey: 'USER_ID', as: 'USER_SCHEDULE'});
 
 // User-College
 COLLEGES_MOD.hasMany(USERS_MOD, {foreignKey: 'USER_COLLEGE_ID'});

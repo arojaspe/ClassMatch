@@ -9,3 +9,5 @@ node_modules/
 GCP_Secret.json
 
 Dist/
+
+Backend/test.ts
