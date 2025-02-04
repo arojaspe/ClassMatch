@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@google-cloud/storage": "^7.15.0",
-    "@react-email/components": "0.0.32",
+    "@react-email/components": "^0.0.32",
     "@web-std/file": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
