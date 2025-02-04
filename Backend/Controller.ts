@@ -154,8 +154,14 @@ export const getAuthenticate = async (req: Request, res: Response) => {
             data: current_user
         })
     } catch (error: any) {
-        console.log(error.message)
-        return
+        res.status(401).json({
+            errors: [{
+                message: "Error: "+error.message,
+                extensions: {
+                    code: "Funcs.auth"
+                }
+            }]
+        })
     }
 }
 export const postRegister = async (req: Request, res: Response) => {
@@ -176,7 +182,7 @@ export const postRegister = async (req: Request, res: Response) => {
                 res.status(200).json({
                     data: {
                         message: "Succesfully Created",
-                        new_user_id: value[0]
+                        pending_verification: value
                     }
                 });
             }
@@ -187,6 +193,103 @@ export const postRegister = async (req: Request, res: Response) => {
                 message: error.message,
                 extensions: {
                     code: "Controller issue"
+                }
+            }]
+        })
+    }
+}
+export const postVerification = async (req: Request, res: Response) => {
+    try {
+        if (!req.body.email) {
+            res.status(401).json({
+                errors: [{
+                    message: "Unable to send verification email: Missing email",
+                    extensions: {
+                        code: "Conts.pVer"
+                    }
+                }]
+            })
+        } else {
+            await Funcs.verifyEmail(req.body.email)
+            res.status(200).send({
+                message: "Verification email was sent!",
+            })
+        } 
+    } catch (error: any) {
+        res.status(401).json({
+            errors: [{
+                message: "Unable to send verification email: "+error.message,
+                extensions: {
+                    code: "Funcs.vEm"
+                }
+            }]
+        })
+    }
+}
+export const getVerification = async (req: Request, res: Response) => {
+    try {
+        let uuid: string = await Funcs.checkVerification(req.params.token)
+        res.status(200).send({
+            message: "User has been verified!",
+            data: {
+                user_id: uuid
+            }
+        })
+    } catch (error: any) {
+        res.status(401).json({
+            errors: [{
+                message: "Email was not verified: "+error.message,
+                extensions: {
+                    code: "Funcs.chVer"
+                }
+            }]
+        })
+    }
+}
+export const putPasswordReset = async (req: Request, res: Response) => {
+    try {
+        if (!req.body.email) {
+            res.status(401).json({
+                errors: [{
+                    message: "Unable to send password reset email: Missing an email",
+                    extensions: {
+                        code: "Conts.pPassR"
+                    }
+                }]
+            })
+        } else {
+            await Funcs.resetPassword(req.body.email)
+            res.status(200).send({
+                message: "Email was sent!",
+            })
+        }
+    } catch (error: any) {
+        res.status(401).json({
+            errors: [{
+                message: "Unable to send password reset email: "+error.message,
+                extensions: {
+                    code: "Funcs.rPass"
+                }
+            }]
+        })
+    }
+}
+
+export const getPasswordReset = async (req: Request, res: Response) => {
+    try {
+        let password: string = await Funcs.checkPasswordReset(req.params.token)
+        res.status(200).send({
+            message: "Password has been reset! We strongly advise you to update it",
+            data: {
+                new_password: password
+            }
+        })
+    } catch (error: any) {
+        res.status(401).json({
+            errors: [{
+                message: "Password was not reset: "+error.message,
+                extensions: {
+                    code: "Funcs.cPass"
                 }
             }]
         })
@@ -313,8 +416,8 @@ export const postImage = async (req: Request, res: Response) => {
 
 //Events
 export const getEvents = async (req: Request, res: Response) => {
-    const events = await Funcs.activeEvents()
     try {
+        const events = await Funcs.activeEvents()
         events ? res.status(200).send({
             message: "Lista de Eventos Activos",
             data: {
@@ -338,9 +441,9 @@ export const getEvents = async (req: Request, res: Response) => {
 }
 export const getEvent = async (req: Request, res: Response) => {
     const id = req.params.id;
-
-    const event = await Funcs.allEventInfo(id)
+    
     try {
+        const event = await Funcs.allEventInfo(id)
         event ? res.status(200).send({
             message: "Evento encontrado",
             data: {
@@ -418,23 +521,188 @@ export const putEvent = async (req: Request, res: Response) => {
 //User Events
 export const getMyApplications = async (req: Request, res: Response) => {
     let current_user = await Funcs.isLoggedIn(req, res)
-    const applications = await Funcs.checkMyApplications(current_user)
 
-    try {
+    if (!current_user) { 
+        res.status(498).send({
+            message: "No hay un usuario logueado",
+            data: {
+                error: "Funcs.isLoggedIn"
+            }
+        }) 
+    } else {
+        try {
+        const applications = await Funcs.checkMyApplications(current_user)
         applications ? res.status(200).send({
             message: "Lista de Eventos aplicados",
             data: applications
         }) : res.status(404).send({
             message: "No se ha aplicado a ningun evento",
             data: {
-                error: "Funcs.checkMyApplications"
+                error: "Conts.gMyApps"
             }
         })
     } catch (error: any) {
         res.status(500).send({
             message: "Error al obtener Eventos: " + error.message,
             data: {
-                error: "Funcs.getMyApplicaitons"
+                error: "Funcs.cMyApps"
+            }
+        })
+    }
+}}
+export const postRequestEvent = async (req: Request, res: Response) => {
+    let current_user = await Funcs.isLoggedIn(req, res)
+    const event_id = req.params.event
+
+    try {
+        const data = await Funcs.requestAttendEvent(current_user, event_id)
+        if (data) {
+            let result= data==1? "Aceptado": "Pendiente" 
+            res.status(200).send({
+                message: "Se ha aplicado a este evento exitosamente",
+                data: {
+                    evento: event_id,
+                    aceptacion: result
+                }
+            })
+        } else {
+            res.status(404).send({
+                message: "No fue posible aplicar al evento en este momento",
+                data: {
+                    error: "Conts.pReqEv"
+                }
+            })
+        }
+    } catch (error: any) {
+        res.status(401).send({
+            message: "Error al aplicar a evento: " + error.message,
+            data: {
+                error: "Funcs.rAttEv"
+            }
+        })
+    }
+}
+export const postRequestAdmin = async (req: Request, res: Response) => {
+    let current_user = await Funcs.isLoggedIn(req, res)
+    const req_uevent = req.body.req_uevent
+    const req_user = req.body.req_user
+    const decision = req.body.decision
+    
+    try {
+        const data = await Funcs.requestDecision(current_user, req_uevent, req_user, Number(decision))
+        data ?
+            res.status(200).send({
+                message: "Solicitud de evento respondida",
+                data: data
+            }) : res.status(404).send({
+                message: "Error al responder solicitud",
+                data: {
+                    error: "Conts.pReqAdm"
+                }
+            })
+    } catch (error: any) {
+        res.status(401).send({
+            message: "No fue posible responder a esta solicitud: " + error.message,
+            data: {
+                error: "Funcs.rDec"
+            }
+        })
+    }
+}
+export const getUEventsAdmin = async (req: Request, res: Response) => {
+    let current_user = await Funcs.isLoggedIn(req, res)
+
+    try {
+        const data = await Funcs.findMyUEventsAdmin(current_user)
+        data ?
+            res.status(200).send({
+                message: "Eventos organizados encontrados",
+                data: data
+            }) : res.status(404).send({
+                message: "No se han encontrado eventos organizados",
+                data: {
+                    error: "Conts.gUEvAdm"
+                }
+            })
+    } catch (error: any) {
+        res.status(401).send({
+            message: "Error al encontrar eventos: " + error.message,
+            data: {
+                error: "Funcs.fMUEAdm"
+            }
+        })
+    }
+}
+export const getUEvents = async (req: Request, res: Response) => {
+    let current_user = await Funcs.isLoggedIn(req, res)
+
+    try {
+        const data = await Funcs.findMyUEvents(current_user)
+        data ?
+            res.status(200).send({
+                message: "Eventos asistidos encontrados",
+                data: data
+            }) : res.status(404).send({
+                message: "No se han encontrado eventos asistidos",
+                data: {
+                    error: "Conts.gUEv"
+                }
+            })
+    } catch (error: any) {
+        res.status(401).send({
+            message: "Error al encontrar eventos: " + error.message,
+            data: {
+                error: "Funcs.fMUEv"
+            }
+        })
+    }
+}
+export const getUEventAttendees = async (req: Request, res: Response) => {
+    let current_user = await Funcs.isLoggedIn(req, res)
+    const event_id = req.params.event
+
+    try {
+        const data = await Funcs.findUEventAttendees(current_user, event_id)
+        data ?
+            res.status(200).send({
+                message: "Usuarios asistentes encontrados",
+                data: data
+            }) : res.status(404).send({
+                message: "No se han encontrado usuarios asistentes aún",
+                data: {
+                    error: "Conts.gUEvAt"
+                }
+            })
+    } catch (error: any) {
+        res.status(401).send({
+            message: "No fue posible encontrar otros usuarios: " + error.message,
+            data: {
+                error: "Funcs.fUEvAt"
+            }
+        })
+    }
+}
+export const getUEReqsAdmin = async (req: Request, res: Response) => {
+    let current_user = await Funcs.isLoggedIn(req, res)
+    let event_id= req.params.event
+    
+    try {
+        const data = await Funcs.findUEventRequestsAdmin(current_user, event_id)
+        data ?
+            res.status(200).send({
+                message: "Solicitudes de evento encontradas",
+                data: data
+            }) : res.status(404).send({
+                message: "No se han encontrado solicitudes",
+                data: {
+                    error: "Conts.gUERAdm"
+                }
+            })
+    } catch (error: any) {
+        res.status(401).send({
+            message: "Error al encontrar solicitudes: " + error.message,
+            data: {
+                error: "Funcs.fUERAdm"
             }
         })
     }

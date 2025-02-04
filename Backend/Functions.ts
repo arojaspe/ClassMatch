@@ -2,7 +2,9 @@ import { Request, Response } from "express";
 import * as Models from "./Models";
 import { v4 as uuidv4 } from 'uuid';
 import { sign, verify } from "jsonwebtoken";
-import { FloatDataType, Model, Op, where, literal } from 'sequelize';
+import { resend }  from "./Connection";
+import  RaycastMagicLinkEmail  from "../Email_templates/Verification";
+import { FloatDataType, Model, Op, where} from 'sequelize';
 
 //Error showing
 interface Result<T> { data: any, error?: string }
@@ -19,7 +21,7 @@ export function str2hsh(str: string): string {
     return hash.toString();
 }
 
-//Users
+//Users !!!!!!!!!!
 export async function createUser(firstname: string, lastname: string, email: string, password: string, gender: string,
     birthdate: Date, college: string, bio: string, filter_age: string, filter_gender: string) {
     let usuario = await findUser(undefined, email)
@@ -30,9 +32,8 @@ export async function createUser(firstname: string, lastname: string, email: str
         throw new Error("Email is not valid for this college")
     }
     else {
-        let id: string = uuidv4()
         await Models.USERS_MOD.create({
-            USER_ID: id,
+            USER_ID: null,
             USER_FIRSTNAME: firstname,
             USER_LASTNAME: lastname,
             USER_EMAIL: email,
@@ -47,7 +48,8 @@ export async function createUser(firstname: string, lastname: string, email: str
             USER_SUPERMATCHES: 5,
             USER_FILTER_GENDER: filter_gender
         })
-        return ([id])
+        verifyEmail(email)
+        return "Email has been sent for verification"
     }
 }
 export async function updateUser(req: Request, res: Response, bio?: Text, last_log?: Date, status?:
@@ -68,6 +70,9 @@ export async function logIn(email: string, password: string) {
     try {
         let usuario = await findUser(undefined, email)
         if (usuario) {
+            if (!usuario.getDataValue("USER_ID")) {
+                throw new Error("Email has not been verified")
+            }
             if (str2hsh(password) == usuario?.getDataValue("USER_PASSWORD")) {
                 let tokens = await updateToken(usuario)
                 return ([tokens.data[0], tokens.data[1], await authUser(usuario.getDataValue("USER_ID"))])
@@ -85,12 +90,13 @@ export async function isLoggedIn(req: Request, res: Response) {
     let payload: any;
 
     if (!req.cookies["refresh_token"]) {
-        return res.status(401).send(
-            
-        )
+        return
     }
     try {
         payload = verify(req.cookies["access_token"], "access_secret");
+        if (!payload.id) {
+            throw new Error("Email has not been verified")
+        }
     } catch (accessTokenError: any) {
         if (accessTokenError.message === "jwt must be provided" || accessTokenError.message.includes("expired")) {
             const newAccessToken = refreshToken(req, res!);
@@ -121,20 +127,32 @@ export function refreshToken(req: Request, res: Response): string {
 }
 export async function authUser(uuid: string) {
     try {
-        const usuario = await Models.USERS_MOD.findOne({
-            where: { USER_ID: uuid },
+        console.log("Here: "+ uuid)
+        const usuario = await Models.USERS_MOD.findByPk( uuid, {
             attributes: {
                 exclude:
                     ["USER_PASSWORD"]
             }
         })
-        return {
-            message: "Success Logging in",
-            data: usuario
-        }
+        if (!usuario?.getDataValue("USER_ID")) {
+            throw new Error("Email not verified")
+        } else {
+            return {
+                message: "Success Logging in",
+                data: usuario
+            }
+        }        
     } catch (error: any) {
         throw new Error("User not logged in");
     }
+}
+export let findUser = async function (id?: string, email?: string) {
+    if (id) {
+        let usuario = await Models.USERS_MOD.findByPk(id)
+        return usuario
+    }
+    let usuario = await Models.USERS_MOD.findOne({ where: { USER_EMAIL: email } })
+    return usuario
 }
 let updateToken = async function (user: Model<any, any>) {
     try {
@@ -146,17 +164,78 @@ let updateToken = async function (user: Model<any, any>) {
             id: user.getDataValue("USER_ID")
         }, "refresh_secret", { expiresIn: "1w" });
         return { data: [access_token, refresh_token] }
+
     } catch (error) {
         throw new Error("Unable to update credentials");
     }
 }
-export let findUser = async function (id?: string, email?: string) {
-    if (id) {
-        let usuario = await Models.USERS_MOD.findByPk(id)
-        return usuario
+
+//Emails
+export async function verifyEmail(email: string) {
+        let confirmaiton_token = sign({
+            uuid: uuidv4(),
+            email: email,
+        }, "id_secret", { expiresIn: "30m" });
+        
+        resend.emails.send({
+            from: 'onboarding@resend.dev',
+            to: email,
+            subject: 'Email de Verificación',
+            react: RaycastMagicLinkEmail({
+                magicLink: confirmaiton_token,
+            })
+        })
+}
+export async function checkVerification(token: string) {
+    let payload: any;
+        payload = verify(token, "id_secret")
+        if (payload) {
+            let new_user= await findUser(undefined, payload.email)
+            if (new_user) {
+                if (new_user?.getDataValue("USER_ID")) {
+                    throw new Error("User is verified already")
+                }
+                await Models.USERS_MOD.update({ USER_ID: payload.uuid }, 
+                    { 
+                        where: {
+                            USER_EMAIL: payload.email}})
+            } else {
+                throw new Error("No email was found")
+            }
+        }
+        return payload.uuid      
+}
+
+export async function resetPassword(email: string) {
+    let confirmaiton_token = sign({
+        password: uuidv4().substring(0, 7),
+        email: email,
+    }, "password_reset", { expiresIn: "10m" });
+    
+    resend.emails.send({
+        from: 'onboarding@resend.dev',
+        to: email,
+        subject: 'Restablecer tu contraseña',
+        react: RaycastMagicLinkEmail({
+            magicLink: confirmaiton_token,
+        })
+    })
+}
+export async function checkPasswordReset(token: string) {
+let payload: any;
+    payload = verify(token, "password_reset")
+    if (payload) {
+        let user= await findUser(undefined, payload.email)
+        if (user) {
+            await Models.USERS_MOD.update({ USER_PASSWORD: str2hsh(payload.password)}, 
+                { 
+                    where: {
+                        USER_EMAIL: payload.email}})
+        } else {
+            throw new Error("No email was found")
+        }
     }
-    let usuario = await Models.USERS_MOD.findOne({ where: { USER_EMAIL: email } })
-    return usuario
+    return payload.password     
 }
 
 //Colleges
@@ -399,9 +478,9 @@ export async function requestAttendEvent(user: string, event: string) {
             if (event_?.getDataValue("EVENT_STATUS") == 0) {
                 throw new Error("Event has expired already")
             }
+
             let id: string = uuidv4()
             let accepted = null
-
             if (event_?.getDataValue("EVENT_LOCK") == 0) {
                 accepted = 1
             }
@@ -411,30 +490,33 @@ export async function requestAttendEvent(user: string, event: string) {
                 UEVENTS_USER: user,
                 UEVENTS_ACCEPTED: accepted
             })
-            return ([event, accepted])
+            return (accepted)
         } else {
             throw new Error(ans)
         }
     }
 }
-export async function requestDecision(uevent_id: string, user: string, decision: number) {
+export async function requestDecision(current_user: string, uevent_id: string, user: string, decision: number) {
     let uevent = await Models.USER_EVENTS_MOD.findOne({
         where: { UEVENTS_ID: uevent_id, UEVENTS_ATTENDEE: user }
     })
-
     if (!uevent) {
         throw new Error("User not found in event")
-    }
-    if ([0, 1].includes(decision)!) {
+    } else if (await !isAdmin(current_user, uevent?.getDataValue("UEVENT_EVENT"))) {
+        throw new Error("You are not the admin of this event")
+    }else if ([0, 1].includes(decision)!) {
         throw new Error("Decision must be 0 or 1")
     }
+
     uevent.set({
         UEVENTS_ACCEPTED: decision
     })
     uevent.save()
+
     let ans = await isEventFull(uevent.getDataValue("UEVENTS_EVENT"))
     return {
-        new_attendee: uevent.getDataValue("UEVENTS_ATTENDEE"),
+        user: user,
+        decision: decision==0? "Solicitud denegada": "Solicitud aprobada",
         note: ans
     }
 }
@@ -490,8 +572,11 @@ export async function findMyUEvents(current_user: string) {
     let ueventExpired: Model<any, any>[] = []
 
     ueventActive = await Models.USER_EVENTS_MOD.findAll({
-        where: { UEVENTS_ATTENDEE: current_user },
-        attributes: ["UEVENTS_ACCEPTED"],
+        where: { 
+            UEVENTS_ATTENDEE: current_user,
+            UEVENTS_ACCEPTED: 1
+        },
+        attributes: [],
         include: [{
             model: Models.EVENTS_MOD,
             where: {
@@ -507,8 +592,11 @@ export async function findMyUEvents(current_user: string) {
         order: [['EVENT_DATE', 'DESC']]
     })
     ueventExpired = await Models.USER_EVENTS_MOD.findAll({
-        where: { UEVENTS_ATTENDEE: current_user },
-        attributes: ["UEVENTS_ACCEPTED"],
+        where: { 
+            UEVENTS_ATTENDEE: current_user,
+            UEVENTS_ACCEPTED: 1
+        },
+        attributes: [],
         include: [{
             model: Models.EVENTS_MOD,
             where: {
@@ -532,10 +620,10 @@ export async function findMyUEvents(current_user: string) {
         expired: ueventExpired
     }
 }
-export async function findUEventAttendees(event: string, current_user: string) {
-    let uevent: Model<any, any>[] = []
+export async function findUEventAttendees(current_user: string, event: string) {
+    let attendees: Model<any, any>[] = []
 
-    uevent = await Models.USER_EVENTS_MOD.findAll({
+    attendees = await Models.USER_EVENTS_MOD.findAll({
         where: {
             UEVENTS_EVENT: event,
             UEVENT_ACCEPTED: 1,
@@ -552,12 +640,16 @@ export async function findUEventAttendees(event: string, current_user: string) {
             where: { IMAGE_ORDER: 1 }
         }]
     })
-    if (!uevent) {
-        throw new Error("User did not attend this Event")
+    if (!attendees) {
+        throw new Error("Current user did not attend this Event")
     }
-    return uevent
+    return attendees
 }
-export async function findUEventRequestsAdmin(event: string) {
+export async function findUEventRequestsAdmin(admin: string, event: string) {
+    if (!isAdmin(admin, event)) {
+        throw new Error("Current user is not the Admin of this Event")
+    }
+
     let ueventAccepted = await Models.USER_EVENTS_MOD.findAll({
         where: {
             UEVENTS_EVENT: event,
