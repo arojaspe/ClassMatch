@@ -88,6 +88,25 @@ export const SCHEDULES_MOD= db.define("SCHEDULES_MOD", {
     freezeTableName: true,
     tableName: 'SCHEDULES'
 })
+export const SUBSCRIPTIONS_MOD= db.define("SUBSCRIPTIONS_MOD", {
+    SUBSCRIPTION_ID: {
+        type: DataTypes.CHAR(36),
+        primaryKey: true,
+    },
+    SUBSCRIPTION_USER: {
+        type: DataTypes.CHAR(36)
+    },
+    SUBSCRIPTION_API_ID: {
+        type: DataTypes.CHAR(32)
+    },
+    SUBSCRIPTION_PLAN: {
+        type: DataTypes.STRING
+    }
+}, {
+    timestamps: false,
+    freezeTableName: true,
+    tableName: 'SUBSCRIPTIONS'
+})
 export const COLLEGES_MOD= db.define("COLLEGES_MOD", {
     COLLEGE_ID: {
         type: DataTypes.CHAR(36),
@@ -333,6 +352,10 @@ export const REPORT_MOD= db.define("REPORT_MOD", {
 
 
 //Relations
+
+// User-Subscription
+USERS_MOD.hasOne(SUBSCRIPTIONS_MOD, {foreignKey: 'SUBSCRIPTION_USER', as: 'USER_SUBSCRIPTION'});
+SUBSCRIPTIONS_MOD.belongsTo(USERS_MOD, {foreignKey: 'SUBSCRIPTION_USER', as: 'USER_SUBSCRIPTION'});
 
 // User-Schedule
 USERS_MOD.hasOne(SCHEDULES_MOD, {foreignKey: 'USER_ID', as: 'USER_SCHEDULE'});

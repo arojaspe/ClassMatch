@@ -40,4 +40,7 @@ router.get('/ue.us/my-events', Conts.getUEvents)
 router.get('/ue.us/attendees/:id', Conts.getUEventAttendees)
 router.get('/ue.ad/requests/:id', Conts.getUEReqsAdmin)
 
+//Mercadopago suscription management: 
+//router.post("/payment", Conts.postPaySuscription)
+
 export default router;

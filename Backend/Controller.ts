@@ -4,6 +4,13 @@ import * as Funcs from "./Functions";
 import * as Storage from "./Connection";
 import { v4 as uuidv4 } from 'uuid';
 
+import mercadopago from "mercadopago";
+import dotenv from "dotenv";
+//dotenv.config();
+
+//Payment Managementh
+
+
 //User Management
 export const getListaUsuarios = async (req: Request, res: Response) => {
     const users = await Models.USERS_MOD.findAll({
