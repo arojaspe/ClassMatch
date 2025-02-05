@@ -61,7 +61,7 @@ import {
           />
           <Text style={footer}>
             Si tienes alguna pregunta, contáctanos en{' '}
-            <Link href='mailto:support@classmatch.com'>
+            <Link href='mailto:team@classmatch.site'>
               support@classmatch.com
             </Link>
           </Text>

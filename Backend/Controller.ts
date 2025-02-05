@@ -210,7 +210,8 @@ export const postVerification = async (req: Request, res: Response) => {
                 }]
             })
         } else {
-            await Funcs.verifyEmail(req.body.email)
+            await Funcs.findUser(undefined, req.body.email)
+            Funcs.verifyEmail(req.body.email)
             res.status(200).send({
                 message: "Verification email was sent!",
             })

@@ -157,10 +157,17 @@ export async function authUser(uuid: string) {
 export let findUser = async function (id?: string, email?: string) {
     if (id) {
         let usuario = await Models.USERS_MOD.findByPk(id)
-        return usuario!
+        if (!usuario) {
+            throw new Error("No user was found: "+id)
+        }
+        return usuario
     }
     let usuario = await Models.USERS_MOD.findOne({ where: { USER_EMAIL: email } })
-    return usuario!
+    if (!usuario) {
+        throw new Error("No user was found: "+email)
+    }
+
+    return usuario
 }
 let addTokens = function (user: Model<any, any>) {
     try {
@@ -208,8 +215,8 @@ export async function verifyEmail(email: string) {
     }, "id_secret", { expiresIn: "30m" });
 
     resend.emails.send({
-        from: 'onboarding@resend.dev',
-        to: "daviseven84@gmail.com",
+        from: 'team@classmatch.site',
+        to: email,
         subject: 'Email de Verificación',
         react: RaycastMagicLinkEmail({
             magicLink: confirmaiton_token,
