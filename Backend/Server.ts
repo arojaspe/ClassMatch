@@ -4,8 +4,6 @@ import * as Rout from "./Routes";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
-import * as Test from "./test";
-
 class Server {
     private app: Application;
     private port: String;
@@ -17,9 +15,7 @@ class Server {
         this.app= express();
         this.port= "5000";
         this.middlewares();
-        this.routes();
-
-        Test.test();
+        this.routes()
     };
 
     middlewares () {

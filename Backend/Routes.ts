@@ -13,6 +13,7 @@ router.post("/login", Conts.postLogin);
 router.get("/logout", Conts.getLogOut);
 router.get("/auth", Conts.getAuthenticate);
 router.post("/register", Conts.postRegister);
+
 router.post("/verify", Conts.postVerification);
 router.get("/verify/:token", Conts.getVerification);
 router.put("/resetp", Conts.putPasswordReset);
@@ -32,7 +33,7 @@ router.post("/e", Conts.postEvent)
 router.put("/e/:id", Conts.putEvent)
 
 //User Event Management: ue
-router.get("/ue", Conts.getMyApplications)
+router.get("/ue/myrequests", Conts.getMyApplications)
 router.post("/ue.us/:id", Conts.postRequestEvent)
 router.post('/ue.ad/req', Conts.postRequestAdmin)
 router.get('/ue.ad/my-events', Conts.getUEventsAdmin)

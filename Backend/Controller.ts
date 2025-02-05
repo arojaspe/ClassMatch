@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import e, { Request, Response } from "express";
 import * as Models from "./Models";
 import * as Funcs from "./Functions";
 import * as Storage from "./Connection";
@@ -62,19 +62,20 @@ export const getUsuario = async (req: Request, res: Response) => {
     })
 }
 export const putUsuario = async (req: Request, res: Response) => {
-    const info = req.body
+    const { bio, last_log, status, rating, filter_age, filter_gender } = req.body
     try {
-        let updated = await Funcs.updateUser(req, res, info.bio, info.last_log, info.status, info.rating, info.filter_age, info.filter_gender)
+        const current_user = await Funcs.isLoggedIn(req, res)
+        let updated = await Funcs.updateUser(current_user.USER_ID, res, bio, last_log, status, rating, filter_age, filter_gender)
         res.status(200).send({
             data: {
                 message: "Succesfully updated",
                 data: updated
             }
         })
-    } catch (error) {
+    } catch (error: any) {
         res.status(401).json({
             errors: [{
-                message: "Could not connect to DB",
+                message: "Could not update user: " + error.message,
                 extensions: {
                     code: "Controller issue"
                 }
@@ -85,9 +86,9 @@ export const putUsuario = async (req: Request, res: Response) => {
 
 //LogIn and Register
 export const postLogin = async (req: Request, res: Response) => {
-    const data = req.body;
+    const { email, password } = req.body;
     try {
-        Funcs.logIn(data.email, data.password).then((value) => {
+        Funcs.logIn(email, password).then((value) => {
             if (typeof (value) != "object") {
                 res.status(401).json({
                     errors: [{
@@ -110,7 +111,7 @@ export const postLogin = async (req: Request, res: Response) => {
                 })
                 res.status(200).json(
                     {
-                        message: "Log In Succesfull",
+                        message: "Success Logging in",
                         data: value[2]
                     }
                 )
@@ -156,7 +157,7 @@ export const getAuthenticate = async (req: Request, res: Response) => {
     } catch (error: any) {
         res.status(401).json({
             errors: [{
-                message: "Error: "+error.message,
+                message: "Error: " + error.message,
                 extensions: {
                     code: "Funcs.auth"
                 }
@@ -165,8 +166,7 @@ export const getAuthenticate = async (req: Request, res: Response) => {
     }
 }
 export const postRegister = async (req: Request, res: Response) => {
-    let [firstname, lastname, email, password, college_id, gender, birthdate, bio, filter_age, filter_gender] = [req.body.firstname, req.body.lastname, req.body.email, req.body.password,
-    req.body.college_id, req.body.gender, req.body.birthdate, req.body.bio, req.body.filter_age, req.body.filter_gender];
+    const { firstname, lastname, email, password, college_id, gender, birthdate, bio, filter_age, filter_gender } = req.body;
     try {
         Funcs.createUser(firstname, lastname, email, password, gender, birthdate, college_id, bio, filter_age, filter_gender).then((value) => {
             if (typeof (value) == "string") {
@@ -214,11 +214,11 @@ export const postVerification = async (req: Request, res: Response) => {
             res.status(200).send({
                 message: "Verification email was sent!",
             })
-        } 
+        }
     } catch (error: any) {
         res.status(401).json({
             errors: [{
-                message: "Unable to send verification email: "+error.message,
+                message: "Unable to send verification email: " + error.message,
                 extensions: {
                     code: "Funcs.vEm"
                 }
@@ -238,7 +238,7 @@ export const getVerification = async (req: Request, res: Response) => {
     } catch (error: any) {
         res.status(401).json({
             errors: [{
-                message: "Email was not verified: "+error.message,
+                message: "Email was not verified: " + error.message,
                 extensions: {
                     code: "Funcs.chVer"
                 }
@@ -266,7 +266,7 @@ export const putPasswordReset = async (req: Request, res: Response) => {
     } catch (error: any) {
         res.status(401).json({
             errors: [{
-                message: "Unable to send password reset email: "+error.message,
+                message: "Unable to send password reset email: " + error.message,
                 extensions: {
                     code: "Funcs.rPass"
                 }
@@ -274,7 +274,6 @@ export const putPasswordReset = async (req: Request, res: Response) => {
         })
     }
 }
-
 export const getPasswordReset = async (req: Request, res: Response) => {
     try {
         let password: string = await Funcs.checkPasswordReset(req.params.token)
@@ -287,7 +286,7 @@ export const getPasswordReset = async (req: Request, res: Response) => {
     } catch (error: any) {
         res.status(401).json({
             errors: [{
-                message: "Password was not reset: "+error.message,
+                message: "Password was not reset: " + error.message,
                 extensions: {
                     code: "Funcs.cPass"
                 }
@@ -314,9 +313,9 @@ export const getColleges = async (req: Request, res: Response) => {
     })
 }
 export const postColleges = async (req: Request, res: Response) => {
-    const data = req.body;
+    const { name, domain, city } = req.body;
     try {
-        let college = await Funcs.createCollege(data.name, data.domain, data.city)
+        let college = await Funcs.createCollege(name, domain, city)
         res.status(200).send({
             message: "Universidad creada",
             data: {
@@ -365,7 +364,7 @@ export const postImage = async (req: Request, res: Response) => {
                             })
                         }
                         let img_id = uuidv4()
-                        let relation = req.body.relation ?? current_user.getDataValue("USER_ID")
+                        let relation = req.body.relation ?? current_user.USER_ID
                         console.log(relation)
                         let data = await Funcs.addImage2DB(img_id, relation, req.body.type)
                         const blob = Storage.bucket.file(`${req.body.type + "/" + img_id}_post.jpg`);
@@ -441,7 +440,7 @@ export const getEvents = async (req: Request, res: Response) => {
 }
 export const getEvent = async (req: Request, res: Response) => {
     const id = req.params.id;
-    
+
     try {
         const event = await Funcs.allEventInfo(id)
         event ? res.status(200).send({
@@ -465,11 +464,12 @@ export const getEvent = async (req: Request, res: Response) => {
     }
 }
 export const postEvent = async (req: Request, res: Response) => {
-    let current_user = await Funcs.isLoggedIn(req, res)
 
-    const data = req.body;
+    const { title, description, date, location, capacity, lock } = req.body;
     try {
-        let event = await Funcs.createEvent(current_user.getDataValue("USER_ID"), data.title, data.description, data.date, data.location, data.capacity, data.lock)
+        let current_user = await Funcs.isLoggedIn(req, res)
+
+        let event = await Funcs.createEvent(current_user.USER_ID, title, description, date, location, capacity, lock)
         res.status(200).send({
             message: "Evento creado",
             data: {
@@ -486,53 +486,42 @@ export const postEvent = async (req: Request, res: Response) => {
     }
 }
 export const putEvent = async (req: Request, res: Response) => {
-    let current_user = await Funcs.isLoggedIn(req, res)
-    const data = req.body;
+    const { event_id, id, title, description, date, location, capacity, status } = req.body;
 
-    if (await Funcs.isAdmin(current_user.getDataValue("USER_ID"), data.event_id)) {
-        try {
-            let event = await Funcs.updateEvent(data.id, data.title, data.description, data.date, data.location, data.capacity, data.status)
+    try {
+        let current_user = await Funcs.isLoggedIn(req, res)
+        if (await Funcs.isAdmin(current_user.USER_ID, event_id)) {
+            let event = await Funcs.updateEvent(id, title, description, date, location, capacity, status)
             res.status(200).send({
                 message: "Evento actualizado",
                 data: {
                     event: event
                 }
             })
-        } catch (error) {
+        } else {
             res.status(401).send({
-                message: "Error al actualizar Evento: " + error,
+                message: "No tienes permisos para actualizar este evento",
                 data: {
-                    error: "Funcs.updateEvent"
+                    error: "Funcs.isAdmin"
                 }
             })
         }
-    } else {
+    } catch (error) {
         res.status(401).send({
-            message: "No tienes permisos para actualizar este evento",
+            message: "Error al actualizar Evento: " + error,
             data: {
-                error: "Funcs.isAdmin"
+                error: "Funcs.updateEvent"
             }
         })
     }
-
-
 }
 
 //User Events
 export const getMyApplications = async (req: Request, res: Response) => {
-    let current_user = await Funcs.isLoggedIn(req, res)
-
-    if (!current_user) { 
-        res.status(498).send({
-            message: "No hay un usuario logueado",
-            data: {
-                error: "Funcs.isLoggedIn"
-            }
-        }) 
-    } else {
-        try {
+    try {
+        let current_user = await Funcs.isLoggedIn(req, res).then((value) => value.USER_ID)
         const applications = await Funcs.checkMyApplications(current_user)
-        applications ? res.status(200).send({
+        applications[0] ? res.status(200).send({
             message: "Lista de Eventos aplicados",
             data: applications
         }) : res.status(404).send({
@@ -549,15 +538,15 @@ export const getMyApplications = async (req: Request, res: Response) => {
             }
         })
     }
-}}
+}
 export const postRequestEvent = async (req: Request, res: Response) => {
-    let current_user = await Funcs.isLoggedIn(req, res)
     const event_id = req.params.event
 
     try {
+        let current_user = await Funcs.isLoggedIn(req, res)
         const data = await Funcs.requestAttendEvent(current_user, event_id)
         if (data) {
-            let result= data==1? "Aceptado": "Pendiente" 
+            let result = data == 1 ? "Aceptado" : "Pendiente"
             res.status(200).send({
                 message: "Se ha aplicado a este evento exitosamente",
                 data: {
@@ -583,12 +572,10 @@ export const postRequestEvent = async (req: Request, res: Response) => {
     }
 }
 export const postRequestAdmin = async (req: Request, res: Response) => {
-    let current_user = await Funcs.isLoggedIn(req, res)
-    const req_uevent = req.body.req_uevent
-    const req_user = req.body.req_user
-    const decision = req.body.decision
-    
+    const { req_uevent, req_user, decision } = req.body
+
     try {
+        let current_user = await Funcs.isLoggedIn(req, res)
         const data = await Funcs.requestDecision(current_user, req_uevent, req_user, Number(decision))
         data ?
             res.status(200).send({
@@ -610,9 +597,8 @@ export const postRequestAdmin = async (req: Request, res: Response) => {
     }
 }
 export const getUEventsAdmin = async (req: Request, res: Response) => {
-    let current_user = await Funcs.isLoggedIn(req, res)
-
     try {
+        let current_user = await Funcs.isLoggedIn(req, res)
         const data = await Funcs.findMyUEventsAdmin(current_user)
         data ?
             res.status(200).send({
@@ -634,9 +620,8 @@ export const getUEventsAdmin = async (req: Request, res: Response) => {
     }
 }
 export const getUEvents = async (req: Request, res: Response) => {
-    let current_user = await Funcs.isLoggedIn(req, res)
-
     try {
+        let current_user = await Funcs.isLoggedIn(req, res)
         const data = await Funcs.findMyUEvents(current_user)
         data ?
             res.status(200).send({
@@ -658,10 +643,10 @@ export const getUEvents = async (req: Request, res: Response) => {
     }
 }
 export const getUEventAttendees = async (req: Request, res: Response) => {
-    let current_user = await Funcs.isLoggedIn(req, res)
     const event_id = req.params.event
 
     try {
+        let current_user = await Funcs.isLoggedIn(req, res)
         const data = await Funcs.findUEventAttendees(current_user, event_id)
         data ?
             res.status(200).send({
@@ -683,10 +668,10 @@ export const getUEventAttendees = async (req: Request, res: Response) => {
     }
 }
 export const getUEReqsAdmin = async (req: Request, res: Response) => {
-    let current_user = await Funcs.isLoggedIn(req, res)
-    let event_id= req.params.event
-    
+    let event_id = req.params.event
+
     try {
+        let current_user = await Funcs.isLoggedIn(req, res)
         const data = await Funcs.findUEventRequestsAdmin(current_user, event_id)
         data ?
             res.status(200).send({

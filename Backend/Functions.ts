@@ -2,9 +2,9 @@ import { Request, Response } from "express";
 import * as Models from "./Models";
 import { v4 as uuidv4 } from 'uuid';
 import { sign, verify } from "jsonwebtoken";
-import { resend }  from "./Connection";
-import  RaycastMagicLinkEmail  from "../Email_templates/Verification";
-import { FloatDataType, Model, Op, where} from 'sequelize';
+import { resend } from "./Connection";
+import RaycastMagicLinkEmail from "../Email_templates/Verification";
+import { FloatDataType, Model, Op, where } from 'sequelize';
 
 //Error showing
 interface Result<T> { data: any, error?: string }
@@ -52,9 +52,9 @@ export async function createUser(firstname: string, lastname: string, email: str
         return "Email has been sent for verification"
     }
 }
-export async function updateUser(req: Request, res: Response, bio?: Text, last_log?: Date, status?:
+export async function updateUser(user_id: string, res: Response, bio?: Text, last_log?: Date, status?:
     Boolean, rating?: FloatDataType, filter_age?: string, filter_gender?: string) {
-    let usuario: Model<any, any> = await isLoggedIn(req, res)
+    let usuario: Model<any, any> = await findUser(user_id)
     usuario.set({
         USER_BIO: bio ?? usuario.getDataValue("USER_BIO"),
         USER_LAST_LOG: last_log ?? usuario.getDataValue("USER_LAST_LOG"),
@@ -74,7 +74,7 @@ export async function logIn(email: string, password: string) {
                 throw new Error("Email has not been verified")
             }
             if (str2hsh(password) == usuario?.getDataValue("USER_PASSWORD")) {
-                let tokens = await updateToken(usuario)
+                let tokens = await addTokens(usuario)
                 return ([tokens.data[0], tokens.data[1], await authUser(usuario.getDataValue("USER_ID"))])
             } else {
                 throw new Error("Not the correct password")
@@ -88,34 +88,45 @@ export async function logIn(email: string, password: string) {
 }
 export async function isLoggedIn(req: Request, res: Response) {
     let payload: any;
-
     if (!req.cookies["refresh_token"]) {
-        return
+        throw new Error("User signed out")
     }
     try {
-        payload = verify(req.cookies["access_token"], "access_secret");
-        if (!payload.id) {
+        payload = verify(req.cookies["access_token"], "access_secret")
+        if (!payload.USER_ID) {
             throw new Error("Email has not been verified")
         }
     } catch (accessTokenError: any) {
         if (accessTokenError.message === "jwt must be provided" || accessTokenError.message.includes("expired")) {
-            const newAccessToken = refreshToken(req, res!);
-            payload = verify(newAccessToken, "access_secret");
+            const newAccessToken = refreshToken(req, res);
+            payload = await verify(newAccessToken, "access_secret")
         } else {
             throw accessTokenError;
         }
     }
-    const user: Result<any> = await authUser(payload.id);
-    return user.data
+    const { iat, exp, ...filteredPayload } = payload
+    return filteredPayload
 }
 export function refreshToken(req: Request, res: Response): string {
     const refresh_token = req.cookies["refresh_token"];
     if (!refresh_token) {
         throw new Error("Refresh token is missing");
     }
-
     const payload: any = verify(refresh_token, "refresh_secret");
-    const access_token = sign({ id: payload.id }, "access_secret", { expiresIn: "15m" });
+    const access_token = sign({
+        USER_ID: payload.USER_ID,
+        USER_FIRSTNAME: payload.USER_FIRSTNAME,
+        USER_LASTNAME: payload.USER_LASTNAME,
+        USER_EMAIL: payload.USER_EMAIL,
+        USER_COLLEGE_ID: payload.USER_COLLEGE_ID,
+        USER_BIRTHDATE: payload.USER_BIRTHDATE,
+        USER_BIO: payload.USER_BIO,
+        USER_STATUS: payload.USER_STATUS,
+        USER_LAST_LOG: payload.USER_LAST_LOG,
+        USER_SUPERMATCHES: payload.USER_SUPERMATCHES,
+        USER_FILTER_AGE: payload.USER_FILTER_AGE,
+        USER_FILTER_GENDER: payload.USER_FILTER_GENDER
+    }, "access_secret", { expiresIn: "15m" });
 
     res.cookie("access_token", access_token, {
         httpOnly: true,
@@ -127,8 +138,8 @@ export function refreshToken(req: Request, res: Response): string {
 }
 export async function authUser(uuid: string) {
     try {
-        console.log("Here: "+ uuid)
-        const usuario = await Models.USERS_MOD.findByPk( uuid, {
+        console.log("Here: " + uuid)
+        const usuario = await Models.USERS_MOD.findByPk(uuid, {
             attributes: {
                 exclude:
                     ["USER_PASSWORD"]
@@ -137,11 +148,8 @@ export async function authUser(uuid: string) {
         if (!usuario?.getDataValue("USER_ID")) {
             throw new Error("Email not verified")
         } else {
-            return {
-                message: "Success Logging in",
-                data: usuario
-            }
-        }        
+            return usuario
+        }
     } catch (error: any) {
         throw new Error("User not logged in");
     }
@@ -149,20 +157,42 @@ export async function authUser(uuid: string) {
 export let findUser = async function (id?: string, email?: string) {
     if (id) {
         let usuario = await Models.USERS_MOD.findByPk(id)
-        return usuario
+        return usuario!
     }
     let usuario = await Models.USERS_MOD.findOne({ where: { USER_EMAIL: email } })
-    return usuario
+    return usuario!
 }
-let updateToken = async function (user: Model<any, any>) {
+let addTokens = function (user: Model<any, any>) {
     try {
-        let access_token = sign({
-            id: user.getDataValue("USER_ID")
+        const access_token = sign({
+            USER_ID: user.getDataValue("USER_ID"),
+            USER_FIRSTNAME: user.getDataValue("USER_FIRSTNAME"),
+            USER_LASTNAME: user.getDataValue("USER_LASTNAME"),
+            USER_EMAIL: user.getDataValue("USER_EMAIL"),
+            USER_COLLEGE_ID: user.getDataValue("USER_COLLEGE_ID"),
+            USER_BIRTHDATE: user.getDataValue("USER_BIRTHDATE"),
+            USER_BIO: user.getDataValue("USER_BIO"),
+            USER_STATUS: user.getDataValue("USER_STATUS"),
+            USER_LAST_LOG: user.getDataValue("USER_LAST_LOG"),
+            USER_SUPERMATCHES: user.getDataValue("USER_SUPERMATCHES"),
+            USER_FILTER_AGE: user.getDataValue("USER_FILTER_AGE"),
+            USER_FILTER_GENDER: user.getDataValue("USER_FILTER_GENDER")
         }, "access_secret", { expiresIn: "15m" });
-
-        let refresh_token = sign({
-            id: user.getDataValue("USER_ID")
+        const refresh_token = sign({
+            USER_ID: user.getDataValue("USER_ID"),
+            USER_FIRSTNAME: user.getDataValue("USER_FIRSTNAME"),
+            USER_LASTNAME: user.getDataValue("USER_LASTNAME"),
+            USER_EMAIL: user.getDataValue("USER_EMAIL"),
+            USER_COLLEGE_ID: user.getDataValue("USER_COLLEGE_ID"),
+            USER_BIRTHDATE: user.getDataValue("USER_BIRTHDATE"),
+            USER_BIO: user.getDataValue("USER_BIO"),
+            USER_STATUS: user.getDataValue("USER_STATUS"),
+            USER_LAST_LOG: user.getDataValue("USER_LAST_LOG"),
+            USER_SUPERMATCHES: user.getDataValue("USER_SUPERMATCHES"),
+            USER_FILTER_AGE: user.getDataValue("USER_FILTER_AGE"),
+            USER_FILTER_GENDER: user.getDataValue("USER_FILTER_GENDER")
         }, "refresh_secret", { expiresIn: "1w" });
+
         return { data: [access_token, refresh_token] }
 
     } catch (error) {
@@ -172,46 +202,47 @@ let updateToken = async function (user: Model<any, any>) {
 
 //Emails
 export async function verifyEmail(email: string) {
-        let confirmaiton_token = sign({
-            uuid: uuidv4(),
-            email: email,
-        }, "id_secret", { expiresIn: "30m" });
-        
-        resend.emails.send({
-            from: 'onboarding@resend.dev',
-            to: email,
-            subject: 'Email de Verificación',
-            react: RaycastMagicLinkEmail({
-                magicLink: confirmaiton_token,
-            })
+    let confirmaiton_token = sign({
+        uuid: uuidv4(),
+        email: email,
+    }, "id_secret", { expiresIn: "30m" });
+
+    resend.emails.send({
+        from: 'onboarding@resend.dev',
+        to: "daviseven84@gmail.com",
+        subject: 'Email de Verificación',
+        react: RaycastMagicLinkEmail({
+            magicLink: confirmaiton_token,
         })
+    })
 }
 export async function checkVerification(token: string) {
     let payload: any;
-        payload = verify(token, "id_secret")
-        if (payload) {
-            let new_user= await findUser(undefined, payload.email)
-            if (new_user) {
-                if (new_user?.getDataValue("USER_ID")) {
-                    throw new Error("User is verified already")
-                }
-                await Models.USERS_MOD.update({ USER_ID: payload.uuid }, 
-                    { 
-                        where: {
-                            USER_EMAIL: payload.email}})
-            } else {
-                throw new Error("No email was found")
+    payload = verify(token, "id_secret")
+    if (payload) {
+        let new_user = await findUser(undefined, payload.email)
+        if (new_user) {
+            if (new_user?.getDataValue("USER_ID")) {
+                throw new Error("User is verified already")
             }
+            await Models.USERS_MOD.update({ USER_ID: payload.uuid },
+                {
+                    where: {
+                        USER_EMAIL: payload.email
+                    }
+                })
+        } else {
+            throw new Error("No email was found")
         }
-        return payload.uuid      
+    }
+    return payload.uuid
 }
-
 export async function resetPassword(email: string) {
     let confirmaiton_token = sign({
         password: uuidv4().substring(0, 7),
         email: email,
     }, "password_reset", { expiresIn: "10m" });
-    
+
     resend.emails.send({
         from: 'onboarding@resend.dev',
         to: email,
@@ -222,20 +253,22 @@ export async function resetPassword(email: string) {
     })
 }
 export async function checkPasswordReset(token: string) {
-let payload: any;
+    let payload: any;
     payload = verify(token, "password_reset")
     if (payload) {
-        let user= await findUser(undefined, payload.email)
+        let user = await findUser(undefined, payload.email)
         if (user) {
-            await Models.USERS_MOD.update({ USER_PASSWORD: str2hsh(payload.password)}, 
-                { 
+            await Models.USERS_MOD.update({ USER_PASSWORD: str2hsh(payload.password) },
+                {
                     where: {
-                        USER_EMAIL: payload.email}})
+                        USER_EMAIL: payload.email
+                    }
+                })
         } else {
             throw new Error("No email was found")
         }
     }
-    return payload.password     
+    return payload.password
 }
 
 //Colleges
@@ -431,7 +464,7 @@ let isEventFull = async function (id: string) {
 
 //User Events
 export async function checkMyApplications(current_user: string) {
-    await Models.EVENTS_MOD.update(
+    Models.EVENTS_MOD.update(
         { EVENT_STATUS: 0 },
         {
             where: {
@@ -447,21 +480,22 @@ export async function checkMyApplications(current_user: string) {
     let applications = await Models.USER_EVENTS_MOD.findAll({
         where: {
             UEVENTS_ACCEPTED: null,
-            UEVENTS_USER: current_user
+            UEVENTS_ATTENDEE: current_user
         },
+        attributes: ["UEVENTS_ID"],
         include: [{
-            model: Models.EVENTS_MOD,
+            model: Models.EVENTS_MOD, as: "EVENTS",
             where: {
                 EVENT_STATUS: 1
             },
-            attributes: ["EVENT_ID", "EVENT_TITLE", "EVENT_DATE", "EVENT_ADMIN", "EVENT_STATUS"]
-        },
-        {
-            model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
-            attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-            where: { IMAGE_ORDER: 1 }
-        }],
-        order: [['EVENT_DATE', 'DESC']]
+            attributes: ["EVENT_ID", "EVENT_TITLE", "EVENT_DATE", "EVENT_ADMIN", "EVENT_STATUS"],
+            order: [['EVENT_DATE', 'DESC']],
+            include: [{
+                model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
+                attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+                where: { IMAGE_ORDER: 1 }
+            }]
+        }]
     })
     return applications
 }
@@ -504,7 +538,7 @@ export async function requestDecision(current_user: string, uevent_id: string, u
         throw new Error("User not found in event")
     } else if (await !isAdmin(current_user, uevent?.getDataValue("UEVENT_EVENT"))) {
         throw new Error("You are not the admin of this event")
-    }else if ([0, 1].includes(decision)!) {
+    } else if ([0, 1].includes(decision)!) {
         throw new Error("Decision must be 0 or 1")
     }
 
@@ -516,7 +550,7 @@ export async function requestDecision(current_user: string, uevent_id: string, u
     let ans = await isEventFull(uevent.getDataValue("UEVENTS_EVENT"))
     return {
         user: user,
-        decision: decision==0? "Solicitud denegada": "Solicitud aprobada",
+        decision: decision == 0 ? "Solicitud denegada" : "Solicitud aprobada",
         note: ans
     }
 }
@@ -532,14 +566,14 @@ export async function findMyUEventsAdmin(current_user: string) {
         },
         include: [{
             model: Models.EVENTS_MOD,
-            attributes: ["EVENT_ID", "EVENT_TITLE", "EVENT_DATE", "EVENT_STATUS"]
-        },
-        {
-            model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
-            attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-            where: { IMAGE_ORDER: 1 }
-        }],
-        order: [['EVENT_DATE', 'DESC']]
+            attributes: ["EVENT_ID", "EVENT_TITLE", "EVENT_DATE", "EVENT_STATUS"],
+            order: [['EVENT_DATE', 'DESC']],
+            include: [{
+                model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
+                attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+                where: { IMAGE_ORDER: 1 }}]
+        }]
+        
     })
     ueventExpired = await Models.EVENTS_MOD.findAll({
         where: {
@@ -548,14 +582,13 @@ export async function findMyUEventsAdmin(current_user: string) {
         },
         include: [{
             model: Models.EVENTS_MOD,
-            attributes: ["EVENT_ID", "EVENT_TITLE", "EVENT_DATE", "EVENT_STATUS"]
-        },
-        {
-            model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
-            attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-            where: { IMAGE_ORDER: 1 }
-        }],
-        order: [['EVENT_DATE', 'ASC']]
+            attributes: ["EVENT_ID", "EVENT_TITLE", "EVENT_DATE", "EVENT_STATUS"],
+            order: [['EVENT_DATE', 'ASC']],
+            include: [{
+                model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
+                attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+                where: { IMAGE_ORDER: 1 }}]
+        }]
     })
 
     if (!ueventActive || !ueventExpired) {
@@ -572,7 +605,7 @@ export async function findMyUEvents(current_user: string) {
     let ueventExpired: Model<any, any>[] = []
 
     ueventActive = await Models.USER_EVENTS_MOD.findAll({
-        where: { 
+        where: {
             UEVENTS_ATTENDEE: current_user,
             UEVENTS_ACCEPTED: 1
         },
@@ -582,17 +615,16 @@ export async function findMyUEvents(current_user: string) {
             where: {
                 EVENT_STATUS: 1
             },
-            attributes: ["EVENT_ID", "EVENT_TITLE", "EVENT_DATE", "EVENT_ADMIN", "EVENT_STATUS"]
-        },
-        {
-            model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
-            attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-            where: { IMAGE_ORDER: 1 }
-        }],
-        order: [['EVENT_DATE', 'DESC']]
+            attributes: ["EVENT_ID", "EVENT_TITLE", "EVENT_DATE", "EVENT_ADMIN", "EVENT_STATUS"],
+            order: [['EVENT_DATE', 'DESC']],
+            include: [{
+                model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
+                attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+                where: { IMAGE_ORDER: 1 }}]
+        }]
     })
     ueventExpired = await Models.USER_EVENTS_MOD.findAll({
-        where: { 
+        where: {
             UEVENTS_ATTENDEE: current_user,
             UEVENTS_ACCEPTED: 1
         },
@@ -602,14 +634,13 @@ export async function findMyUEvents(current_user: string) {
             where: {
                 EVENT_STATUS: 0
             },
-            attributes: ["EVENT_ID", "EVENT_TITLE", "EVENT_DATE", "EVENT_ADMIN", "EVENT_STATUS"]
-        },
-        {
-            model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
-            attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-            where: { IMAGE_ORDER: 1 }
-        }],
-        order: [['EVENT_DATE', 'ASC']]
+            attributes: ["EVENT_ID", "EVENT_TITLE", "EVENT_DATE", "EVENT_ADMIN", "EVENT_STATUS"],
+            order: [['EVENT_DATE', 'ASC']],
+            include: [{
+                model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
+                attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+                where: { IMAGE_ORDER: 1 }}]
+        }]
     })
 
     if (!ueventActive || !ueventExpired) {
@@ -632,12 +663,11 @@ export async function findUEventAttendees(current_user: string, event: string) {
         attributes: [],
         include: [{
             model: Models.USERS_MOD,
-            attributes: ["USER_ID", "USER_FIRSTNAME", "USER_LASTNAME"]
-        },
-        {
-            model: Models.IMAGES_MOD, as: 'USER_IMAGES',
-            attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-            where: { IMAGE_ORDER: 1 }
+            attributes: ["USER_ID", "USER_FIRSTNAME", "USER_LASTNAME"],
+            include: [{
+                model: Models.IMAGES_MOD, as: 'USER_IMAGES',
+                attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+                where: { IMAGE_ORDER: 1 }}]
         }]
     })
     if (!attendees) {
@@ -658,12 +688,11 @@ export async function findUEventRequestsAdmin(admin: string, event: string) {
         attributes: [],
         include: [{
             model: Models.USERS_MOD,
-            attributes: ["USER_ID", "USER_FIRSTNAME", "USER_LASTNAME"]
-        },
-        {
-            model: Models.IMAGES_MOD, as: 'USER_IMAGES',
-            attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-            where: { IMAGE_ORDER: 1 }
+            attributes: ["USER_ID", "USER_FIRSTNAME", "USER_LASTNAME"],
+            include: [{
+                model: Models.IMAGES_MOD, as: 'USER_IMAGES',
+                attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+                where: { IMAGE_ORDER: 1 }}]
         }]
     })
 
@@ -675,12 +704,11 @@ export async function findUEventRequestsAdmin(admin: string, event: string) {
         attributes: ["UEVENT_ID"],
         include: [{
             model: Models.USERS_MOD,
-            attributes: ["USER_ID", "USER_FIRSTNAME", "USER_LASTNAME"]
-        },
-        {
-            model: Models.IMAGES_MOD, as: 'USER_IMAGES',
-            attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-            where: { IMAGE_ORDER: 1 }
+            attributes: ["USER_ID", "USER_FIRSTNAME", "USER_LASTNAME"],
+            include: [{
+                model: Models.IMAGES_MOD, as: 'USER_IMAGES',
+                attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+                where: { IMAGE_ORDER: 1 }}]
         }]
     })
 
