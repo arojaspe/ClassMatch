@@ -20,6 +20,10 @@ import RestablecerContraseñaCodigo from "./pages/RestablecerContraseñaCodigo.t
 //import Cookies from "universal-cookie";
 import PrivateRoute from "./middleware/PrivateRoute.tsx";
 import NuevaContraseña from "./pages/NuevaContraseña.tsx";
+import axios from "axios";
+
+axios.defaults.withCredentials = true;
+axios.defaults.baseURL = "http://127.0.0.1:5000/api";
 
 export const Layout = () => {
   return (

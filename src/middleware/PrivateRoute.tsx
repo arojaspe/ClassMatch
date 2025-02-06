@@ -9,7 +9,7 @@ interface PrivateRouteProps {
 }
 
 export default function PrivateRoute({ children }: PrivateRouteProps) {
-  const token = cookies.get("token");
+  const token = cookies.get("access_token");
 
   if (!token) {
     return <Navigate to="/login" />;

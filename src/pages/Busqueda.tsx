@@ -9,7 +9,7 @@ export default function Busqueda() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/us")
+      .get("/us")
       .then((response) => {
         setUsuarios(response.data.data);
         console.log(response.data.data);

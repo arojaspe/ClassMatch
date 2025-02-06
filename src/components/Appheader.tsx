@@ -1,10 +1,11 @@
+import axios from "../api/axiosConfig";
 import { useEffect, useState, useRef } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
-import Cookies from "universal-cookie";
-
-const cookies = new Cookies();
+import { Link, useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 export default function Appheader() {
+  const [cookies, removeCookie] = useCookies(["access_token"]); // Obtiene la cookie "access_token"
+
   const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [menuVisible, setMenuVisible] = useState(false); // Estado para mostrar/ocultar el menú
   const menuRef = useRef<HTMLDivElement | null>(null); // Referencia al menú desplegable
@@ -13,8 +14,9 @@ export default function Appheader() {
 
   useEffect(() => {
     const verifyToken = () => {
-      const token = cookies.get("token");
-      setIsAuthenticated(!!token);
+      const token = cookies.access_token;
+      console.log(token);
+      setIsAuthenticated(!!token); // Set isAuthenticated to true if token is defined
     };
 
     verifyToken();
@@ -38,19 +40,30 @@ export default function Appheader() {
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, []);
+  });
 
   const toggleMenu = (event: React.MouseEvent) => {
     event.preventDefault(); // Evita que se haga una navegación
     setMenuVisible((prev) => !prev); // Alternar la visibilidad del menú
   };
 
-  const handleLogout = () => {
-    cookies.remove("token"); // Eliminar el token de la cookie
-    setIsAuthenticated(false); // Actualizar el estado de autenticación
-    navigate("/"); // Redirigir al inicio
-  };
+  const handleLogout = async () => {
+    try {
+      await axios.get("/logout", { withCredentials: true }); // Asegura que envías la cookie al backend
 
+      // Borra el token del almacenamiento local
+      localStorage.removeItem("user");
+
+      // Borra la cookie de `access_token`
+      removeCookie("access_token", { path: "/" });
+
+      // Redirige al login
+      navigate("/login");
+      window.location.reload(); // Recarga la app para reflejar los cambios
+    } catch (error) {
+      console.log("Error al cerrar sesión", error);
+    }
+  };
   return (
     <header className="py-4 bg-headClassMatch text-white shadow-md w-full fixed top-0 h-auto z-10">
       <div className="mx-auto px-10">
