@@ -394,8 +394,8 @@ REPORT_MOD.hasMany(IMAGES_MOD, {foreignKey: 'IMAGE_RELATION', as: "REPORT_IMAGES
 IMAGES_MOD.belongsTo(REPORT_MOD, {foreignKey: 'IMAGE_RELATION', as: "REPORT_IMAGES"});
 
 // Event-User_Events
-EVENTS_MOD.hasMany(USER_EVENTS_MOD, {foreignKey: 'UEVENTS_EVENT'});
-USER_EVENTS_MOD.belongsTo(EVENTS_MOD, {foreignKey: 'UEVENTS_EVENT'});
+EVENTS_MOD.hasMany(USER_EVENTS_MOD, {foreignKey: 'UEVENTS_EVENT', as: "EVENTS"});
+USER_EVENTS_MOD.belongsTo(EVENTS_MOD, {foreignKey: 'UEVENTS_EVENT', as: "EVENTS"});
 
 // User-User_Events
 USERS_MOD.hasMany(USER_EVENTS_MOD, {foreignKey: 'UEVENTS_ATTENDEE'});

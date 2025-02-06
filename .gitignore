@@ -1,13 +1,9 @@
 # Ignore all .log files
 *.log
 
-# Ignore the node_modules directory
-node_modules/
-
 # Ignore environment variables
 .env
 GCP_Secret.json
-
 Dist/
-
 Backend/test.ts
+node_modules
