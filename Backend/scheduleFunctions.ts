@@ -1,38 +1,39 @@
 import * as Models from "./Models";
+import {Request, Response} from "express";
 
 // 24 bits represented as values
 // 0-33554431
 export interface CodedSchedule{
-    Monday: number;
-    Tuesday: number;
-    Wednesday: number;
-    Thursday: number;
-    Friday: number;
-    Saturday: number;
-    Sunday: number;
+    MONDAY: number;
+    TUESDAY: number;
+    WEDNESDAY: number;
+    THURSDAY: number;
+    FRIDAY: number;
+    SATURDAY: number;
+    SUNDAY: number;
 }
 
 // [0-1, 1-2, ..., 22-23, 23-24]
 export interface DecodedSchedule{
-    Monday: boolean[];
-    Tuesday: boolean[];
-    Wednesday: boolean[];
-    Thursday: boolean[];
-    Friday: boolean[];
-    Saturday: boolean[];
-    Sunday: boolean[];
+    MONDAY: boolean[];
+    TUEDAY: boolean[];
+    WEDNESDAY: boolean[];
+    THURSDAY: boolean[];
+    FRIDAY: boolean[];
+    SATURDAY: boolean[];
+    SUNDAY: boolean[];
 }
 export function buildCodedSchedule(rawCodedSchedule : Record<string, any>) : CodedSchedule {
     const {SCHEDULE_ID, USER_ID, ...days} = rawCodedSchedule;
 
     let code = {} as CodedSchedule;
-    code.Monday = days.MONDAY;
-    code.Tuesday = days.TUESDAY;
-    code.Wednesday = days.WEDNESDAY;
-    code.Thursday = days.THURSDAY;
-    code.Friday = days.FRIDAY;
-    code.Saturday = days.SATURDAY;
-    code.Sunday = days.SUNDAY;
+    code.MONDAY = days.MONDAY;
+    code.TUESDAY = days.TUESDAY;
+    code.WEDNESDAY = days.WEDNESDAY;
+    code.THURSDAY = days.THURSDAY;
+    code.FRIDAY = days.FRIDAY;
+    code.SATURDAY = days.SATURDAY;
+    code.SUNDAY = days.SUNDAY;
 
     return code;
 }
@@ -68,26 +69,26 @@ export function compareSchedules(schedule1 : CodedSchedule, schedule2: CodedSche
     let matchesNum = 0;
     let common = {} as CodedSchedule;
 
-    common.Monday = schedule1.Monday & schedule2.Monday;
-    matchesNum += (common.Monday.toString(2).match(/1/g) || []).length;
+    common.MONDAY = schedule1.MONDAY & schedule2.MONDAY;
+    matchesNum += (common.MONDAY.toString(2).match(/1/g) || []).length;
 
-    common.Tuesday = schedule1.Tuesday & schedule2.Tuesday;
-    matchesNum += (common.Tuesday.toString(2).match(/1/g) || []).length;
+    common.TUESDAY = schedule1.TUESDAY & schedule2.TUESDAY;
+    matchesNum += (common.TUESDAY.toString(2).match(/1/g) || []).length;
 
-    common.Wednesday = schedule1.Wednesday & schedule2.Wednesday;
-    matchesNum += (common.Wednesday.toString(2).match(/1/g) || []).length;
+    common.WEDNESDAY = schedule1.WEDNESDAY & schedule2.WEDNESDAY;
+    matchesNum += (common.WEDNESDAY.toString(2).match(/1/g) || []).length;
 
-    common.Thursday = schedule1.Thursday & schedule2.Thursday;
-    matchesNum += (common.Thursday.toString(2).match(/1/g) || []).length;
+    common.THURSDAY = schedule1.THURSDAY & schedule2.THURSDAY;
+    matchesNum += (common.THURSDAY.toString(2).match(/1/g) || []).length;
 
-    common.Friday = schedule1.Friday & schedule2.Friday;
-    matchesNum += (common.Friday.toString(2).match(/1/g) || []).length;
+    common.FRIDAY = schedule1.FRIDAY & schedule2.FRIDAY;
+    matchesNum += (common.FRIDAY.toString(2).match(/1/g) || []).length;
 
-    common.Saturday = schedule1.Saturday & schedule2.Saturday;
-    matchesNum += (common.Saturday.toString(2).match(/1/g) || []).length;
+    common.SATURDAY = schedule1.SATURDAY & schedule2.SATURDAY;
+    matchesNum += (common.SATURDAY.toString(2).match(/1/g) || []).length;
 
-    common.Sunday = schedule1.Sunday & schedule2.Sunday;
-    matchesNum += (common.Sunday.toString(2).match(/1/g) || []).length;
+    common.SUNDAY = schedule1.SUNDAY & schedule2.SUNDAY;
+    matchesNum += (common.SUNDAY.toString(2).match(/1/g) || []).length;
 
     return {matches: matchesNum, commonSchedule: common};
 }

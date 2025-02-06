@@ -1,15 +1,84 @@
 import { Request, Response } from "express";
 import * as Models from "./Models";
 import * as Funcs from "./Functions";
+import * as Schedule from "./scheduleFunctions";
 import * as Storage from "./Connection";
 import { v4 as uuidv4 } from 'uuid';
 
 import mercadopago from "mercadopago";
 import dotenv from "dotenv";
-//dotenv.config();
+dotenv.config();
 
-//Payment Managementh
+//Payment Management
 
+
+// Schedule Management
+
+// Returns DecodedSchedule
+export const getUserSchedule = async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    let modelSchedule = await Models.SCHEDULES_MOD.findOne({where: {USER_ID: id}});
+
+    if(modelSchedule != null) {
+        const codedSchedule = Schedule.buildCodedSchedule(modelSchedule.toJSON());
+        const decodedSchedule = Schedule.decodeSchedule(codedSchedule);
+
+
+        res.status(201).json(
+            {
+                message: "Horario encontrado",
+                data: decodedSchedule
+            })
+    } 
+    else {
+        res.status(404).json({
+            errors: [{
+                message: "No existe horario con ID: " + id,
+                extensions: {
+                    code: "Conts.getUserSchedule - No user found"
+                }
+            }]
+        })
+    }
+}
+
+interface ScheduleUpdateObject {
+    id: string;
+    newSchedule: Schedule.DecodedSchedule;
+}
+
+// Requires the cookies (ScheduleUpdateObject)
+export const putUserSchedule = async (req: Request, res: Response) => {
+    const id = req.body.id;
+    const newSchedule = Schedule.codeSchedule(req.body.newSchedule);
+
+    try {
+        await Funcs.isLoggedIn(req, res);
+        const [updatedRows] = await Models.SCHEDULES_MOD.update(newSchedule, {
+            where: {USER_ID: id}
+        });
+        
+        const updated = await Models.SCHEDULES_MOD.findOne({where: {USER_ID: id}});
+
+        res.status(200).send({
+            data: {
+                message: "Succesfully updated",
+                data: updated
+            }
+        })
+
+    } catch (error) {
+        res.status(401).json({
+            errors: [{
+                message: "Could not connect to DB",
+                extensions: {
+                    code: "Controller issue"
+                }
+            }]
+        })
+    }
+}
 
 //User Management
 export const getListaUsuarios = async (req: Request, res: Response) => {
@@ -69,7 +138,7 @@ export const getUsuario = async (req: Request, res: Response) => {
     })
 }
 export const putUsuario = async (req: Request, res: Response) => {
-    const info = req.body
+    const info = req.body;
     try {
         let updated = await Funcs.updateUser(req, res, info.bio, info.last_log, info.status, info.rating, info.filter_age, info.filter_gender)
         res.status(200).send({

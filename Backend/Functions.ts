@@ -52,6 +52,7 @@ export async function createUser(firstname: string, lastname: string, email: str
         return "Email has been sent for verification"
     }
 }
+
 export async function updateUser(req: Request, res: Response, bio?: Text, last_log?: Date, status?:
     Boolean, rating?: FloatDataType, filter_age?: string, filter_gender?: string) {
     let usuario: Model<any, any> = await isLoggedIn(req, res)
