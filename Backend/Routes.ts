@@ -44,4 +44,9 @@ router.get('/ue.ad/requests/:id', Conts.getUEReqsAdmin)
 //Mercadopago suscription management: 
 //router.post("/payment", Conts.postPaySuscription)
 
+//Schedules manegement
+router.get("/sch/:id", Conts.getUserSchedule);
+router.get("/sch", Conts.getUserSchedule);
+
+
 export default router;

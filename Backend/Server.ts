@@ -4,6 +4,8 @@ import * as Rout from "./Routes";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
+import * as Test from "./test";
+
 class Server {
     private app: Application;
     private port: String;
@@ -53,3 +55,4 @@ class Server {
 };
 
 new Server().listen();
+Test.test();
