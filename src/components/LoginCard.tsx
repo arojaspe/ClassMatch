@@ -1,5 +1,6 @@
 import { SetStateAction, useState, useContext } from "react";
-import axios from "../api/axiosConfig"; // Usa axiosConfig en lugar de axios normal
+import api from "../api/axiosConfig"; // Usa axiosConfig en lugar de axios normal
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
@@ -8,6 +9,7 @@ export default function LoginCard() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const { setUser } = useContext(AuthContext) ?? {};
   const { user } = useContext(AuthContext) ?? {}; // Usa AuthContext para verificar el usuario
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -30,24 +32,50 @@ export default function LoginCard() {
       const response = await axios.post(
         "/login",
         { email, password },
-        { withCredentials: true } // Esto asegura que las cookies de sesión se guarden
+        { withCredentials: true }
       );
 
       if (response.status === 200) {
         console.log("Datos correctos");
-        setMessage("Datos correctos");
+        setMessage("Datos correctos"); // Debería actualizar el mensaje
 
-        // Guardar los datos del usuario
-        const userData = response.data.data;
-        localStorage.setItem("user", JSON.stringify(userData));
+        // Guardar usuario en localStorage
+        localStorage.setItem("user", JSON.stringify(response.data.data));
 
+        // Navegar a otra página
+        console.log("navegando...");
         navigate("/busqueda");
-        //window.location.reload(); // Recarga la app para actualizar el estado del usuario
+        window.location.reload();
       }
-    } catch {
-      setMessage("Datos incorrectos. Inténtalo de nuevo.");
+    } catch (error) {
+      console.error("Error en login:", error);
+      setMessage("Datos incorrectos. Inténtalo de nuevo."); // Si no funciona, revisa punto 2
     }
   };
+  // const handleLogin = async (event: { preventDefault: () => void }) => {
+  //   event.preventDefault();
+  //   try {
+  //     const response = await axios.post(
+  //       "/login",
+  //       { email, password },
+  //       { withCredentials: true } // Esto asegura que las cookies de sesión se guarden
+  //     );
+
+  //     if (response.status === 200) {
+  //       console.log("Datos correctos");
+  //       setMessage("Datos correctos");
+
+  //       // Guardar los datos del usuario
+  //       const userData = response.data.data;
+  //       localStorage.setItem("user", JSON.stringify(userData));
+
+  //       navigate("/busqueda");
+  //       //window.location.reload(); // Recarga la app para actualizar el estado del usuario
+  //     }
+  //   } catch {
+  //     setMessage("Datos incorrectos. Inténtalo de nuevo.");
+  //   }
+  // };
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);

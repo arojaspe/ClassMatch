@@ -1,37 +1,24 @@
-import { createContext, useState, useEffect, ReactNode } from "react";
-import { checkAuth, refreshAccessToken } from "../api/auth";
+import { createContext, useState, useEffect } from "react";
+import { checkAuth } from "../api/auth";
 
-interface AuthContextType {
+export const AuthContext = createContext<{
   user: any;
-  logout: () => void;
-}
+  setUser: (user: any) => void;
+} | null>(null);
 
-export const AuthContext = createContext<AuthContextType | null>(null);
-
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
     const verifyUser = async () => {
-      let authenticatedUser = await checkAuth();
-      if (!authenticatedUser) {
-        await refreshAccessToken();
-        authenticatedUser = await checkAuth();
-      }
+      const authenticatedUser = await checkAuth();
       setUser(authenticatedUser);
     };
-
     verifyUser();
-  }, []);
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
-    window.location.href = "/login";
-  };
+  }, []); // Solo se ejecuta una vez al montar la app
 
   return (
-    <AuthContext.Provider value={{ user, logout }}>
+    <AuthContext.Provider value={{ user, setUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -9,7 +9,7 @@ export default function LogIn() {
 
   useEffect(() => {
     if (user) {
-      console.log("Ya hay un usuario logueado");
+      console.log("Ya hay un usuario autenticado");
       navigate("/busqueda");
     }
   }, [user, navigate]);
