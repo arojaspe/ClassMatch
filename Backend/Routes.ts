@@ -1,5 +1,6 @@
 import { Router } from "express";
 import * as Conts from "./Controller";
+import * as Subs from "./Subscriptions";
 
 const router= Router();
 
@@ -47,6 +48,10 @@ router.get('/ue.ad/requests/:id', Conts.getUEReqsAdmin)
 //Schedules manegement
 router.get("/sch/:id", Conts.getUserSchedule);
 router.put("/sch/:id", Conts.putUserSchedule);
+
+//Subscriptions manegement
+router.post("/sub", Subs.createSubscription);
+router.post("/webhook", Subs.receiveWebhook);
 
 
 export default router;

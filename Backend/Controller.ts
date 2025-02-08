@@ -9,15 +9,12 @@ import mercadopago from "mercadopago";
 import dotenv from "dotenv";
 dotenv.config();
 
-//Payment Management
-
-
 // Schedule Management
 // Returns DecodedSchedule
 export const getUserSchedule = async (req: Request, res: Response) => {
     const { id } = req.params;
 
-    let modelSchedule = await Models.SCHEDULES_MOD.findOne({where: {USER_ID: id}});
+    const modelSchedule = await Models.SCHEDULES_MOD.findOne({where: {USER_ID: id}});
 
     if(modelSchedule) {
         const codedSchedule = Schedule.buildCodedSchedule(modelSchedule.toJSON());
