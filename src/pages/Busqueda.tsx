@@ -12,7 +12,7 @@ export default function Busqueda() {
       .get("/us")
       .then((response) => {
         setUsuarios(response.data.data);
-        console.log(response.data.data);
+        console.log(response.data.data[1].user);
       })
       .catch((error) => {
         console.error("Error fetching personas:", error);
@@ -23,7 +23,7 @@ export default function Busqueda() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Usuario actual basado en el índice
-  const currentUser = usuarios[currentIndex];
+  const currentUser = usuarios[currentIndex]?.user;
   console.log(currentUser);
 
   // Función para avanzar al siguiente usuario

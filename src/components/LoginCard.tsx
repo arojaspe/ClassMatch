@@ -1,6 +1,5 @@
 import { SetStateAction, useState, useContext } from "react";
 import api from "../api/axiosConfig"; // Usa axiosConfig en lugar de axios normal
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
@@ -9,7 +8,6 @@ export default function LoginCard() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const { setUser } = useContext(AuthContext) ?? {};
   const { user } = useContext(AuthContext) ?? {}; // Usa AuthContext para verificar el usuario
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -29,7 +27,7 @@ export default function LoginCard() {
   const handleLogin = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
     try {
-      const response = await axios.post(
+      const response = await api.post(
         "/login",
         { email, password },
         { withCredentials: true }
@@ -45,7 +43,7 @@ export default function LoginCard() {
         // Navegar a otra página
         console.log("navegando...");
         navigate("/busqueda");
-        window.location.reload();
+        //window.location.reload();
       }
     } catch (error) {
       console.error("Error en login:", error);

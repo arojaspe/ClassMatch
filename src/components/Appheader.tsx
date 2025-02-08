@@ -1,20 +1,33 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import axios from "../api/axiosConfig";
+import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
-import { AuthContext } from "../context/AuthContext";
-import api from "../api/axiosConfig";
 
 export default function Appheader() {
   const [cookies, removeCookie] = useCookies(["access_token"]);
-  const { user, setUser } = useContext(AuthContext) ?? {};
-  const [menuVisible, setMenuVisible] = useState(false);
-  const menuRef = useRef<HTMLDivElement | null>(null);
-  const buttonRef = useRef<HTMLDivElement | null>(null);
+
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [menuVisible, setMenuVisible] = useState(false); // Estado para mostrar/ocultar el menú
+  const menuRef = useRef<HTMLDivElement | null>(null); // Referencia al menú desplegable
+  const buttonRef = useRef<HTMLDivElement | null>(null); // Referencia al área que activa el menú (nombre + foto)
   const navigate = useNavigate();
 
   useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const response = await axios.get("/auth", { withCredentials: true });
+        setIsAuthenticated(response.data.isAuthenticated);
+      } catch (error) {
+        console.log("Error checking authentication status", error);
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkAuthStatus();
+
     // Detectar clics fuera del menú para cerrarlo
     const handleClickOutside = (event: MouseEvent) => {
+      // Verifica si el clic fue fuera del botón o el menú
       if (
         menuRef.current &&
         !menuRef.current.contains(event.target as Node) &&
@@ -26,27 +39,35 @@ export default function Appheader() {
     };
 
     document.addEventListener("click", handleClickOutside);
+
+    // Limpiar el event listener cuando el componente se desmonte
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, []);
+  });
 
   const toggleMenu = (event: React.MouseEvent) => {
-    event.preventDefault();
-    setMenuVisible((prev) => !prev);
+    event.preventDefault(); // Evita que se haga una navegación
+    setMenuVisible((prev) => !prev); // Alternar la visibilidad del menú
   };
 
   const handleLogout = async () => {
     try {
-      await api.get("/logout", { withCredentials: true });
-      removeCookie("access_token", { path: "/" });
-      setUser?.(null);
+      await axios.get("/logout", { withCredentials: true }); // Asegura que envías la cookie al backend
+
+      // Borra el token del almacenamiento local
+      localStorage.removeItem("user");
+
+      // Borra la cookie de `access_token`
+      //removeCookie("access_token", { path: "/" });
+
+      // Redirige al login
       navigate("/login");
+      window.location.reload(); // Recarga la app para reflejar los cambios
     } catch (error) {
       console.log("Error al cerrar sesión", error);
     }
   };
-
   return (
     <header className="py-4 bg-headClassMatch text-white shadow-md w-full fixed top-0 h-auto z-10">
       <div className="mx-auto px-10">
@@ -61,52 +82,54 @@ export default function Appheader() {
             </Link>
           </div>
 
-          {user ? (
+          {isAuthenticated ? (
             <>
               <nav className="flex px-8 space-x-4 w-[80%] justify-start">
                 <Link
                   to="/busqueda"
-                  className="px-8 py-2 bg-buttonClassMatch text-lg text-white rounded-md hover:bg-gray-100 hover:text-black transition"
+                  className="px-8 py-2 bg-buttonClassMatch font-KhandMedium text-lg text-white rounded-md hover:bg-gray-100 hover:text-black transition font-Khand-Regular"
                 >
                   Búsqueda
                 </Link>
                 <Link
                   to="/mismatch"
-                  className="px-8 py-2 bg-buttonClassMatch text-lg text-white rounded-md hover:bg-gray-100 hover:text-black transition"
+                  className="px-8 py-2 bg-buttonClassMatch font-KhandMedium text-lg text-white rounded-md hover:bg-gray-100 hover:text-black transition"
                 >
                   Mis match
                 </Link>
                 <Link
                   to="/eventos"
-                  className="px-8 py-2 bg-buttonClassMatch text-lg text-white rounded-md hover:bg-gray-100 hover:text-black transition"
+                  className="px-8 py-2 bg-buttonClassMatch font-KhandMedium text-lg text-white rounded-md hover:bg-gray-100 hover:text-black transition"
                 >
                   Eventos
                 </Link>
                 <Link
                   to="/premium"
-                  className="px-8 py-2 bg-premiumButtonClassMatch text-lg text-white rounded-md hover:bg-gray-100 hover:text-black transition"
+                  className="px-8 py-2 bg-premiumButtonClassMatch font-KhandMedium text-lg text-white rounded-md hover:bg-gray-100 hover:text-black transition"
                 >
                   Premium
                 </Link>
               </nav>
 
               <div
-                className="right-4 h-10 absolute flex items-center cursor-pointer text-lg text-white hover:text-mainClassMatch transition"
-                ref={buttonRef}
-                onClick={toggleMenu}
+                className="right-4 h-10 absolute flex items-center cursor-pointer font-KhandMedium text-lg text-white hover:text-mainClassMatch transition"
+                ref={buttonRef} // Referencia al contenedor
+                onClick={toggleMenu} // Alterna la visibilidad del menú
               >
                 <div className="flex items-center space-x-1">
                   <img
                     className="img-fluid h-16 rounded-full"
-                    src="/img/Profile.png"
+                    src={`/img/Profile.png`}
                     alt="imagen perfil"
                   />
                 </div>
+
+                {/* Menú desplegable */}
                 {menuVisible && (
                   <div
-                    ref={menuRef}
+                    ref={menuRef} // Referencia al menú
                     className="absolute mt-2 bg-white text-black rounded-md shadow-lg w-40 z-20"
-                    style={{ top: "140%", left: "-130%" }}
+                    style={{ top: "140%", left: "-130%" }} // Esto asegura que el menú se muestre hacia abajo
                   >
                     <Link
                       to="/configuracion"
