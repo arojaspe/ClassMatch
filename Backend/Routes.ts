@@ -46,7 +46,7 @@ router.get('/ue.ad/requests/:id', Conts.getUEReqsAdmin)
 
 //Schedules manegement
 router.get("/sch/:id", Conts.getUserSchedule);
-router.get("/sch", Conts.getUserSchedule);
+router.put("/sch/:id", Conts.putUserSchedule);
 
 
 export default router;

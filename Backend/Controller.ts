@@ -19,7 +19,7 @@ export const getUserSchedule = async (req: Request, res: Response) => {
 
     let modelSchedule = await Models.SCHEDULES_MOD.findOne({where: {USER_ID: id}});
 
-    if(modelSchedule != null) {
+    if(modelSchedule) {
         const codedSchedule = Schedule.buildCodedSchedule(modelSchedule.toJSON());
         const decodedSchedule = Schedule.decodeSchedule(codedSchedule);
 
@@ -47,7 +47,7 @@ interface ScheduleUpdateObject {
     newSchedule: Schedule.DecodedSchedule;
 }
 
-// Requires the cookies (ScheduleUpdateObject)
+// Receives DecodedSchedule
 export const putUserSchedule = async (req: Request, res: Response) => {
     const newSchedule = Schedule.codeSchedule(req.body);
 
