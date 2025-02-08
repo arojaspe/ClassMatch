@@ -55,4 +55,3 @@ class Server {
 };
 
 new Server().listen();
-Test.test();

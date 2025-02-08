@@ -142,8 +142,15 @@ export async function authUser(uuid: string) {
         const usuario = await Models.USERS_MOD.findByPk(uuid, {
             attributes: {
                 exclude:
-                    ["USER_PASSWORD"]
-            }
+                    ["USER_PASSWORD"],
+            },
+            include:
+                [
+                {
+                    model: Models.SCHEDULES_MOD, as: "USER_SCHEDULE",
+                    attributes: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
+                }
+            ]
         })
         if (!usuario?.getDataValue("USER_ID")) {
             throw new Error("Email not verified")

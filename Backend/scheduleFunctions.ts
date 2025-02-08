@@ -24,7 +24,7 @@ export interface DecodedSchedule{
     SUNDAY: boolean[];
 }
 export function buildCodedSchedule(rawCodedSchedule : Record<string, any>) : CodedSchedule {
-    const {SCHEDULE_ID, USER_ID, ...days} = rawCodedSchedule;
+    const days = rawCodedSchedule;
 
     let code = {} as CodedSchedule;
     code.MONDAY = days.MONDAY;
@@ -94,29 +94,31 @@ export function compareSchedules(schedule1 : CodedSchedule, schedule2: CodedSche
 }
 
 export interface SortedUser{
+    user: Record<string, any>;
     matches: number;
     schedule: DecodedSchedule;
     commonSchedule: DecodedSchedule;
-    user: Record<string, any>;
 }
 
 // The Parameters are users in JSON format
-export function scheduleFilter(otherUsers: Array<Record<string, any>>, currUser: Record<string, any>) : Array<Record<string, any>>{
+export function scheduleFilter(otherUsers: Array<Record<string, any>>, currUserSchedule: CodedSchedule, currUserId: string) : Array<Record<string, any>>{
     let sortedArray : Array<SortedUser> = [];
 
-    let currUserSchedule : CodedSchedule = buildCodedSchedule(currUser.USER_SCHEDULE);
+    //let currUserSchedule : CodedSchedule = buildCodedSchedule(currUser.USER_SCHEDULE);
 
     for(let user of otherUsers) {
-        let tempSchedule : CodedSchedule = buildCodedSchedule(user.USER_SCHEDULE);
-        let {matches, commonSchedule} = (compareSchedules(currUserSchedule, tempSchedule));
+        if (user.USER_SCHEDULE && user.USER_ID != currUserId) {
+            let tempSchedule : CodedSchedule = buildCodedSchedule(user.USER_SCHEDULE);
+            let {matches, commonSchedule} = (compareSchedules(currUserSchedule, tempSchedule));
 
-        if(matches > 0) {
-            sortedArray.push({
-                matches: matches,
-                schedule: decodeSchedule(tempSchedule),
-                commonSchedule: decodeSchedule(commonSchedule),
-                user: user
-            })
+            if(matches > 0) {
+                sortedArray.push({
+                    matches: matches,
+                    schedule: decodeSchedule(tempSchedule),
+                    commonSchedule: decodeSchedule(commonSchedule),
+                    user: user
+                })
+            }
         }
     }
 

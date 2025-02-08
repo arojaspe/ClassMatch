@@ -13,7 +13,6 @@ dotenv.config();
 
 
 // Schedule Management
-
 // Returns DecodedSchedule
 export const getUserSchedule = async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -50,16 +49,15 @@ interface ScheduleUpdateObject {
 
 // Requires the cookies (ScheduleUpdateObject)
 export const putUserSchedule = async (req: Request, res: Response) => {
-    const id = req.body.id;
-    const newSchedule = Schedule.codeSchedule(req.body.newSchedule);
+    const newSchedule = Schedule.codeSchedule(req.body);
 
     try {
-        await Funcs.isLoggedIn(req, res);
+        const currUser = await Funcs.isLoggedIn(req, res);
         const [updatedRows] = await Models.SCHEDULES_MOD.update(newSchedule, {
-            where: {USER_ID: id}
+            where: {USER_ID: currUser.USER_ID}
         });
         
-        const updated = await Models.SCHEDULES_MOD.findOne({where: {USER_ID: id}});
+        const updated = await Models.SCHEDULES_MOD.findOne({where: {USER_ID: currUser.USER_ID}});
 
         res.status(200).send({
             data: {
@@ -87,25 +85,44 @@ export const getListaUsuarios = async (req: Request, res: Response) => {
         include: [{
             model: Models.IMAGES_MOD, as: 'USER_IMAGES',
             attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-        }],
+        },
+        {
+            model: Models.SCHEDULES_MOD, as: "USER_SCHEDULE",
+            attributes: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
+        }
+        ],
         order: [[{
             model: Models.IMAGES_MOD, as: 'USER_IMAGES'
         }, 'IMAGE_ORDER', 'ASC']
         ]
     });
-    users ? res.status(200).json(
-        {
-            message: "Lista de Perfiles",
-            data: users
-        }
-    ) : res.status(404).json({
-        errors: [{
-            message: "No fue posible obtener los perfiles",
-            extensions: {
-                code: "Conts.getListaUsuarios"
+
+    if(users) {
+        const otherUsers = users.map(user => user.toJSON());
+        const currUser = await Funcs.isLoggedIn(req, res);
+        const userScheduleModel = await Models.SCHEDULES_MOD.findOne({where: {USER_ID: currUser.USER_ID}});
+        const currUserSchedule = Schedule.buildCodedSchedule(userScheduleModel!.toJSON());
+        console.log(currUserSchedule);
+
+        const scheduleFilteredUsers = Schedule.scheduleFilter(otherUsers, currUserSchedule, currUser.USER_ID);
+
+        res.status(200).json(
+            {
+                message: "Lista de Perfiles",
+                data: scheduleFilteredUsers
             }
-        }]
-    })
+        );
+    }
+    else {
+        res.status(404).json({
+            errors: [{
+                message: "No fue posible obtener los perfiles",
+                extensions: {
+                    code: "Conts.getListaUsuarios"
+                }
+            }]
+        });
+    }
 } // Add Schedule match
 export const getUsuario = async (req: Request, res: Response) => {
 
@@ -116,7 +133,12 @@ export const getUsuario = async (req: Request, res: Response) => {
         include: [{
             model: Models.IMAGES_MOD, as: 'USER_IMAGES',
             attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-        }],
+        },
+        {
+            model: Models.SCHEDULES_MOD, as: "USER_SCHEDULE",
+            attributes: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
+        }
+        ],
         order: [[{
             model: Models.IMAGES_MOD, as: 'USER_IMAGES'
         }, 'IMAGE_ORDER', 'ASC']
