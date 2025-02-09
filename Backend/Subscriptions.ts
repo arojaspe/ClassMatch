@@ -8,7 +8,7 @@ import * as crypto from "crypto";
 
 dotenv.config();
 const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN as string;
-const secret = process.env.WEB_HOOK_SECRET as string;
+const secretKey = process.env.WEB_HOOK_SECRET as string;
 export const client = new MercadoPagoConfig({accessToken: accessToken});
 
 
@@ -18,6 +18,7 @@ export const client = new MercadoPagoConfig({accessToken: accessToken});
 
 export const createSubscription = async (req: Request, res: Response) => {
     const userEmail = req.body.email;
+
     try {
         const currUser = await Funcs.isLoggedIn(req, res);
         const subscription = await new PreApproval(client).create({
@@ -60,15 +61,73 @@ export const createSubscription = async (req: Request, res: Response) => {
     }
 }
 
+function verifySignature(req: any) {
+    const headers = req.headers;
+
+    // Obtain the x-signature value from the header
+    const xSignature = headers['x-signature']!; // Assuming headers is an object containing request headers
+    const xRequestId = headers['x-request-id']!; // Assuming headers is an object containing request headers
+
+    // Obtain Query params related to the request URL
+    const dataID = req.query['data.id'];
+
+    // Separating the x-signature into parts
+    const parts = xSignature.split(',');
+
+    // Initializing variables to store ts and hash
+    let ts;
+    let hash;
+
+    // Iterate over the values to obtain ts and v1
+    parts.forEach((part : string) => {
+        // Split each part into key and value
+        const [key, value] = part.split('=');
+        if (key && value) {
+            const trimmedKey = key.trim();
+            const trimmedValue = value.trim();
+            if (trimmedKey === 'ts') {
+                ts = trimmedValue;
+            } else if (trimmedKey === 'v1') {
+                hash = trimmedValue;
+            }
+        }
+    });
+
+    // Generate the manifest string
+    const manifest = `id:${dataID};request-id:${xRequestId};ts:${ts};`;
+
+    // Create an HMAC signature
+    const hmac = crypto.createHmac('sha256', secretKey);
+    hmac.update(manifest);
+
+    // Obtain the hash result as a hexadecimal string
+    const sha = hmac.digest('hex');
+
+    if (sha === hash) {
+        // HMAC verification passed
+        return true;
+    } else {
+        // HMAC verification failed
+        return false;
+}
+}
+
 export const receiveWebhook = async (req: Request, res: Response) => {
     const body: {data: {id: string}; type: string} = req.body;
     console.log(body);
 
+    if (!verifySignature(req)) {
+        console.log("Firma no válida, posible ataque.");
+        res.status(403).send("Firma no válida");
+
+        return;
+    }
+
     try {
         if(body.type === "subscription_preapproval" ) {
             const preapproval = await new PreApproval(client).get({id: body.data.id});
-            const user = await Models.SUBSCRIPTIONS_MOD.findOne({where: {SUBSCRIPTION_API_ID: body.data.id}});
-            const userId = user!.toJSON().USER_ID;
+            const subscription = await Models.SUBSCRIPTIONS_MOD.findOne({where: {SUBSCRIPTION_API_ID: body.data.id}});
+            const userId = subscription!.toJSON().SUBSCRIPTION_USER;
             
             if(preapproval.status === "authorized") {
                 const [updatedRows] = await Models.SUBSCRIPTIONS_MOD.update(
