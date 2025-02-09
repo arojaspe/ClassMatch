@@ -17,6 +17,8 @@ export interface UsuarioClassmatch {
     IMAGE_LINK: string;
     IMAGE_ORDER: number;
   }> | null;
+  user: [];
+  matches: [];
 }
 
 export type UserImageGalleryProps = UserImage[] | null;

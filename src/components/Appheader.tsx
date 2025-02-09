@@ -1,10 +1,19 @@
 import { useEffect, useState, useRef } from "react";
+<<<<<<< Updated upstream
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
 
 export default function Appheader() {
+=======
+import { Link, useNavigate } from "react-router-dom";
+//import { useCookies } from "react-cookie";
+
+export default function Appheader() {
+  //const [cookies, removeCookie] = useCookies(["access_token"]);
+
+>>>>>>> Stashed changes
   const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [menuVisible, setMenuVisible] = useState(false); // Estado para mostrar/ocultar el menú
   const menuRef = useRef<HTMLDivElement | null>(null); // Referencia al menú desplegable
@@ -12,9 +21,27 @@ export default function Appheader() {
   const navigate = useNavigate();
 
   useEffect(() => {
+<<<<<<< Updated upstream
     const verifyToken = () => {
       const token = cookies.get("token");
       setIsAuthenticated(!!token);
+=======
+    const checkAuthStatus = async () => {
+      try {
+        const response = await axios.get("/auth", { withCredentials: true });
+        if (response.status === 200) {
+          // const user = response.data.data;
+          // console.log("usuario", user);
+          // localStorage.setItem("user", JSON.stringify(user));
+          setIsAuthenticated(true);
+        }
+
+        console.log("El usuario está autenticado", response.status);
+      } catch (error) {
+        console.log("Error checking authentication status", error);
+        setIsAuthenticated(false);
+      }
+>>>>>>> Stashed changes
     };
 
     verifyToken();
@@ -45,10 +72,29 @@ export default function Appheader() {
     setMenuVisible((prev) => !prev); // Alternar la visibilidad del menú
   };
 
+<<<<<<< Updated upstream
   const handleLogout = () => {
     cookies.remove("token"); // Eliminar el token de la cookie
     setIsAuthenticated(false); // Actualizar el estado de autenticación
     navigate("/"); // Redirigir al inicio
+=======
+  const handleLogout = async () => {
+    try {
+      await axios.get("/logout", { withCredentials: true }); // Asegura que envías la cookie al backend
+
+      // Borra el token del almacenamiento local
+      localStorage.removeItem("user");
+
+      //Borra la cookie de `access_token`
+      // removeCookie("access_token", { path: "/" });
+
+      // Redirige al login
+      navigate("/login");
+      window.location.reload(); // Recarga la app para reflejar los cambios
+    } catch (error) {
+      console.log("Error al cerrar sesión", error);
+    }
+>>>>>>> Stashed changes
   };
 
   return (
@@ -95,11 +141,18 @@ export default function Appheader() {
               </nav>
 
               <div
-                className="right-4 h-10 absolute flex items-center cursor-pointer font-KhandMedium text-lg text-white hover:text-mainClassMatch transition"
+                className="right-4 h-10 absolute flex items-center cursor-pointer font-KhandMedium text-lg text-white hover:text-mainClassMatch transition space-x-3"
                 ref={buttonRef} // Referencia al contenedor
                 onClick={toggleMenu} // Alterna la visibilidad del menú
               >
-                <div className="flex items-center space-x-1">
+                <p>
+                  Hola, {""}
+                  {
+                    JSON.parse(localStorage.getItem("user") || "{}")
+                      .USER_FIRSTNAME
+                  }
+                </p>
+                <div className="flex items-center space-x-2">
                   <img
                     className="img-fluid h-16 rounded-full"
                     src={`/img/Profile.png`}
@@ -112,7 +165,7 @@ export default function Appheader() {
                   <div
                     ref={menuRef} // Referencia al menú
                     className="absolute mt-2 bg-white text-black rounded-md shadow-lg w-40 z-20"
-                    style={{ top: "140%", left: "-130%" }} // Esto asegura que el menú se muestre hacia abajo
+                    style={{ top: "140%", left: "-0%" }} // Esto asegura que el menú se muestre hacia abajo
                   >
                     <Link
                       to="/configuracion"
