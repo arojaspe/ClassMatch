@@ -244,7 +244,26 @@ export async function checkVerification(token: string) {
                     where: {
                         USER_EMAIL: payload.email
                     }
-                })
+                });
+
+            await Models.SCHEDULES_MOD.create({
+                SCHEDULE_ID: uuidv4(),
+                USER_ID: payload.uuid,
+                MONDAY: null,
+                TUESDAY: null,
+                WEDNESDAY: null,
+                THURSDAY: null,
+                FRIDAY: null,
+                SATURDAY: null,
+                SUNDAY: null
+            });
+
+            await Models.SUBSCRIPTIONS_MOD.create({
+                SUBSCRIPTION_ID: uuidv4(),
+                SUBSCRIPTION_USER: payload.uuid,
+                SUBSCRIPTION_API_ID: null,
+                SUBSCRIPTION_PLAN: "Basic"
+            });
         } else {
             throw new Error("No email was found")
         }
