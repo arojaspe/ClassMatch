@@ -1,8 +1,7 @@
-import Cookies from "universal-cookie";
+import { useCookies } from "react-cookie";
 import Logo from "./Logo";
 import { Link } from "react-router-dom";
 
-const cookies = new Cookies();
 interface HomeCardProps {
   containerClassName?: string;
   sectionClassName?: string;
@@ -18,6 +17,7 @@ export default function HomeCard({
   titleClassName = "",
   descriptionClassName = "",
 }: HomeCardProps) {
+  const [cookies] = useCookies(["access_token"]); // Obtiene la cookie
   return (
     <div className="flex flex-col items-center py-6">
       <div
@@ -45,7 +45,7 @@ export default function HomeCard({
           </p>
         </section>
       </div>
-      {cookies.get("token") ? null : (
+      {cookies.access_token ? null : (
         <nav className="flex w-[80%] justify-center space-x-4 mt-6">
           <Link
             to="/login"

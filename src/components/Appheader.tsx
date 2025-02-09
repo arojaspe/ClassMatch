@@ -1,3 +1,4 @@
+import axios from "../api/axiosConfig";
 import { useEffect, useState, useRef } from "react";
 <<<<<<< Updated upstream
 import { Link, Navigate, useNavigate } from "react-router-dom";
@@ -44,7 +45,7 @@ export default function Appheader() {
 >>>>>>> Stashed changes
     };
 
-    verifyToken();
+    checkAuthStatus();
 
     // Detectar clics fuera del menú para cerrarlo
     const handleClickOutside = (event: MouseEvent) => {
@@ -65,7 +66,7 @@ export default function Appheader() {
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, []);
+  });
 
   const toggleMenu = (event: React.MouseEvent) => {
     event.preventDefault(); // Evita que se haga una navegación
