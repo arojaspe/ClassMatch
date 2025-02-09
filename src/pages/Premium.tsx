@@ -3,9 +3,9 @@ import React from "react";
 export default function Premium() {
   return (
     <>
-      <div className="bg-accentClassMatch">
-        <main className="max-w-6xl mx-auto px-8 h-screen pt-[9%]">
-          <div className="max-w-5xl mx-auto mb-14 text-center">
+      <div className="bg-accentClassMatch h-screen flex ">
+        <main className="max-w-6xl mx-auto px-8 flex flex-col justify-center items-center">
+          <div className="max-w-5xl mx-auto mb-4 text-center">
             <p className="text-headClassMatch font-medium font-KhandSemiBold text-3xl">
               Con ClassMatch Premium, tu experiencia estará a otro nivel
             </p>
@@ -95,13 +95,9 @@ export default function Premium() {
               </ul>
               <a
                 href="#/"
-                className="flex justify-center items-center bg-headClassMatch rounded-xl py-5 px-4 text-center text-white text-xl"
+                className="flex justify-center items-center font-KhandSemiBold bg-headClassMatch rounded-xl py-5 px-4 text-center text-white text-2xl"
               >
                 Escoger plan
-                <img
-                  src="https://res.cloudinary.com/williamsondesign/arrow-right.svg"
-                  className="ml-2"
-                />
               </a>
             </div>
           </div>

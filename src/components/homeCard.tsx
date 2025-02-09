@@ -1,6 +1,7 @@
-import { useCookies } from "react-cookie";
 import Logo from "./Logo";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 interface HomeCardProps {
   containerClassName?: string;
@@ -17,7 +18,24 @@ export default function HomeCard({
   titleClassName = "",
   descriptionClassName = "",
 }: HomeCardProps) {
-  const [cookies] = useCookies(["access_token"]); // Obtiene la cookie
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const response = await axios.get("/auth", { withCredentials: true });
+        if (response.status === 200) {
+          setIsAuthenticated(true);
+        }
+        console.log("El usuario está autenticado", response.status);
+      } catch (error) {
+        console.log("Error checking authentication status", error);
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
   return (
     <div className="flex flex-col items-center py-6">
       <div
@@ -45,7 +63,7 @@ export default function HomeCard({
           </p>
         </section>
       </div>
-      {cookies.access_token ? null : (
+      {!isAuthenticated ? (
         <nav className="flex w-[80%] justify-center space-x-4 mt-6">
           <Link
             to="/login"
@@ -60,6 +78,8 @@ export default function HomeCard({
             Crear cuenta
           </Link>
         </nav>
+      ) : (
+        <></>
       )}
     </div>
   );

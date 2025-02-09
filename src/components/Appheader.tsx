@@ -16,12 +16,8 @@ export default function Appheader() {
       try {
         const response = await axios.get("/auth", { withCredentials: true });
         if (response.status === 200) {
-          // const user = response.data.data;
-          // console.log("usuario", user);
-          // localStorage.setItem("user", JSON.stringify(user));
           setIsAuthenticated(true);
         }
-
         console.log("El usuario está autenticado", response.status);
       } catch (error) {
         console.log("Error checking authentication status", error);
@@ -50,7 +46,7 @@ export default function Appheader() {
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, []);
+  });
 
   const toggleMenu = (event: React.MouseEvent) => {
     event.preventDefault(); // Evita que se haga una navegación
