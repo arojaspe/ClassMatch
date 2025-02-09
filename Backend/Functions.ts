@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { sign, verify } from "jsonwebtoken";
 import { resend } from "./Connection";
 import RaycastMagicLinkEmail from "../Email_templates/Verification";
-import { FloatDataType, Model, Op, where } from 'sequelize';
+import { FloatDataType, Model, Op} from 'sequelize';
 
 //Error showing
 interface Result<T> { data: any, error?: string }
@@ -20,6 +20,20 @@ export function str2hsh(str: string): string {
     }
     return hash.toString();
 }
+
+/* 
+Bulk Testing
+
+Interests
+export function TestInterests() {
+    intereses.forEach( (value) =>
+        Models.INTERESTS_MOD.create({
+            INTEREST_ID: uuidv4(),
+            INTEREST_NAME: value
+        })
+    )
+}
+*/
 
 //Users !!!!!!!!!!
 export async function createUser(firstname: string, lastname: string, email: string, password: string, gender: string,

@@ -1,11 +1,10 @@
-import e, { Request, Response } from "express";
+import { Request, Response } from "express";
 import * as Models from "./Models";
 import * as Funcs from "./Functions";
 import * as Schedule from "./scheduleFunctions";
 import * as Storage from "./Connection";
 import { v4 as uuidv4 } from 'uuid';
 
-import mercadopago from "mercadopago";
 import dotenv from "dotenv";
 dotenv.config();
 
