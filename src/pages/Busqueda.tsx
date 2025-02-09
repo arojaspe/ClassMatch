@@ -14,7 +14,7 @@ export default function Busqueda() {
       .get("/us")
       .then((response) => {
         setUsuarios(response.data.data);
-        console.log(response.data.data);
+        console.log("Los usuarios son", response.data.data);
         console.log(response.data.data[1].matches);
       })
       .catch((error) => {

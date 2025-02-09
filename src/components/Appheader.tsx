@@ -1,9 +1,6 @@
 import axios from "../api/axiosConfig";
 import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Cookies from "universal-cookie";
-
-const cookies = new Cookies();
 
 export default function Appheader() {
   //const [cookies, removeCookie] = useCookies(["access_token"]);
@@ -15,8 +12,6 @@ export default function Appheader() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    
-
     const checkAuthStatus = async () => {
       try {
         const response = await axios.get("/auth", { withCredentials: true });
@@ -32,7 +27,6 @@ export default function Appheader() {
         console.log("Error checking authentication status", error);
         setIsAuthenticated(false);
       }
-
     };
 
     checkAuthStatus();
@@ -62,7 +56,6 @@ export default function Appheader() {
     event.preventDefault(); // Evita que se haga una navegación
     setMenuVisible((prev) => !prev); // Alternar la visibilidad del menú
   };
-
 
   const handleLogout = async () => {
     try {
