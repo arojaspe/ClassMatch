@@ -61,6 +61,32 @@ export const createSubscription = async (req: Request, res: Response) => {
     }
 }
 
+export const getPlan = async (req: Request, res: Response) => {
+    const currUser = await Funcs.isLoggedIn(req, res);
+
+    const subscription = await Models.SUBSCRIPTIONS_MOD.findOne({where: {SUBSCRIPTION_USER: currUser.USER_ID}});
+    
+
+    if(subscription) {
+        const subscriptionRaw = subscription.toJSON();
+        res.status(201).json(
+            {
+                message: "Plan encontrado",
+                data: subscriptionRaw.SUBSCRIPTION_PLAN
+            })
+    } 
+    else {
+        res.status(404).json({
+            errors: [{
+                message: "No existe suscripción con ID: " + currUser.USER_ID,
+                extensions: {
+                    code: "Subs.getPlan - No user found"
+                }
+            }]
+        })
+    }
+}
+
 function verifySignature(req: any) {
     const headers = req.headers;
 

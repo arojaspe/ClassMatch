@@ -51,7 +51,11 @@ router.put("/sch/:id", Conts.putUserSchedule);
 
 //Subscriptions manegement
 router.post("/sub", Subs.createSubscription);
+
+router.post("/sub", Subs.createSubscription);
+router.get("/plan", Subs.getPlan);
 router.post("/webhook", Subs.receiveWebhook);
+
 
 
 export default router;
