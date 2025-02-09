@@ -1,20 +1,13 @@
 import axios from "../api/axiosConfig";
 import { useEffect, useState, useRef } from "react";
-<<<<<<< Updated upstream
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
 
 export default function Appheader() {
-=======
-import { Link, useNavigate } from "react-router-dom";
-//import { useCookies } from "react-cookie";
-
-export default function Appheader() {
   //const [cookies, removeCookie] = useCookies(["access_token"]);
 
->>>>>>> Stashed changes
   const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [menuVisible, setMenuVisible] = useState(false); // Estado para mostrar/ocultar el menú
   const menuRef = useRef<HTMLDivElement | null>(null); // Referencia al menú desplegable
@@ -22,11 +15,8 @@ export default function Appheader() {
   const navigate = useNavigate();
 
   useEffect(() => {
-<<<<<<< Updated upstream
-    const verifyToken = () => {
-      const token = cookies.get("token");
-      setIsAuthenticated(!!token);
-=======
+    
+
     const checkAuthStatus = async () => {
       try {
         const response = await axios.get("/auth", { withCredentials: true });
@@ -42,7 +32,7 @@ export default function Appheader() {
         console.log("Error checking authentication status", error);
         setIsAuthenticated(false);
       }
->>>>>>> Stashed changes
+
     };
 
     checkAuthStatus();
@@ -66,36 +56,31 @@ export default function Appheader() {
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  });
+  }, []);
 
   const toggleMenu = (event: React.MouseEvent) => {
     event.preventDefault(); // Evita que se haga una navegación
     setMenuVisible((prev) => !prev); // Alternar la visibilidad del menú
   };
 
-<<<<<<< Updated upstream
-  const handleLogout = () => {
-    cookies.remove("token"); // Eliminar el token de la cookie
-    setIsAuthenticated(false); // Actualizar el estado de autenticación
-    navigate("/"); // Redirigir al inicio
-=======
+
   const handleLogout = async () => {
     try {
       await axios.get("/logout", { withCredentials: true }); // Asegura que envías la cookie al backend
 
       // Borra el token del almacenamiento local
       localStorage.removeItem("user");
+      setIsAuthenticated(false); // Actualizar el estado de autenticación
 
       //Borra la cookie de `access_token`
       // removeCookie("access_token", { path: "/" });
 
       // Redirige al login
-      navigate("/login");
+      navigate("/");
       window.location.reload(); // Recarga la app para reflejar los cambios
     } catch (error) {
       console.log("Error al cerrar sesión", error);
     }
->>>>>>> Stashed changes
   };
 
   return (
