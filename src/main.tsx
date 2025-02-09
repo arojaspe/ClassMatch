@@ -21,6 +21,7 @@ import RestablecerContraseñaCodigo from "./pages/RestablecerContraseñaCodigo.t
 import PrivateRoute from "./middleware/PrivateRoute.tsx";
 import NuevaContraseña from "./pages/NuevaContraseña.tsx";
 import axios from "axios";
+import Personalizar from "./pages/Personalizar.tsx";
 
 axios.defaults.baseURL = "http://127.0.0.1:5000/api";
 axios.defaults.withCredentials = true;
@@ -110,6 +111,9 @@ const router = createBrowserRouter([
       {
         path: "/crearcuenta",
         element: <CrearCuenta />,
+      },{
+        path: "/Personalizar",
+        element: <Personalizar />,
       },
       {
         path: "/login",
