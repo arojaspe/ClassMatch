@@ -143,10 +143,10 @@ export default function Appheader() {
                     style={{ top: "140%", left: "-0%" }} // Esto asegura que el menú se muestre hacia abajo
                   >
                     <Link
-                      to="/configuracion"
+                      to="/personalizar"
                       className="block px-4 py-2 text-lg hover:bg-gray-200 hover:text-headClassMatch"
                     >
-                      Configuración
+                      Personalizar perfil
                     </Link>
                     <button
                       onClick={handleLogout}
