@@ -269,7 +269,7 @@ export default function PersonalizarPerfil() {
                         <td
                           key={dia}
                           className={`border-b border-l p-2 cursor-pointer transition duration-200 ease-in-out
-                            ${seleccionado[dia][index] ? "bg-cyan-800 text-white text-center" : "bg-gray-200 hover:bg-gray-300"} 
+                            ${seleccionado[dia][index] ? "bg-cyan-700 text-white text-center" : "bg-gray-200 hover:bg-gray-300"} 
                             ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
                           onClick={() => handleSeleccionarHora(dia, index)}
                         >
