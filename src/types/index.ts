@@ -1,4 +1,7 @@
 export interface UsuarioClassmatch {
+  [x: string]: any;
+  user: any;
+  matches: any;
   USER_ID: string; // UUID format
   USER_FIRSTNAME: string | null; // Can be null if not mandatory
   USER_LASTNAME: string | null; // Can be null if not mandatory
@@ -17,8 +20,6 @@ export interface UsuarioClassmatch {
     IMAGE_LINK: string;
     IMAGE_ORDER: number;
   }> | null;
-  user: [];
-  matches: [];
 }
 
 export type UserImageGalleryProps = UserImage[] | null;

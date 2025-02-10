@@ -28,6 +28,7 @@ export default function Busqueda() {
   // Usuario actual basado en el índice
   const currentUser = usuarios[currentIndex]?.user;
   const currentMatch = usuarios[currentIndex]?.matches;
+  const currentCommonSchedule = usuarios[currentIndex]?.commonSchedule;
 
   console.log(currentUser);
 
@@ -85,7 +86,11 @@ export default function Busqueda() {
               exit="exit"
               className="w-[100%] h-[100%] flex justify-center items-center"
             >
-              <UserCard {...currentUser} matches={currentMatch} />
+              <UserCard
+                user={currentUser}
+                matches={currentMatch}
+                commonSchedule={currentCommonSchedule}
+              />
             </motion.div>
           </AnimatePresence>
 
