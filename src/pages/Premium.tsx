@@ -1,4 +1,58 @@
+import { v4 as uuidv4 } from "uuid";
+
+//import mercadopago from "mercadopago";
+import { Wallet, initMercadoPago } from "@mercadopago/sdk-react";
+
+import { useState } from "react";
+import axios from "../api/axiosConfig";
+import { checkAuth } from "../api/auth";
+import { useNavigate } from "react-router-dom";
+
+//const MERCADO_PAGO_PUBLIC_KEY = process.env.MERCADO_PAGO_PUBLIC_KEY! as string;
+
+type PremiumMembership = {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+};
+
+const premiumMembership: PremiumMembership = {
+  id: uuidv4(),
+  name: "ClassMatch Premium",
+  price: 15900,
+  description: "Membresía de ClassMatch premium",
+};
+
 export default function Premium() {
+  const [preferenceId, setPreferenceId] = useState(null);
+  const navigate = useNavigate();
+
+  initMercadoPago(import.meta.env.MERCADO_PAGO_PUBLIC_KEY);
+
+  const createPreference = async () => {
+    try {
+      const userData = await checkAuth();
+      if (!userData) {
+        navigate("/login");
+        console.log(import.meta.env.MERCADO_PAGO_PUBLIC_KEY);
+        return;
+      }
+
+      const subResponse = await axios.post("/sub", {
+        email: userData.USER_EMAIL,
+        //email: "",
+      });
+
+      if (subResponse.data.data) {
+        console.log(subResponse.data.data);
+        setPreferenceId(subResponse.data.data); // Aquí guardamos el `init_point`
+      }
+    } catch (error) {
+      console.error("Error creating preference", error);
+    }
+  };
+
   return (
     <>
       <div className="bg-accentClassMatch h-screen flex ">
@@ -13,7 +67,9 @@ export default function Premium() {
             <div className="w-full flex-1 mt-8 p-8 order-2 bg-white shadow-xl rounded-3xl sm:w-96 lg:w-full lg:order-1">
               <div className="mb-7 pb-7 flex items-center border-b border-gray-300">
                 <div className="ml-5">
-                  <span className="block text-4xl font-KhandBold">Basic</span>
+                  <span className="block text-4xl font-KhandBold">
+                    ClassMatch Basic
+                  </span>
                   <span>
                     <span className="text-2xl font-KhandSemiBold">Gratis </span>
                   </span>
@@ -60,10 +116,16 @@ export default function Premium() {
                   className="rounded-3xl w-20 h-20"
                 />
                 <div className="ml-5">
-                  <span className="block text-4xl font-KhandBold">Premium</span>
+                  <span className="block text-4xl font-KhandBold">
+                    {premiumMembership.name}
+                  </span>
                   <span>
                     <span className="text-3xl font-KhandSemiBold">
-                      $&thinsp; 15.900
+                      {premiumMembership.price.toLocaleString("es-CO", {
+                        style: "currency",
+                        currency: "COP",
+                        maximumFractionDigits: 0,
+                      })}
                     </span>
                   </span>
                 </div>
@@ -91,12 +153,28 @@ export default function Premium() {
                   </span>
                 </li>
               </ul>
-              <a
-                href="#/"
-                className="flex justify-center items-center font-KhandSemiBold bg-headClassMatch rounded-xl py-5 px-4 text-center text-white text-2xl"
-              >
-                Escoger plan
-              </a>
+              <div className="flex justify-center items-center space-x-4">
+                <button
+                  onClick={createPreference}
+                  className="flex justify-center items-center font-KhandSemiBold bg-headClassMatch rounded-xl py-5 px-4 text-center text-white text-2xl"
+                >
+                  Suscribirse
+                </button>
+                <div id="wallet_container" className="h-">
+                  {/* {preferenceId && <p>{preferenceId}</p>} */}
+
+                  {preferenceId && (
+                    <button
+                      className="flex justify-center items-center font-KhandSemiBold bg-headClassMatch rounded-xl py-5 px-4 text-center text-white text-2xl"
+                      onClick={() => window.open(preferenceId, "_self")}
+                    >
+                      {" "}
+                      Pagar con MercadoPago
+                      <Wallet initialization={{ preferenceId }} />
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </main>
