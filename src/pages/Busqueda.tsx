@@ -65,12 +65,12 @@ export default function Busqueda() {
   return (
     <div className="h-screen pt-[9%] bg-mainClassMatch flex justify-center">
       <div className="flex flex-col h-[85%] w-[90%] items-center bg-backgroundClassMatch rounded-lg">
-        <aside className="w-full bg-accentClassMatch rounded-t-lg justify-self-start h-[3.5rem] flex items-center px-4">
+        <aside className="w-full bg-accentClassMatch rounded-t-lg justify-self-start h-[10%] flex items-center px-4">
           <h1 className="text-black text-2xl font-KhandMedium">
             ¡Veamos qué personas puedes encontrar en ClassMatch!
           </h1>
         </aside>
-        <div className="h-full w-full flex justify-between items-center ">
+        <div className="h-[90%] w-full flex justify-between items-center ">
           <button
             className="bg-mainClassMatch bg-opacity-20 w-[5%] text-white h-[70%] rounded-r-lg hover:bg-opacity-30"
             onClick={handlePrevious}
