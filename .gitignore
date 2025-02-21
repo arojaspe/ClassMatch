@@ -3,7 +3,10 @@
 
 # Ignore environment variables
 .env
+
+# Folders and Files
 GCP_Secret.json
 Dist/
 Backend/test.ts
-node_modules
+Bulk/
+node_modules/
