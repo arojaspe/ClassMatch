@@ -12,6 +12,7 @@ router.put("/u", Conts.putUsuario);
 //Interests Management:
 router.put("/ui", Conts.putUserInterests);
 router.get("/i", Conts.getInterests);
+router.get("/ui/:id", Conts.getUserInterests);
 
 //Login and Register
 router.post("/login", Conts.postLogin);

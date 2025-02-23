@@ -8,7 +8,42 @@ import { v4 as uuidv4 } from 'uuid';
 import dotenv from "dotenv";
 dotenv.config();
 
-// 
+// Receives user id or string "CURR"
+// Returns list of Interests
+export const getUserInterests = async(req: Request, res: Response) => {
+    let { id } = req.params;
+
+    try {
+        const currUser = await Funcs.isLoggedIn(req, res);
+
+        if(id === "SELF") {
+            id = currUser.USER_ID;
+        }
+
+        const interestsList = await Funcs.findInterests(id);
+
+        res.status(200).send({
+            data: {
+                message: "Lista de intereses encontrada satisfactoriamente",
+                data: interestsList
+            }
+        })
+
+    } catch (error) {
+        res.status(401).json({
+            errors: [{
+                message: "Could not connect to DB",
+                extensions: {
+                    code: "Controller issue getInterests"
+                }
+            }]
+        })
+    }
+    
+
+}
+
+// Retreives all possible Interests available
 export const getInterests = async(req: Request, res: Response) => {
     try {
         const interestsList = await Models.INTERESTS_MOD.findAll();

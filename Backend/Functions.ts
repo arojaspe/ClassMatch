@@ -345,6 +345,28 @@ export async function updateInterests(userId: string, interestsIds: Array<string
     return newUserInterestsIds;
 }
 
+export async function findInterests(userId: String) {
+    const interestsList = await Models.USER_INTERESTS_MOD.findAll({
+        attributes : {exclude: ["UINTEREST_ID", "UINTEREST_USER"]},
+        where: {
+            UINTEREST_USER: userId,
+        }
+    });
+
+
+    let userInterests: Array<string> = [];
+
+    for(let interest of interestsList) {
+        let interestRow = await Models.INTERESTS_MOD.findByPk(interest.get("UINTEREST_INTEREST") as string);
+        
+        if(interestRow) {
+            userInterests.push(interestRow.get("INTEREST_NAME") as string);
+        }
+    }
+    
+    return userInterests;
+}
+
 //Colleges
 export async function createCollege(name: string, domain: string, city: string) {
     let college = await findCollege(undefined, domain, city)
