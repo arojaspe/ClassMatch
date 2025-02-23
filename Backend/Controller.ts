@@ -8,8 +8,32 @@ import { v4 as uuidv4 } from 'uuid';
 import dotenv from "dotenv";
 dotenv.config();
 
-// Interest Management
+// 
+export const getInterests = async(req: Request, res: Response) => {
+    try {
+        const interestsList = await Models.INTERESTS_MOD.findAll();
 
+        res.status(200).send({
+            data: {
+                message: "Lista de intereses encontrada satisfactoriamente",
+                data: interestsList
+            }
+        })
+
+    } catch (error) {
+        res.status(401).json({
+            errors: [{
+                message: "Could not connect to DB",
+                extensions: {
+                    code: "Controller issue getInterests"
+                }
+            }]
+        })
+    }
+}
+
+// Receives list of interests Ids
+// Returns ids of interest-user table
 export const putUserInterests = async(req: Request, res: Response) => {
     const interestsIds = req.body;
     console.log(interestsIds);
