@@ -8,6 +8,49 @@ import { v4 as uuidv4 } from 'uuid';
 import dotenv from "dotenv";
 dotenv.config();
 
+// Interest Management
+
+export const putUserInterests = async(req: Request, res: Response) => {
+    const interestsIds = req.body;
+    console.log(interestsIds);
+
+    if(interestsIds.length > 8) {
+        res.status(401).json({
+            errors: [{
+                message: "Too many interests. Max 8",
+                extensions: {
+                    code: "Controller issue putUserInterests"
+                }
+            }]
+        })
+    }
+    else {
+        try {
+            const currUser = await Funcs.isLoggedIn(req, res);
+            const userInterestsIds = await Funcs.updateInterests(currUser.USER_ID, 
+                                                                 interestsIds);
+            
+            //console.log(userInterestsIds);
+            res.status(200).send({
+                data: {
+                    message: "Succesfully updated",
+                    data: userInterestsIds
+                }
+            })
+
+        } catch (error) {
+            res.status(401).json({
+                errors: [{
+                    message: "Could not connect to DB",
+                    extensions: {
+                        code: "Controller issue putUserInterests"
+                    }
+                }]
+            })
+        }
+    }
+}
+
 // Schedule Management
 // Returns DecodedSchedule
 export const getUserSchedule = async (req: Request, res: Response) => {

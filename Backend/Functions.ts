@@ -318,6 +318,33 @@ export async function checkPasswordReset(token: string) {
     return payload.password
 }
 
+// Interests
+export async function updateInterests(userId: string, interestsIds: Array<string>) {
+    // First erases the previous interests
+    await Models.USER_INTERESTS_MOD.destroy({
+        where: {
+            UINTEREST_USER: userId,
+        },
+    })
+
+    // Creates the new interests
+    let newUserInterestsIds: Array<string> = [];
+
+    for (let interestId of interestsIds) {
+        let id: string = uuidv4();
+
+        await Models.USER_INTERESTS_MOD.create({
+            UINTEREST_ID: id,
+            UINTEREST_USER: userId,
+            UINTEREST_INTEREST: interestId,
+        })
+
+        newUserInterestsIds.push(id);
+    }
+
+    return newUserInterestsIds;
+}
+
 //Colleges
 export async function createCollege(name: string, domain: string, city: string) {
     let college = await findCollege(undefined, domain, city)
