@@ -8,6 +8,39 @@ import { v4 as uuidv4 } from 'uuid';
 import dotenv from "dotenv";
 dotenv.config();
 
+// Interests
+export const getInterestFilteredUsers = async (req: Request, res: Response) => {
+    const {interests} = req.params;
+    const interestsIds = interests.split(",") || [];
+
+    try {
+        const currUser = await Funcs.isLoggedIn(req, res);
+        const rawUsers = await Funcs.findUsersByInterests(interestsIds);
+        const userScheduleModel = await Models.SCHEDULES_MOD.findOne({where: {USER_ID: currUser.USER_ID}});
+        const currUserSchedule = Schedule.buildCodedSchedule(userScheduleModel!.toJSON());
+        const scheduleFilteredUsers = Schedule.scheduleFilter(rawUsers, currUserSchedule, currUser.USER_ID);
+        
+
+        res.status(200).send({
+            data: {
+                message: "Lista de intereses encontrada satisfactoriamente",
+                data: scheduleFilteredUsers
+            }
+        })
+
+    } catch (error) {
+        res.status(401).json({
+            errors: [{
+                message: "Could not connect to DB",
+                extensions: {
+                    code: "Controller issue getInterestFilteredUserFilteredUsers"
+                }
+            }]
+        })
+    }
+
+}
+
 // Receives user id or string "CURR"
 // Returns list of Interests
 export const getUserInterests = async(req: Request, res: Response) => {
@@ -389,7 +422,7 @@ export const postRegister = async (req: Request, res: Response) => {
             errors: [{
                 message: error.message,
                 extensions: {
-                    code: "Controller issue"
+                   code: "Controller issue"
                 }
             }]
         })

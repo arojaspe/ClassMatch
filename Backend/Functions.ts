@@ -367,6 +367,60 @@ export async function findInterests(userId: String) {
     return userInterests;
 }
 
+export async function findInterestsIds(interests: Array<string>) {
+    let ids: Array<string> = [];
+
+    for(let interest of interests) {
+        let interestRow = await Models.INTERESTS_MOD.findOne({
+            where: {INTEREST_NAME: interest}});
+        
+        if(interestRow != null)
+            ids.push(interestRow.get("INTEREST_ID") as string);
+    }
+
+    return ids;
+}
+
+export async function findUsersByInterests(interestsIds : Array<string>) {
+    const uInterestsRows = await Models.USER_INTERESTS_MOD.findAll({
+        attributes : {exclude: ["UINTEREST_ID", "UINTEREST_INTEREST"]},
+        where: {
+            UINTEREST_INTEREST: {
+                [Op.in]: interestsIds
+            }
+        },
+    });
+
+    let userIds = uInterestsRows.map(row => row.get("UINTEREST_USER"));
+    userIds = Array.from(new Set(userIds));
+
+    const users = await Models.USERS_MOD.findAll({
+        attributes: { exclude: ["USER_EMAIL", "USER_PASSWORD", "USER_LAST_LOG", "USER_FILTER_AGE", "USER_SUPERMATCHES", "USER_FILTER_GENDER"] },
+        where: {
+            USER_ID: {
+                [Op.in]: userIds
+            }
+        },
+        include: [{
+            model: Models.IMAGES_MOD, as: 'USER_IMAGES',
+            attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+        },
+        {
+            model: Models.SCHEDULES_MOD, as: "USER_SCHEDULE",
+            attributes: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
+        }
+        ],
+        order: [[{
+            model: Models.IMAGES_MOD, as: 'USER_IMAGES'
+        }, 'IMAGE_ORDER', 'ASC']
+        ]
+    });
+
+    const usersRaw = users.map(user => user.toJSON());
+
+    return usersRaw;
+}
+
 //Colleges
 export async function createCollege(name: string, domain: string, city: string) {
     let college = await findCollege(undefined, domain, city)
