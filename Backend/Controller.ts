@@ -23,7 +23,7 @@ export const getInterestFilteredUsers = async (req: Request, res: Response) => {
 
         res.status(200).send({
             data: {
-                message: "Lista de intereses encontrada satisfactoriamente",
+                message: "Lista de usuarios filtrada con base a los intereses seleccionados",
                 data: scheduleFilteredUsers
             }
         })
