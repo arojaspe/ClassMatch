@@ -215,12 +215,16 @@ export const putUserSchedule = async (req: Request, res: Response) => {
 //gender: "M", "F", "NB"
 //ageL: agelowlimit
 //ageU: ageuplimit
+//SEPARADOS POR COMAS SIN ESPACIOS
 //interests: adfasfas,adfafs,afdsfaf ... (Ids)
+//colleges: asdfasdfsaf,adfafdssa,adfasf... (Ids)
 export const getListaUsuarios = async (req: Request, res: Response) => {
+    const currUser = await Funcs.isLoggedIn(req, res);
+
     let gender = req.query.gender as string || ["M", "F", "NB"];
     if(typeof gender === "string")
        gender = gender.split(","); 
-    console.log("gender" + gender);
+
     const iageL = req.query.ageL;
     let ageL = 0;
     if(iageL != null)
@@ -235,12 +239,16 @@ export const getListaUsuarios = async (req: Request, res: Response) => {
     const interests = req.query.interests as string || "any";
     let users = null;
 
+    let colleges = req.query.colleges as string || currUser.USER_COLLEGE_ID;
+    colleges = colleges.split(","); 
+
     if(interests === "any") {
         users = await Models.USERS_MOD.findAll({
             attributes: { exclude: ["USER_EMAIL", "USER_PASSWORD", "USER_LAST_LOG", "USER_FILTER_AGE", "USER_SUPERMATCHES", "USER_FILTER_GENDER"] },
             where: {
                 [Op.and]: [
                     {USER_GENDER: gender},
+                    {USER_COLLEGE_ID: colleges},
                     Sequelize.literal(`TIMESTAMPDIFF(YEAR, USER_BIRTHDATE, CURDATE()) BETWEEN ${Number(ageL)} AND ${Number(ageU)}`),
                 ]
             },
@@ -262,12 +270,11 @@ export const getListaUsuarios = async (req: Request, res: Response) => {
     else {
         const interestsArray = interests.toString().split(",");
         console.log(interestsArray);
-        users = await Funcs.findUsersByInterests(interestsArray, ageL, ageU, gender);
+        users = await Funcs.findUsersByInterests(interestsArray, ageL, ageU, gender, colleges);
     }
 
     if(users) {
         const otherUsers = users.map(user => user.toJSON());
-        const currUser = await Funcs.isLoggedIn(req, res);
         const userScheduleModel = await Models.SCHEDULES_MOD.findOne({where: {USER_ID: currUser.USER_ID}});
         const currUserSchedule = Schedule.buildCodedSchedule(userScheduleModel!.toJSON());
         console.log(currUserSchedule);

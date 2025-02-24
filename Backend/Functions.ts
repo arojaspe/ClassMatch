@@ -460,7 +460,8 @@ export async function findInterestsIds(interests: Array<string>) {
 export async function findUsersByInterests(interestsIds : Array<string>,
                                           ageL: number,
                                           ageU: number,
-                                          gender: Array<string>) 
+                                          gender: Array<string>,
+                                          colleges: Array<string>) 
 {
     const uInterestsRows = await Models.USER_INTERESTS_MOD.findAll({
         attributes : {exclude: ["UINTEREST_ID", "UINTEREST_INTEREST"]},
@@ -478,6 +479,7 @@ export async function findUsersByInterests(interestsIds : Array<string>,
             [Op.and]: [
                 {USER_ID: userIds},
                 {USER_GENDER: gender},
+                {USER_COLLEGE_ID: colleges},
                 Sequelize.literal(`TIMESTAMPDIFF(YEAR, USER_BIRTHDATE, CURDATE()) BETWEEN ${Number(ageL)} AND ${Number(ageU)}`),
             ]
         },
