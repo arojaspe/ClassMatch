@@ -500,7 +500,7 @@ export async function findUsersByInterests(interestsIds : Array<string>,
 }
 
 // Reports
-export async function createReport(reportingId: string, reportedId: string, reason: boolean) {
+export async function createReport(reportingId: string, reportedId: string, reason: string) {
     let id: string = uuidv4();
     await Models.REPORT_MOD.create({
         REPORT_ID: id,

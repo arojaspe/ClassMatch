@@ -353,7 +353,7 @@ export const REPORT_MOD= db.define("REPORT_MOD", {
         type: DataTypes.CHAR(36),
     },
     REPORT_REASON: {
-        type: DataTypes.BOOLEAN,
+        type: DataTypes.TEXT,
     }
 }, {
     timestamps: false,

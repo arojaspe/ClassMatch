@@ -13,7 +13,7 @@ dotenv.config();
 
 // Receives object with
 // reportedUserId : id (string)
-// reason: boolean
+// reason: string
 export const postReport = async(req: Request, res: Response) => {
     const {reportedUserId, reason} = req.body;
     console.log(reason);
