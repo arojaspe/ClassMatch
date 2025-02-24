@@ -1,11 +1,12 @@
 import express, {Application} from "express";
 import db from "./Connection";
 import * as Rout from "./Routes";
+import * as Funcs from "./Functions";
+import { socketHandler } from "./Socket";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import http from "http";  // Import HTTP module
 import { Server as SocketIOServer } from "socket.io";
-import { socketHandler } from "./Socket";
 
 
 //import * as Test from "./test";
@@ -54,7 +55,7 @@ class Server {
             await db.authenticate();
             console.log("Database Online");
             console.log("Hello There")
-            //Run test code here
+            Funcs.findUsersByRating("4a24fb34-9abc-4f00-a378-f4323b916488", 9)
         } catch (error) {
             console.error("Error connecting to the database:", error);
         };
