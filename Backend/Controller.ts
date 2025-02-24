@@ -9,24 +9,23 @@ import { v4 as uuidv4 } from 'uuid';
 import dotenv from "dotenv";
 dotenv.config();
 
-// Interests
-/*
-export const getInterestFilteredUsers = async (req: Request, res: Response) => {
-    const {interests} = req.params;
-    const interestsIds = interests.split(",") || [];
+// Reports
 
+// Receives object with
+// reportedUserId : id (string)
+// reason: boolean
+export const postReport = async(req: Request, res: Response) => {
+    const {reportedUserId, reason} = req.body;
+    console.log(reason);
+    
     try {
         const currUser = await Funcs.isLoggedIn(req, res);
-        const rawUsers = await Funcs.findUsersByInterests(interestsIds);
-        const userScheduleModel = await Models.SCHEDULES_MOD.findOne({where: {USER_ID: currUser.USER_ID}});
-        const currUserSchedule = Schedule.buildCodedSchedule(userScheduleModel!.toJSON());
-        const scheduleFilteredUsers = Schedule.scheduleFilter(rawUsers, currUserSchedule, currUser.USER_ID);
-        
+        const reportId = await Funcs.createReport(currUser.USER_ID, reportedUserId, reason);
 
         res.status(200).send({
             data: {
-                message: "Lista de usuarios filtrada con base a los intereses seleccionados",
-                data: scheduleFilteredUsers
+                message: "Reporte creado satisfactoriamente",
+                data: reportId
             }
         })
 
@@ -35,14 +34,15 @@ export const getInterestFilteredUsers = async (req: Request, res: Response) => {
             errors: [{
                 message: "Could not connect to DB",
                 extensions: {
-                    code: "Controller issue getInterestFilteredUserFilteredUsers"
+                    code: "Controller issue postReport"
                 }
             }]
         })
     }
 
 }
-*/
+
+// Interests
 // Receives user id or string "SELF"
 // Returns list of Interests
 export const getUserInterests = async(req: Request, res: Response) => {

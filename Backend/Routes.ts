@@ -9,11 +9,13 @@ router.get("/us", Conts.getListaUsuarios);
 router.get("/u/:id", Conts.getUsuario); //Backend
 router.put("/u", Conts.putUsuario);
 
+//Reports Management: r
+router.post("/r", Conts.postReport);
+
 //Interests Management:
 router.put("/ui", Conts.putUserInterests);
 router.get("/i", Conts.getInterests);
 router.get("/ui/:id", Conts.getUserInterests);
-//router.get("/ufi/:interests", Conts.getInterestFilteredUsers);
 
 //Login and Register
 router.post("/login", Conts.postLogin);

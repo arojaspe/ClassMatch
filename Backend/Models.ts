@@ -358,7 +358,7 @@ export const REPORT_MOD= db.define("REPORT_MOD", {
 }, {
     timestamps: false,
     freezeTableName: true,
-    tableName: 'REPORT'
+    tableName: 'REPORTS'
 })
 
 

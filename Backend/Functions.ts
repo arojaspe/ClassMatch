@@ -499,6 +499,19 @@ export async function findUsersByInterests(interestsIds : Array<string>,
     return users;
 }
 
+// Reports
+export async function createReport(reportingId: string, reportedId: string, reason: boolean) {
+    let id: string = uuidv4();
+    await Models.REPORT_MOD.create({
+        REPORT_ID: id,
+        REPORTING_USER: reportingId,
+        REPORTED_USER: reportedId,
+        REPORT_REASON: reason
+    })
+
+    return id;
+}
+
 //Colleges
 export async function createCollege(name: string, domain: string, city: string) {
     let college = await findCollege(undefined, domain, city)
