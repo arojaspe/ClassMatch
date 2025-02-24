@@ -3,12 +3,18 @@ import db from "./Connection";
 import * as Rout from "./Routes";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import http from "http";  // Import HTTP module
+import { Server as SocketIOServer } from "socket.io";
+import { socketHandler } from "./Socket";
+
 
 //import * as Test from "./test";
 
 class Server {
     private app: Application;
     private port: String;
+    private server: http.Server;
+    private io: SocketIOServer;
     private apiPaths= {
         path: "/api/"
     }
@@ -17,7 +23,16 @@ class Server {
         this.app= express();
         this.port= "5000";
         this.middlewares();
-        this.routes()
+        this.routes();
+        this.server= http.createServer(this.app);
+        this.io= new SocketIOServer(this.server, {
+            cors: {
+                credentials: true,
+                origin: "*",
+            },
+            path: "/socket.io"
+        });
+        socketHandler(this.io);
     };
 
     middlewares () {
@@ -46,9 +61,9 @@ class Server {
     };
 
     listen() {
-        this.app.listen(this.port, () => {
+        this.server.listen(this.port, () => {
             console.log("Server Running: " + this.port)
-        })
+        });
     }
 };
 

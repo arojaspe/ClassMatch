@@ -430,7 +430,8 @@ export const allEventInfo = async (event_id: string) => {
         {
             model: Models.IMAGES_MOD, as: 'USER_IMAGES',
             attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-            where: { IMAGE_ORDER: 1 }
+            where: { IMAGE_ORDER: 1 },
+            required: false
         },
         {
             model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
@@ -638,7 +639,7 @@ export async function findMyUEventsAdmin(current_user: string) {
         }]
     })
 
-    if (!ueventActive || !ueventExpired) {
+    if (ueventActive.length+ueventExpired.length ===0 ) {
         throw new Error("User has not  organized any Events")
     }
     return {
@@ -690,7 +691,7 @@ export async function findMyUEvents(current_user: string) {
         }]
     })
 
-    if (!ueventActive || !ueventExpired) {
+    if (ueventActive.length+ueventExpired.length ===0 ) {
         throw new Error("User has not attended any Events")
     }
     return {
@@ -759,7 +760,7 @@ export async function findUEventRequestsAdmin(admin: string, event: string) {
         }]
     })
 
-    if (!ueventAccepted || !ueventRequested) {
+    if (ueventAccepted.length+ueventRequested.length ===0 ) {
         throw new Error("Event has not requests yet")
     }
     return {
@@ -794,4 +795,186 @@ let checkUserUEvent = async function (user_id: string, event_id: string) {
         throw new Error("User has not requested to attend Event")
     }
     return uevent
+}
+
+//Chats
+export const checkMyChats = async (current_user: string) => {
+    try {
+        const subrooms = await Models.ROOMS_MOD.findAll({
+            where: { ROOM_USER: current_user },
+            attributes: ["ROOM_ID"],
+            group: ["ROOM_ID"]})
+        
+        const roomIds = subrooms.map(room => room.getDataValue("ROOM_ID"));
+
+        const rooms = await Models.ROOMS_MOD.findAll({
+            where: { 
+                ROOM_ID: { [Op.in]: roomIds},
+                ROOM_USER: { [Op.ne]: current_user}
+            },
+            attributes: ["ROOM_ID", "ROOM_EVENT"],
+            group: ["ROOM_ID"],
+            include: [
+                {
+                    model: Models.USERS_MOD,
+                    attributes: ["USER_FIRSTNAME"],
+                    order: [["USER_LAST_LOG", "DESC"]],
+                    required: false,
+                    /*
+                    include: [{
+                        model: Models.IMAGES_MOD, as: 'USER_IMAGES',
+                        attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+                        where: { IMAGE_ORDER: 1 },
+                        required: false
+                    }] */
+                },
+                {
+                    model: Models.EVENTS_MOD,
+                    as: "EVENT_ROOM",
+                    attributes: ["EVENT_TITLE"],
+                    order: [["EVENT_DATE", "DESC"]],
+                    required: false,
+                    /*
+                    include: [{
+                        model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
+                        attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+                        where: { IMAGE_ORDER: 1 },
+                        required: false
+                    }]*/
+                },
+            ],
+        })
+
+    if (rooms.length === 0) {
+        throw new Error("User has no chats");
+    }
+
+    let user_rooms: { USER_FIRSTNAME: any; ROOM_ID: any; USER_IMAGES: string; }[]= []
+    let event_rooms: { EVENT_TITLE: any; ROOM_ID: any; EVENT_IMAGES: string; }[]= []
+
+    rooms.forEach(room => {
+        if (room.getDataValue("ROOM_EVENT") === null) {
+            user_rooms.push(
+                {
+                    ROOM_ID: room.getDataValue("ROOM_ID"),
+                    USER_FIRSTNAME: room.getDataValue("USER_MOD").getDataValue("USER_FIRSTNAME"),
+                    USER_IMAGES: ""
+                }
+            )
+        } else {
+            event_rooms.push(
+                {
+                    ROOM_ID: room.getDataValue("ROOM_ID"),
+                    EVENT_TITLE: room.getDataValue("EVENT_ROOM").getDataValue("EVENT_TITLE"),
+                    EVENT_IMAGES: ""
+                }
+            )
+        }
+    })
+
+    return {
+        users: user_rooms,
+        events: event_rooms,
+    };
+    } catch (error:any) {
+        console.log(error)
+        throw new Error(error)
+    }
+};
+export const sendMessage = async (sender: string, room: string, message: string) => {
+    const newMessage = await Models.CHATS_MOD.create({
+                    CHAT_ID: uuidv4(),
+                    CHAT_SENDER: sender,
+                    CHAT_ROOM: room,
+                    CHAT_MESSAGE: message
+                });
+    return newMessage
+};
+export const getRoomMessages = async (current_user: string, room: string, page: number) => {
+    await UserinRoom(current_user, room);
+
+    const max_pages= await Models.CHATS_MOD.count({
+        where: { CHAT_ROOM: room },
+    })
+
+    if (page*20 >= max_pages/20 +20) {
+        throw new Error("This room has no more messages")
+    }
+  
+    const messages = await Models.CHATS_MOD.findAll({
+      where: { CHAT_ROOM: room },
+      attributes: ["CHAT_ID", "CHAT_SENDER", "CHAT_MESSAGE", "CHAT_TIMESTAMP"],
+      include: [{
+        model: Models.READ_STATUS_MOD,
+        as: "READ_STATUS",
+        required: false,
+        where: { RS_USER: { [Op.ne]: current_user } },
+        attributes: ["RS_USER", "RS_TIMESTAMP"],
+      }],
+      order: [["CHAT_TIMESTAMP", "ASC"]],
+      limit: 20,
+      offset: (page - 1) * 20
+    });
+
+    if (messages.length === 0) {
+        throw new Error("No messages found in this room");
+    }
+  
+    const formattedMessages = messages.map((msg) => {
+        const obj = msg.toJSON();
+        if (obj.CHAT_SENDER !== current_user) {
+          delete obj.READ_STATUS;
+        }
+        return obj;
+      });
+    updateReadStatus(current_user, room)
+      return formattedMessages;
+};
+export const updateReadStatus = async (current_user: string, room: string) => {
+    const messages = await Models.CHATS_MOD.findAll({
+      where: {
+        CHAT_ROOM: room,
+        CHAT_SENDER: { [Op.ne]: current_user }
+      },
+      attributes: ["CHAT_ID"],
+      include: [{
+        model: Models.READ_STATUS_MOD,
+        as: "READ_STATUS",
+        required: false,
+        where: { RS_USER: current_user },
+        attributes: ["RS_CHAT"]
+      }]
+    });
+  
+    const messagesToMarkRead = messages
+      .filter(msg => {
+        const readRecords = msg.get("READ_STATUS");
+        return !readRecords || (Array.isArray(readRecords) && readRecords.length === 0);
+      })
+      .map(msg => ({
+        RS_CHAT: msg.get("CHAT_ID"),
+        RS_USER: current_user,
+        RS_TIMESTAMP: new Date(),
+      }));
+  
+    if (messagesToMarkRead.length === 0) return;
+    await Models.READ_STATUS_MOD.bulkCreate(messagesToMarkRead, { ignoreDuplicates: true });
+  
+    return messagesToMarkRead;
+};
+
+//Rooms
+let UserinRoom = async function (user_id: string, room_id: string): Promise<boolean> {
+    console.log(user_id, room_id)
+
+    let room = await Models.ROOMS_MOD.findAll({
+        where: {
+            ROOM_ID: room_id,
+            ROOM_USER: user_id
+        }
+    })
+    if (!room[0]) {
+        throw new Error("User not found in given room")
+    }
+    return true
 }

@@ -10,7 +10,6 @@ const dbUser = process.env.DB_USER as string;
 const dbPass = process.env.DB_PASSWORD as string;
 const dbHost = process.env.DB_HOST as string;
 
-
 //AWS DB
 const db = new Sequelize(dbName, dbUser, dbPass, {
     host: dbHost,
