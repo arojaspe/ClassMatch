@@ -13,7 +13,7 @@ router.put("/u", Conts.putUsuario);
 router.put("/ui", Conts.putUserInterests);
 router.get("/i", Conts.getInterests);
 router.get("/ui/:id", Conts.getUserInterests);
-router.get("/ufi/:interests", Conts.getInterestFilteredUsers);
+//router.get("/ufi/:interests", Conts.getInterestFilteredUsers);
 
 //Login and Register
 router.post("/login", Conts.postLogin);

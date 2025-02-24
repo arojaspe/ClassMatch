@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import {Op, Sequelize} from "sequelize";
 import * as Models from "./Models";
 import * as Funcs from "./Functions";
 import * as Schedule from "./scheduleFunctions";
@@ -9,6 +10,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // Interests
+/*
 export const getInterestFilteredUsers = async (req: Request, res: Response) => {
     const {interests} = req.params;
     const interestsIds = interests.split(",") || [];
@@ -40,8 +42,8 @@ export const getInterestFilteredUsers = async (req: Request, res: Response) => {
     }
 
 }
-
-// Receives user id or string "CURR"
+*/
+// Receives user id or string "SELF"
 // Returns list of Interests
 export const getUserInterests = async(req: Request, res: Response) => {
     let { id } = req.params;
@@ -210,23 +212,58 @@ export const putUserSchedule = async (req: Request, res: Response) => {
 }
 
 //User Management
+//gender: "M", "F", "NB"
+//ageL: agelowlimit
+//ageU: ageuplimit
+//interests: adfasfas,adfafs,afdsfaf ... (Ids)
 export const getListaUsuarios = async (req: Request, res: Response) => {
-    const users = await Models.USERS_MOD.findAll({
-        attributes: { exclude: ["USER_EMAIL", "USER_PASSWORD", "USER_LAST_LOG", "USER_FILTER_AGE", "USER_SUPERMATCHES", "USER_FILTER_GENDER"] },
-        include: [{
-            model: Models.IMAGES_MOD, as: 'USER_IMAGES',
-            attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-        },
-        {
-            model: Models.SCHEDULES_MOD, as: "USER_SCHEDULE",
-            attributes: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
-        }
-        ],
-        order: [[{
-            model: Models.IMAGES_MOD, as: 'USER_IMAGES'
-        }, 'IMAGE_ORDER', 'ASC']
-        ]
-    });
+    let gender = req.query.gender as string || ["M", "F", "NB"];
+    if(typeof gender === "string")
+       gender = gender.split(","); 
+    console.log("gender" + gender);
+    const iageL = req.query.ageL;
+    let ageL = 0;
+    if(iageL != null)
+        ageL = Number(iageL);
+
+    const iageU = req.query.ageU;
+    let ageU = 100;
+    if(iageU != null)
+        ageU = Number(iageU);
+
+
+    const interests = req.query.interests as string || "any";
+    let users = null;
+
+    if(interests === "any") {
+        users = await Models.USERS_MOD.findAll({
+            attributes: { exclude: ["USER_EMAIL", "USER_PASSWORD", "USER_LAST_LOG", "USER_FILTER_AGE", "USER_SUPERMATCHES", "USER_FILTER_GENDER"] },
+            where: {
+                [Op.and]: [
+                    {USER_GENDER: gender},
+                    Sequelize.literal(`TIMESTAMPDIFF(YEAR, USER_BIRTHDATE, CURDATE()) BETWEEN ${Number(ageL)} AND ${Number(ageU)}`),
+                ]
+            },
+            include: [{
+                model: Models.IMAGES_MOD, as: 'USER_IMAGES',
+                attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+            },
+            {
+                model: Models.SCHEDULES_MOD, as: "USER_SCHEDULE",
+                attributes: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
+            }
+            ],
+            order: [[{
+                model: Models.IMAGES_MOD, as: 'USER_IMAGES'
+            }, 'IMAGE_ORDER', 'ASC']
+            ]
+        });
+    }
+    else {
+        const interestsArray = interests.toString().split(",");
+        console.log(interestsArray);
+        users = await Funcs.findUsersByInterests(interestsArray, ageL, ageU, gender);
+    }
 
     if(users) {
         const otherUsers = users.map(user => user.toJSON());

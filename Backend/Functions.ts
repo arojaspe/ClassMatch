@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { sign, verify } from "jsonwebtoken";
 import { resend } from "./Connection";
 import RaycastMagicLinkEmail from "../Email_templates/Verification";
-import { FloatDataType, Model, Op} from 'sequelize';
+import { FloatDataType, Model, Op, Sequelize} from 'sequelize';
 import moment from "moment";
 
 //Error showing
@@ -457,13 +457,15 @@ export async function findInterestsIds(interests: Array<string>) {
     return ids;
 }
 
-export async function findUsersByInterests(interestsIds : Array<string>) {
+export async function findUsersByInterests(interestsIds : Array<string>,
+                                          ageL: number,
+                                          ageU: number,
+                                          gender: Array<string>) 
+{
     const uInterestsRows = await Models.USER_INTERESTS_MOD.findAll({
         attributes : {exclude: ["UINTEREST_ID", "UINTEREST_INTEREST"]},
         where: {
-            UINTEREST_INTEREST: {
-                [Op.in]: interestsIds
-            }
+            UINTEREST_INTEREST: interestsIds
         },
     });
 
@@ -473,9 +475,11 @@ export async function findUsersByInterests(interestsIds : Array<string>) {
     const users = await Models.USERS_MOD.findAll({
         attributes: { exclude: ["USER_EMAIL", "USER_PASSWORD", "USER_LAST_LOG", "USER_FILTER_AGE", "USER_SUPERMATCHES", "USER_FILTER_GENDER"] },
         where: {
-            USER_ID: {
-                [Op.in]: userIds
-            }
+            [Op.and]: [
+                {USER_ID: userIds},
+                {USER_GENDER: gender},
+                Sequelize.literal(`TIMESTAMPDIFF(YEAR, USER_BIRTHDATE, CURDATE()) BETWEEN ${Number(ageL)} AND ${Number(ageU)}`),
+            ]
         },
         include: [{
             model: Models.IMAGES_MOD, as: 'USER_IMAGES',
@@ -492,9 +496,7 @@ export async function findUsersByInterests(interestsIds : Array<string>) {
         ]
     });
 
-    const usersRaw = users.map(user => user.toJSON());
-
-    return usersRaw;
+    return users;
 }
 
 //Colleges
