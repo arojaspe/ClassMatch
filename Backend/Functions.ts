@@ -5,11 +5,12 @@ import { sign, verify } from "jsonwebtoken";
 import { resend } from "./Connection";
 import RaycastMagicLinkEmail from "../Email_templates/Verification";
 import { FloatDataType, Model, Op} from 'sequelize';
+import moment from "moment";
 
 //Error showing
 interface Result<T> { data: any, error?: string }
 
-//String Handling
+// Data hanlding
 export function str2hsh(str: string): string {
     let hash = 0;
     if (str.length == 0) return hash.toString();
@@ -19,6 +20,14 @@ export function str2hsh(str: string): string {
         hash = hash & hash;
     }
     return hash.toString();
+}
+function shuffleArray<T>(array: T[]): T[] {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
 }
 
 /* 
@@ -57,7 +66,7 @@ export async function createUser(firstname: string, lastname: string, email: str
             USER_COLLEGE_ID: college,
             USER_BIO: bio,
             USER_LAST_LOG: new Date(),
-            USER_RATING: 0,
+            USER_RATING: 1000,
             USER_FILTER_AGE: filter_age,
             USER_SUPERMATCHES: 5,
             USER_FILTER_GENDER: filter_gender
@@ -175,6 +184,63 @@ export async function authUser(uuid: string) {
         throw new Error("User not logged in");
     }
 }
+
+export async function findUsersByRating(current_user: string, totalCount: number = 20) {
+  
+  const currentUserData = await Models.USERS_MOD.findOne({
+    where: { USER_ID: current_user },
+    attributes: ["USER_RATING", "USER_FILTER_GENDER", "USER_FILTER_AGE"],
+  });
+
+  const currentRating = currentUserData!.getDataValue("USER_RATING");
+  const currentFiltGen = currentUserData!.getDataValue("USER_FILTER_GENDER");
+  const filtAge = currentUserData!.getDataValue("USER_FILTER_AGE").split("-");
+
+  const mn = moment().subtract(filtAge[0], "years").format("YYYY-MM-DD");
+  const mx = moment().subtract(filtAge[1], "years").format("YYYY-MM-DD");
+
+  const otherUsers = await Models.USERS_MOD.findAll({
+    where: { 
+      USER_ID: { [Op.ne]: current_user },
+      // USER_GENDER: { [Op.eq]: currentFiltGen },
+      // USER_BIRTHDATE: { [Op.between]: [mn, mx] }
+    },
+    attributes: ["USER_ID", "USER_RATING", "USER_FIRSTNAME"]
+  });
+
+  const lowerUsers = otherUsers.filter(user => user.getDataValue("USER_RATING") < currentRating);
+  const higherUsers = otherUsers.filter(user => user.getDataValue("USER_RATING") >= currentRating);
+
+  const sortedByCloseness = [...otherUsers].sort((a, b) => {
+    const diffA = Math.abs(a.getDataValue("USER_RATING") - currentRating);
+    const diffB = Math.abs(b.getDataValue("USER_RATING") - currentRating);
+    return diffA - diffB;
+  });
+
+  const countClosest = Math.floor(totalCount * 0.70);
+  const countLower = Math.floor(totalCount * 0.15);
+  const countHigher = totalCount - countClosest - countLower;
+
+  const closestUsers = sortedByCloseness.slice(0, countClosest);
+
+  const closestUserIds = new Set(closestUsers.map(u => u.getDataValue("USER_ID")));
+  const lowerUnique = lowerUsers.filter(user => !closestUserIds.has(user.getDataValue("USER_ID")));
+  const higherUnique = higherUsers.filter(user => !closestUserIds.has(user.getDataValue("USER_ID")));
+
+  const randomLower = shuffleArray(lowerUnique).slice(0, countLower);
+  const randomHigher = shuffleArray(higherUnique).slice(0, countHigher);
+
+  let finalUsers = [...closestUsers, ...randomLower, ...randomHigher];
+
+  finalUsers = shuffleArray(finalUsers);
+
+  finalUsers.forEach((E) => {
+    console.log(E.getDataValue("USER_ID"), E.getDataValue("USER_FIRSTNAME"));
+  });
+
+  return finalUsers;
+}
+
 export let findUser = async function (id?: string, email?: string) {
     if (id) {
         let usuario = await Models.USERS_MOD.findByPk(id)
@@ -226,6 +292,16 @@ let addTokens = function (user: Model<any, any>) {
     } catch (error) {
         throw new Error("Unable to update credentials");
     }
+}
+let checkAge= function (birthDate: string) {
+    const birth = new Date(birthDate);
+    const today = new Date();
+
+    let age = today.getFullYear() - birth.getFullYear();
+    const hasBirthdayPassed = (today.getMonth() > birth.getMonth()) || 
+        (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate());
+
+    return hasBirthdayPassed ? age : age - 1;
 }
 
 //Emails
@@ -533,7 +609,8 @@ export const allEventInfo = async (event_id: string) => {
         {
             model: Models.IMAGES_MOD, as: 'USER_IMAGES',
             attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-            where: { IMAGE_ORDER: 1 }
+            where: { IMAGE_ORDER: 1 },
+            required: false
         },
         {
             model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
@@ -741,7 +818,7 @@ export async function findMyUEventsAdmin(current_user: string) {
         }]
     })
 
-    if (!ueventActive || !ueventExpired) {
+    if (ueventActive.length+ueventExpired.length ===0 ) {
         throw new Error("User has not  organized any Events")
     }
     return {
@@ -793,7 +870,7 @@ export async function findMyUEvents(current_user: string) {
         }]
     })
 
-    if (!ueventActive || !ueventExpired) {
+    if (ueventActive.length+ueventExpired.length ===0 ) {
         throw new Error("User has not attended any Events")
     }
     return {
@@ -862,7 +939,7 @@ export async function findUEventRequestsAdmin(admin: string, event: string) {
         }]
     })
 
-    if (!ueventAccepted || !ueventRequested) {
+    if (ueventAccepted.length+ueventRequested.length ===0 ) {
         throw new Error("Event has not requests yet")
     }
     return {
@@ -897,4 +974,272 @@ let checkUserUEvent = async function (user_id: string, event_id: string) {
         throw new Error("User has not requested to attend Event")
     }
     return uevent
+}
+
+//Chats
+export const checkMyChats = async (current_user: string) => {
+    try {
+        const subrooms = await Models.ROOMS_MOD.findAll({
+            where: { ROOM_USER: current_user },
+            attributes: ["ROOM_ID"],
+            group: ["ROOM_ID"]})
+        
+        const roomIds = subrooms.map(room => room.getDataValue("ROOM_ID"));
+
+        const rooms = await Models.ROOMS_MOD.findAll({
+            where: { 
+                ROOM_ID: { [Op.in]: roomIds},
+                ROOM_USER: { [Op.ne]: current_user}
+            },
+            attributes: ["ROOM_ID", "ROOM_EVENT"],
+            group: ["ROOM_ID"],
+            include: [
+                {
+                    model: Models.USERS_MOD,
+                    attributes: ["USER_FIRSTNAME"],
+                    order: [["USER_LAST_LOG", "DESC"]],
+                    required: false,
+                    /*
+                    include: [{
+                        model: Models.IMAGES_MOD, as: 'USER_IMAGES',
+                        attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+                        where: { IMAGE_ORDER: 1 },
+                        required: false
+                    }] */
+                },
+                {
+                    model: Models.EVENTS_MOD,
+                    as: "EVENT_ROOM",
+                    attributes: ["EVENT_TITLE"],
+                    order: [["EVENT_DATE", "DESC"]],
+                    required: false,
+                    /*
+                    include: [{
+                        model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
+                        attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+                        where: { IMAGE_ORDER: 1 },
+                        required: false
+                    }]*/
+                },
+            ],
+        })
+
+    if (rooms.length === 0) {
+        throw new Error("User has no chats");
+    }
+
+    let user_rooms: { USER_FIRSTNAME: any; ROOM_ID: any; USER_IMAGES: string; }[]= []
+    let event_rooms: { EVENT_TITLE: any; ROOM_ID: any; EVENT_IMAGES: string; }[]= []
+
+    rooms.forEach(room => {
+        if (room.getDataValue("ROOM_EVENT") === null) {
+            user_rooms.push(
+                {
+                    ROOM_ID: room.getDataValue("ROOM_ID"),
+                    USER_FIRSTNAME: room.getDataValue("USER_MOD").getDataValue("USER_FIRSTNAME"),
+                    USER_IMAGES: ""
+                }
+            )
+        } else {
+            event_rooms.push(
+                {
+                    ROOM_ID: room.getDataValue("ROOM_ID"),
+                    EVENT_TITLE: room.getDataValue("EVENT_ROOM").getDataValue("EVENT_TITLE"),
+                    EVENT_IMAGES: ""
+                }
+            )
+        }
+    })
+
+    return {
+        users: user_rooms,
+        events: event_rooms,
+    };
+    } catch (error:any) {
+        console.log(error)
+        throw new Error(error)
+    }
+};
+export const sendMessage = async (sender: string, room: string, message: string) => {
+    const newMessage = await Models.CHATS_MOD.create({
+                    CHAT_ID: uuidv4(),
+                    CHAT_SENDER: sender,
+                    CHAT_ROOM: room,
+                    CHAT_MESSAGE: message
+                });
+    return newMessage
+};
+export const getRoomMessages = async (current_user: string, room: string, page: number) => {
+    await UserinRoom(current_user, room);
+
+    const max_pages= await Models.CHATS_MOD.count({
+        where: { CHAT_ROOM: room },
+    })
+
+    if (page*20 >= max_pages/20 +20) {
+        throw new Error("This room has no more messages")
+    }
+  
+    const messages = await Models.CHATS_MOD.findAll({
+      where: { CHAT_ROOM: room },
+      attributes: ["CHAT_ID", "CHAT_SENDER", "CHAT_MESSAGE", "CHAT_TIMESTAMP"],
+      include: [{
+        model: Models.READ_STATUS_MOD,
+        as: "READ_STATUS",
+        required: false,
+        where: { RS_USER: { [Op.ne]: current_user } },
+        attributes: ["RS_USER", "RS_TIMESTAMP"],
+      }],
+      order: [["CHAT_TIMESTAMP", "ASC"]],
+      limit: 20,
+      offset: (page - 1) * 20
+    });
+
+    if (messages.length === 0) {
+        throw new Error("No messages found in this room");
+    }
+  
+    const formattedMessages = messages.map((msg) => {
+        const obj = msg.toJSON();
+        if (obj.CHAT_SENDER !== current_user) {
+          delete obj.READ_STATUS;
+        }
+        return obj;
+      });
+    updateReadStatus(current_user, room)
+      return formattedMessages;
+};
+export const updateReadStatus = async (current_user: string, room: string) => {
+    const messages = await Models.CHATS_MOD.findAll({
+      where: {
+        CHAT_ROOM: room,
+        CHAT_SENDER: { [Op.ne]: current_user }
+      },
+      attributes: ["CHAT_ID"],
+      include: [{
+        model: Models.READ_STATUS_MOD,
+        as: "READ_STATUS",
+        required: false,
+        where: { RS_USER: current_user },
+        attributes: ["RS_CHAT"]
+      }]
+    });
+  
+    const messagesToMarkRead = messages
+      .filter(msg => {
+        const readRecords = msg.get("READ_STATUS");
+        return !readRecords || (Array.isArray(readRecords) && readRecords.length === 0);
+      })
+      .map(msg => ({
+        RS_CHAT: msg.get("CHAT_ID"),
+        RS_USER: current_user,
+        RS_TIMESTAMP: new Date(),
+      }));
+  
+    if (messagesToMarkRead.length === 0) return;
+    await Models.READ_STATUS_MOD.bulkCreate(messagesToMarkRead, { ignoreDuplicates: true });
+  
+    return messagesToMarkRead;
+};
+
+//Rooms
+let UserinRoom = async function (user_id: string, room_id: string): Promise<boolean> {
+    console.log(user_id, room_id)
+
+    let room = await Models.ROOMS_MOD.findAll({
+        where: {
+            ROOM_ID: room_id,
+            ROOM_USER: user_id
+        }
+    })
+    if (!room[0]) {
+        throw new Error("User not found in given room")
+    }
+    return true
+}
+
+//Matches
+export async function createMatch(current_user: string, other_user: string, supermatch: boolean) {
+    if (await matchAlreadyExists(current_user, other_user)) {
+        console.log("Flag 1")
+        return
+    } else if (await isAlreadyMatch(current_user, other_user)) {
+        console.log("HEERE")
+        //TO-DO
+    }
+    else {
+        console.log(current_user, other_user)
+        await Models.MATCHES_MOD.create({
+            MATCH_ID: uuidv4(),
+            MATCHING_USER: current_user,
+            MATCHED_USER: other_user,
+            SUPERMATCH: supermatch
+        })
+        ELOUpdate(current_user, other_user, supermatch)
+        return "Match created"
+    }
+}
+
+let isAlreadyMatch= async function (current:string, other: string): Promise<boolean> {
+
+    let match= await Models.MATCHES_MOD.findOne({
+        where: {
+            MATCHING_USER: other,
+            MATCHED_USER: current
+        }
+    })
+
+    return match? true : false 
+}
+
+let matchAlreadyExists= async function (current:string, other: string): Promise<boolean> {
+
+    let match= await Models.MATCHES_MOD.findOne({
+        where: {
+            MATCHING_USER: current,
+            MATCHED_USER: other
+        }
+    })
+
+    return match? true : false 
+}
+
+let ELOUpdate = async (current_user: string, other_user: string, supermatch: boolean) => {
+    let users= [current_user, other_user]
+    const current_rating= await Models.USERS_MOD.findOne({
+        where: {
+            USER_ID: current_user
+        },
+        attributes: ["USER_RATING"]
+    })
+    const other_rating= await Models.USERS_MOD.findOne({
+        where: {
+            USER_ID: other_user
+        },
+        attributes: ["USER_RATING"]
+    })
+
+    const ratings: number[]= ELOcurrrentONother(current_rating?.getDataValue("USER_RATING"), other_rating?.getDataValue("USER_RATING"), supermatch)
+
+    ratings.forEach(async (rating) => {
+        let ind= ratings.indexOf(rating)
+        await Models.USERS_MOD.update({ 
+            USER_RATING: ratings[ind] 
+        },
+            {
+                where: {
+                    USER_ID: users[ind]
+                }
+            });
+    })
+};
+let ELOcurrrentONother = function (current_user: number, other_user: number, supermatch: boolean): number[] {
+    let K= 32 //Change standard
+    if (supermatch) {
+        K= 16
+    }
+    const Pcurrent= current_user - K * (1- 1/(1+Math.pow(10, (other_user-current_user)/400)))
+    const Pother= other_user + K * (1- 1/(1+Math.pow(10, (current_user-other_user)/400)))
+    
+    return [Pcurrent, Pother]
 }

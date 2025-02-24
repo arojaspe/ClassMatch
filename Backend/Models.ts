@@ -264,7 +264,7 @@ export const USER_EVENTS_MOD= db.define("USER_EVENTS_MOD", {
     freezeTableName: true,
     tableName: 'USER_EVENTS'
 })
-export const CHATS_USERS_MOD= db.define("CHATS_USERS_MOD", {
+export const CHATS_MOD= db.define("CHATS_MOD", {
     CHAT_ID: {
         type: DataTypes.CHAR(36),
         primaryKey: true
@@ -272,45 +272,56 @@ export const CHATS_USERS_MOD= db.define("CHATS_USERS_MOD", {
     CHAT_SENDER: {
         type: DataTypes.CHAR(36),
     },
-    CHAT_RECEIVER: {
+    CHAT_ROOM: {
         type: DataTypes.CHAR(36),
     },
     CHAT_MESSAGE: {
         type: DataTypes.TEXT,
     },
-    CHAT_READ: {
-        type: DataTypes.BOOLEAN,
-    },
-    CHAT_TIMETAMP: {
+    CHAT_TIMESTAMP: {
         type: DataTypes.NOW,
     },
 }, {
     timestamps: false,
     freezeTableName: true,
-    tableName: 'CHATS_USERS'
+    tableName: 'CHATS'
 })
-export const CHATS_EVENTS_MOD= db.define("CHATS_EVENTS_MOD", {
-    CHAT_ID: {
+export const READ_STATUS_MOD= db.define("READ_STATUS_MOD", {
+    RS_CHAT: {
+        type: DataTypes.CHAR(36)
+    },
+    RS_USER: {
+        type: DataTypes.CHAR(36),
+    },
+    RS_TIMESTAMP: {
+        type: DataTypes.NOW,
+    }
+}, {
+    timestamps: false,
+    freezeTableName: true,
+    tableName: 'READ_STATUS'
+})
+export const ROOMS_MOD= db.define("ROOMS_MOD", {
+    ID: {
         type: DataTypes.CHAR(36),
         primaryKey: true
     },
-    CHAT_SENDER: {
+    ROOM_USER: {
         type: DataTypes.CHAR(36),
     },
-    CHAT_EVENT: {
+    ROOM_EVENT: {
         type: DataTypes.CHAR(36),
     },
-    CHAT_MESSAGE: {
-        type: DataTypes.TEXT,
-    },
-    CHAT_TIMETAMP: {
-        type: DataTypes.NOW,
-    },
+    ROOM_ID: {
+        type: DataTypes.CHAR(36)
+    }
 }, {
+    
     timestamps: false,
     freezeTableName: true,
-    tableName: 'CHATS_EVENTS'
-})
+    tableName: 'ROOMS'
+}
+)
 export const MATCHES_MOD= db.define("MATCHES_MOD", {
     MATCH_ID: {
         type: DataTypes.CHAR(36),
@@ -401,19 +412,25 @@ USER_EVENTS_MOD.belongsTo(EVENTS_MOD, {foreignKey: 'UEVENTS_EVENT', as: "EVENTS"
 USERS_MOD.hasMany(USER_EVENTS_MOD, {foreignKey: 'UEVENTS_ATTENDEE'});
 USER_EVENTS_MOD.belongsTo(USERS_MOD, {foreignKey: 'UEVENTS_ATTENDEE'});
 
-// User-Chats_Users
-USERS_MOD.hasMany(CHATS_USERS_MOD, {foreignKey: 'CHAT_SENDER'});
-CHATS_USERS_MOD.belongsTo(USERS_MOD, {foreignKey: 'CHAT_SENDER'});
-USERS_MOD.hasMany(CHATS_USERS_MOD, {foreignKey: 'CHAT_RECEIVER'});
-CHATS_USERS_MOD.belongsTo(USERS_MOD, {foreignKey: 'CHAT_RECEIVER'});
+// User-Chats
+USERS_MOD.hasMany(CHATS_MOD, {foreignKey: 'CHAT_SENDER'});
+CHATS_MOD.belongsTo(USERS_MOD, {foreignKey: 'CHAT_SENDER'});
 
-// Event-Chats_Events
-EVENTS_MOD.hasMany(CHATS_EVENTS_MOD, {foreignKey: 'CHAT_EVENT'});
-CHATS_EVENTS_MOD.belongsTo(EVENTS_MOD, {foreignKey: 'CHAT_EVENT'});
+// User-Rooms
+USERS_MOD.hasMany(ROOMS_MOD, {foreignKey: 'ROOM_USER'});
+ROOMS_MOD.belongsTo(USERS_MOD, {foreignKey: 'ROOM_USER'});
 
-// User-Chats_Events
-USERS_MOD.hasMany(CHATS_EVENTS_MOD, {foreignKey: 'CHAT_SENDER'});
-CHATS_EVENTS_MOD.belongsTo(USERS_MOD, {foreignKey: 'CHAT_SENDER'});
+// Event-Rooms
+EVENTS_MOD.hasMany(ROOMS_MOD, {foreignKey: 'ROOM_EVENT', as: "EVENT_ROOM"});
+ROOMS_MOD.belongsTo(EVENTS_MOD, {foreignKey: 'ROOM_EVENT', as: "EVENT_ROOM"});
+
+// User-Read_Status
+USERS_MOD.hasMany(READ_STATUS_MOD, {foreignKey: 'RS_USER'});
+READ_STATUS_MOD.belongsTo(USERS_MOD, {foreignKey: 'RS_USER'});
+
+// Chats-Read_Status
+CHATS_MOD.hasMany(READ_STATUS_MOD, { foreignKey: "RS_CHAT", as: "READ_STATUS" });
+READ_STATUS_MOD.belongsTo(CHATS_MOD, { foreignKey: "RS_CHAT", as: "chat" });
 
 // User-Matches
 USERS_MOD.hasMany(MATCHES_MOD, {foreignKey: 'MATCHING_USER'});
