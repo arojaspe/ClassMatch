@@ -4,7 +4,7 @@ import {MercadoPagoConfig, PreApproval} from "mercadopago";
 import * as Models from "./Models";
 import dotenv from "dotenv";
 import * as crypto from "crypto";
-import {accessToken, secretKey} from "./Connections";
+import {accessToken, secretKey} from "./Connection";
 
 
 export const client = new MercadoPagoConfig({accessToken: accessToken});
