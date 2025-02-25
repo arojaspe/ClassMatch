@@ -1,20 +1,8 @@
 import HomeCard from "./components/homeCard";
-import { useEffect, useState } from "react";
-import { checkAuth } from "./api/auth"; // Importa la función
+
 import { AuthProvider } from "./context/AuthContext";
 
 export default function App() {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const authenticatedUser = await checkAuth();
-      if (authenticatedUser) {
-        setUser(authenticatedUser); // Guarda la info del usuario en el estado
-      }
-    };
-    fetchUser();
-  }, []);
   return (
     <>
       <AuthProvider>

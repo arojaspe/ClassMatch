@@ -111,7 +111,8 @@ const router = createBrowserRouter([
       {
         path: "/crearcuenta",
         element: <CrearCuenta />,
-      },{
+      },
+      {
         path: "/Personalizar",
         element: <Personalizar />,
       },

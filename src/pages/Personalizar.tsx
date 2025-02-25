@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function PersonalizarPerfil() {
-  const [photo, setPhoto] = useState<File | null>(null); // Para manejar la foto
-  const [university, setUniversity] = useState("");
-  const [career, setCareer] = useState("");
+  const [currentPage, setCurrentPage] = useState(0);
+  //const [photo, setPhoto] = useState<File | null>(null); // Para manejar la foto
+
   const [message, setMessage] = useState("");
+  const [interests, setInterests] = useState<string[]>([]);
   const [errors, setErrors] = useState({
-    photo: false,
-    university: false,
-    career: false,
+    //photo: false,
+
     interests: false,
     description: false,
     horario: false,
@@ -17,15 +18,39 @@ export default function PersonalizarPerfil() {
 
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]); // Para manejar los intereses seleccionados
 
-  const interests = {
-    Arte: ["Pintura", "Música", "Literatura"],
-    Deportes: ["Fútbol", "Basketball", "Ciclismo"],
-  };
+  useEffect(() => {
+    axios
+      .get("/i")
+      .then((response) => {
+        const interestsArray = response.data.data.data.map(
+          (interest: { INTEREST_NAME: string }) => interest.INTEREST_NAME
+        );
+        setInterests(interestsArray);
+        console.log("Los Intereses", interestsArray);
+      })
+      .catch((error) => {
+        console.error("Error fetching intereses:", error);
+      });
+  }, []);
+  // const interests = {
+  //   Arte: ["Pintura", "Música", "Literatura"],
+  //   Deportes: ["Fútbol", "Basketball", "Ciclismo"],
+  // };
 
-  const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+  const diasSemana = [
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+    "Domingo",
+  ];
   const horas = Array.from({ length: 24 }, (_, index) => `${index}:00`);
 
-  const [seleccionado, setSeleccionado] = useState<{ [key: string]: boolean[] }>(() => {
+  const [seleccionado, setSeleccionado] = useState<{
+    [key: string]: boolean[];
+  }>(() => {
     const initialState: { [key: string]: boolean[] } = {};
     diasSemana.forEach((dia) => {
       initialState[dia] = Array(24).fill(false);
@@ -33,35 +58,33 @@ export default function PersonalizarPerfil() {
     return initialState;
   });
 
-  const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files ? event.target.files[0] : null;
+  // const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = event.target.files ? event.target.files[0] : null;
 
-    if (file && file.type.startsWith("image/")) {
-      setPhoto(file);
-    } else {
-      setPhoto(null);
-      setMessage("Por favor, selecciona un archivo de imagen.");
-    }
-  };
+  //   if (file && file.type.startsWith("image/")) {
+  //     setPhoto(file);
+  //   } else {
+  //     setPhoto(null);
+  //     setMessage("Por favor, selecciona un archivo de imagen.");
+  //   }
+  // };
 
-  const handleUniversityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setUniversity(event.target.value);
-  };
-
-  const handleCareerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCareer(event.target.value);
-  };
-
-  const handleDescriptionChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleDescriptionChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
     setDescription(event.target.value);
   };
 
   const handleInterestClick = (interest: string) => {
-    setSelectedInterests((prev) =>
-      prev.includes(interest)
-        ? prev.filter((item) => item !== interest) // Desmarcar si ya está seleccionado
-        : [...prev, interest] // Marcar si no está seleccionado
-    );
+    setSelectedInterests((prev) => {
+      if (prev.includes(interest)) {
+        return prev.filter((item) => item !== interest); // Desmarcar si ya está seleccionado
+      } else if (prev.length < 8) {
+        return [...prev, interest]; // Marcar si no está seleccionado y hay menos de 8
+      } else {
+        return prev; // No hacer nada si ya hay 8 seleccionados
+      }
+    });
   };
 
   const handleSeleccionarHora = (dia: string, horaIndex: number) => {
@@ -78,12 +101,14 @@ export default function PersonalizarPerfil() {
 
     // Validación de todos los campos
     const newErrors = {
-      photo: !photo,
-      university: !university,
-      career: !career,
-      interests: selectedInterests.length === 0,
+      //photo: !photo,
+
+      interests: selectedInterests.length === 0 || selectedInterests.length > 8,
       description: !description,
-      horario: Object.values(seleccionado).flat().filter((hora) => hora).length < 3, // Contamos cuántas horas fueron seleccionadas
+      horario:
+        Object.values(seleccionado)
+          .flat()
+          .filter((hora) => hora).length < 3, // Contamos cuántas horas fueron seleccionadas
     };
 
     setErrors(newErrors);
@@ -106,15 +131,16 @@ export default function PersonalizarPerfil() {
             Personalizar perfil
           </h2>
           <p className="w-full text-xl mt-4 font-KhandRegular">
-            Vamos a personalizar tu perfil de ClassMatch para mejorar tu experiencia.
+            Vamos a personalizar tu perfil de ClassMatch para mejorar tu
+            experiencia.
           </p>
           <form
             className="mb-4 mt-5 w-full flex flex-col"
             onSubmit={handleSaveProfile}
           >
             {/* Sección para subir una foto */}
-            <h2 className="font-KhandSemiBold text-4xl text-black font-bold pb-3">
-                Selecciona tu foto de perfil
+            {/* <h2 className="font-KhandSemiBold text-4xl text-black font-bold pb-3">
+              Selecciona tu foto de perfil
             </h2>
             <div className="mb-6">
               <label
@@ -124,7 +150,9 @@ export default function PersonalizarPerfil() {
                 Subir foto de perfil
               </label>
               <div
-                className={`flex items-center justify-center w-full ${photo ? "h-72" : "h-32"} border-2 rounded-lg cursor-pointer ${
+                className={`flex items-center justify-center w-full ${
+                  photo ? "h-72" : "h-32"
+                } border-2 rounded-lg cursor-pointer ${
                   errors.photo ? "border-red-500" : "border-gray-300"
                 } ${photo ? "border-none" : "border-dashed"}`}
                 onClick={() => document.getElementById("photo")?.click()} // Activar clic manualmente
@@ -148,91 +176,80 @@ export default function PersonalizarPerfil() {
                   />
                 )}
               </div>
-              {errors.photo && <p className="text-red-500">Por favor, sube una foto.</p>}
-            </div>
+              {errors.photo && (
+                <p className="text-red-500">Por favor, sube una foto.</p>
+              )}
+            </div> */}
 
             {/* Sección para universidad */}
-            <h2 className="font-KhandSemiBold text-4xl text-black font-bold pb-3">
-                Selecciona tu universidad
-            </h2>
-            <div className="mb-6">
-              <input
-                className={`w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline ${
-                  errors.university ? "border-red-500" : ""
-                }`}
-                type="text"
-                name="university"
-                id="university"
-                placeholder="Universidad"
-                value={university}
-                onChange={handleUniversityChange}
-              />
-              {errors.university && <p className="text-red-500">Por favor, ingresa tu universidad.</p>}
-            </div>
 
             {/* Sección para carrera */}
-            <div className="mb-6">
-              <input
-                className={`w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline ${
-                  errors.career ? "border-red-500" : ""
-                }`}
-                type="text"
-                name="career"
-                id="career"
-                placeholder="Carrera"
-                value={career}
-                onChange={handleCareerChange}
-              />
-              {errors.career && <p className="text-red-500">Por favor, ingresa tu carrera.</p>}
-            </div>
 
             {/* Sección de intereses */}
             <h2 className="font-KhandSemiBold text-4xl text-black font-bold pb-3">
-                Selecciona tus intereses
+              Selecciona tus intereses
             </h2>
             <div className="mb-6 w-full bg-gray-100 p-6 rounded-md">
               <label
                 htmlFor="interests"
                 className="block text-xl font-KhandRegular mb-2"
               >
-                Elige tus intereses personales (mínimo uno).
+                Elige tus intereses personales (máximo 8).
               </label>
-              <div className="space-y-6">
-                {Object.keys(interests).map((category) => (
-                  <div key={category}>
-                    <h3 className="font-KhandSemiBold text-xl mb-2">{category}</h3>
-                    <div className="flex flex-wrap gap-4">
-                      {interests[category as keyof typeof interests].map((interest) => (
-                        <button
-                          key={interest}
-                          type="button" // Cambié el tipo de button de enlace a solo button
-                          className={`px-8 py-2 rounded-md text-lg font-KhandMedium transition ${
-                            selectedInterests.includes(interest)
-                              ? "bg-buttonClassMatch text-white"
-                              : "bg-gray-200 text-black hover:bg-gray-300"
-                          }`}
-                          onClick={() => handleInterestClick(interest)}
-                        >
-                          {interest}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {interests
+                  .slice(currentPage * 20, (currentPage + 1) * 20)
+                  .map((interest) => (
+                    <button
+                      key={interest}
+                      type="button"
+                      className={`h-16 text-nowrap text-center rounded-md text-lg font-KhandMedium transition ${
+                        selectedInterests.includes(interest)
+                          ? "bg-buttonClassMatch text-white"
+                          : "bg-gray-200 text-black hover:bg-gray-300"
+                      }`}
+                      onClick={() => handleInterestClick(interest)}
+                    >
+                      {interest}
+                    </button>
+                  ))}
               </div>
-              {errors.interests && <p className="text-red-500">Por favor, selecciona al menos un interés.</p>}
+              {errors.interests && (
+                <p className="text-red-500">
+                  Por favor, selecciona al menos un interés.
+                </p>
+              )}
+              <div className="flex justify-center mt-4 space-x-2">
+                {Array.from({ length: Math.ceil(interests.length / 20) }).map(
+                  (_, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      className={`w-8 h-8 rounded-full ${
+                        currentPage === index
+                          ? "bg-buttonClassMatch text-white"
+                          : "bg-gray-300"
+                      }`}
+                      onClick={() => setCurrentPage(index)}
+                    >
+                      {index + 1}
+                    </button>
+                  )
+                )}
+              </div>
             </div>
 
             {/* Sección de descripción */}
             <h2 className="font-KhandSemiBold text-4xl text-black font-bold pb-3">
-                Háblanos sobre ti
+              Háblanos sobre ti
             </h2>
             <div className="mb-6">
               <label
                 htmlFor="description"
                 className="block text-xl font-KhandRegular mb-2"
               >
-                Haz una breve descripción sobre ti, tus intereses o lo que quieras compartir con los demás.
+                Haz una breve descripción sobre ti, tus intereses o lo que
+                quieras compartir con los demás.
               </label>
               <textarea
                 id="description"
@@ -241,12 +258,16 @@ export default function PersonalizarPerfil() {
                 value={description}
                 onChange={handleDescriptionChange}
               ></textarea>
-              {errors.description && <p className="text-red-500">Por favor, agrega una descripción.</p>}
+              {errors.description && (
+                <p className="text-red-500">
+                  Por favor, agrega una descripción.
+                </p>
+              )}
             </div>
 
             {/* Sección para seleccionar horarios */}
             <h2 className="font-KhandSemiBold text-4xl text-black font-bold">
-                Selecciona tu horario semanal
+              Selecciona tu horario semanal
             </h2>
             <p className="w-full text-xl mt-4 font-KhandRegular">
               Marca las horas disponibles de cada día, debes poner mínimo 3.
@@ -255,21 +276,34 @@ export default function PersonalizarPerfil() {
               <table className="w-full table-auto border-collapse">
                 <thead>
                   <tr>
-                    <th className="border-b-4 border-t-4 p-3 text-xl font-semibold text-black bg-gray-100">Hora/Día</th>
+                    <th className="border-b-4 border-t-4 p-3 text-xl font-semibold text-black bg-gray-100">
+                      Hora/Día
+                    </th>
                     {diasSemana.map((dia) => (
-                      <th key={dia} className="border-b-4 border-t-4 p-3 text-xl font-semibold text-black bg-gray-100">{dia}</th>
+                      <th
+                        key={dia}
+                        className="border-b-4 border-t-4 p-3 text-xl font-semibold text-black bg-gray-100"
+                      >
+                        {dia}
+                      </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {horas.map((hora, index) => (
                     <tr key={index}>
-                      <td className="border-b p-2 text-lg font-medium bg-gray-50 text-black text-center">{hora}</td>
+                      <td className="border-b p-2 text-lg font-medium bg-gray-50 text-black text-center">
+                        {hora}
+                      </td>
                       {diasSemana.map((dia) => (
                         <td
                           key={dia}
                           className={`border-b border-l p-2 cursor-pointer transition duration-200 ease-in-out
-                            ${seleccionado[dia][index] ? "bg-cyan-700 text-white text-center" : "bg-gray-200 hover:bg-gray-300"} 
+                            ${
+                              seleccionado[dia][index]
+                                ? "bg-cyan-700 text-white text-center"
+                                : "bg-gray-200 hover:bg-gray-300"
+                            } 
                             ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
                           onClick={() => handleSeleccionarHora(dia, index)}
                         >
@@ -281,7 +315,11 @@ export default function PersonalizarPerfil() {
                 </tbody>
               </table>
             </div>
-            {errors.horario && <p className="text-red-500">Por favor, selecciona al menos 3 horas.</p>}
+            {errors.horario && (
+              <p className="text-red-500">
+                Por favor, selecciona al menos 3 horas.
+              </p>
+            )}
 
             {/* Botón de guardar */}
             <button

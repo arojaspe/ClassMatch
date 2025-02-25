@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function Busqueda() {
   const [usuarios, setUsuarios] = useState<UsuarioClassmatch[]>([]);
   const [direction, setDirection] = useState<"left" | "right">("right");
+  const [userInterests, setUserInterests] = useState<string[]>();
 
   useEffect(() => {
     axios
@@ -29,8 +30,21 @@ export default function Busqueda() {
   const currentUser = usuarios[currentIndex]?.user;
   const currentMatch = usuarios[currentIndex]?.matches;
   const currentCommonSchedule = usuarios[currentIndex]?.commonSchedule;
+  const currentId = currentUser?.USER_ID;
 
   console.log(currentUser);
+
+  useEffect(() => {
+    axios
+      .get("/ui/" + currentId)
+      .then((response) => {
+        console.log("Los intereses del usuario son", response.data.data.data);
+        setUserInterests(response.data.data.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching intereses del usuario logueado", error);
+      });
+  }, [currentUser, currentId]);
 
   // Función para avanzar al siguiente usuario
   const handleNext = () => {
@@ -90,6 +104,7 @@ export default function Busqueda() {
                 user={currentUser}
                 matches={currentMatch}
                 commonSchedule={currentCommonSchedule}
+                userInterests={userInterests}
               />
             </motion.div>
           </AnimatePresence>
