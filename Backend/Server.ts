@@ -62,7 +62,7 @@ class Server {
     };
 
     listen() {
-        this.server.listen(this.port, "0.0.0.0", () => {
+        this.server.listen(this.port, () => {
             console.log("Server Running: " + this.port)
         });
     }
