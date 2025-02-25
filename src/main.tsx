@@ -23,7 +23,7 @@ import NuevaContraseña from "./pages/NuevaContraseña.tsx";
 import axios from "axios";
 import Personalizar from "./pages/Personalizar.tsx";
 
-axios.defaults.baseURL = "http://127.0.0.1:5000/api";
+axios.defaults.baseURL = "https://classmatch.site/api";
 axios.defaults.withCredentials = true;
 
 export const Layout = () => {
