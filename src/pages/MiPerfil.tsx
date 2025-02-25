@@ -28,7 +28,7 @@ export default function MiPerfil() {
       .get("/auth")
       .then((response) => {
         console.log("Los datos del usuario son", response.data.data);
-        setUsuario(response.data.data);
+        //setUsuario(response.data.data);
         setIdUsuario(response.data.data.USER_ID);
       })
       .catch((error) => {
@@ -72,6 +72,18 @@ export default function MiPerfil() {
       })
       .catch((error) => {
         console.error("Error fetching imagenes del usuario logueado", error);
+      });
+  }, [idUsuario]);
+
+  useEffect(() => {
+    axios
+      .get("/u/" + idUsuario)
+      .then((response) => {
+        console.log("los datos del usuario logueado son", response.data.data);
+        setUsuario(response.data.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching los datos del usuario logueado", error);
       });
   }, [idUsuario]);
 

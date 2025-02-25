@@ -94,11 +94,26 @@ export default function PersonalizarPerfil() {
     console.log("Formateado", selectedInterests);
     axios
       .put("/ui", selectedInterests)
-      .then((response) => {
-        console.log("Intereses actualizados con éxito:", response.data);
+      .then(() => {
+        setMessage("Intereses guardados correctamente");
+        alert("Intereses actualizados con éxito:");
+        setSelectedInterests([]);
       })
       .catch((error) => {
         console.error("Error azl actualizar intereses:", error);
+      });
+  };
+
+  const handleDescriptionButtonClick = () => {
+    axios
+      .put("/u", { bio: description })
+      .then(() => {
+        setMessage("Descripción guardada correctamente");
+        alert("Descripción actualizada con éxito");
+        setDescription("");
+      })
+      .catch((error) => {
+        console.error("Error al actualizar la descripción:", error);
       });
   };
 
@@ -252,8 +267,10 @@ export default function PersonalizarPerfil() {
                   )
                 )}
               </div>
+            </div>
+            <div className="flex flex-col items-center justify-center space-x-4 space-y-3">
               <button
-                className="bg-buttonClassMatch place-self-center w-[12rem] hover:bg-headClassMatch text-white font-KhandRegular text-base font-semibold px-6 py-2 rounded-md"
+                className="bg-buttonClassMatch mb-5 place-self-center w-[12rem] hover:bg-headClassMatch text-white font-KhandRegular text-base font-semibold px-6 py-2 rounded-md"
                 onClick={() => handleInterestButtonClick()}
               >
                 Guardar intereses
@@ -279,12 +296,13 @@ export default function PersonalizarPerfil() {
                 value={description}
                 onChange={handleDescriptionChange}
               ></textarea>
-              {errors.description && (
-                <p className="text-red-500">
-                  Por favor, agrega una descripción.
-                </p>
-              )}
             </div>
+            <button
+              className="bg-buttonClassMatch mb-5 place-self-center w-[12rem] hover:bg-headClassMatch text-white font-KhandRegular text-base font-semibold px-6 py-2 rounded-md"
+              onClick={() => handleDescriptionButtonClick()}
+            >
+              Guardar descripción
+            </button>
 
             {/* Sección para seleccionar horarios */}
             <h2 className="font-KhandSemiBold text-4xl text-black font-bold">
