@@ -22,7 +22,7 @@ class Server {
     constructor(){
         this.dbConnect();
         this.app= express();
-        this.port= 5000;
+        this.port= "5000";
         this.middlewares();
         this.routes();
         this.server= http.createServer(this.app);
