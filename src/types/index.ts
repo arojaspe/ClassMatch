@@ -28,3 +28,8 @@ export interface UserImage {
   IMAGE_LINK: string | null;
   IMAGE_ORDER: number | null;
 }
+
+export interface Interest {
+  INTEREST_ID: string;
+  INTEREST_NAME: string;
+}

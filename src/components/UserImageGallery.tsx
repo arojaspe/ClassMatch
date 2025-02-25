@@ -33,7 +33,7 @@ export default function UserImageGallery({
   }
 
   return (
-    <div className="flex items-center justify-center w-full h-[70%] py-4">
+    <div className="flex items-center justify-center w-full h-[70%] ">
       <div className="flex w-full h-full justify-center items-center ">
         {images.length > 0 ? (
           <>

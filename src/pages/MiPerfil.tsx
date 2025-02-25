@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { UsuarioClassmatch } from "../types";
+import { UserImage, UsuarioClassmatch } from "../types";
 import UserProfileCard from "../components/UserProfileCard";
 
 type UserSchedule = {
@@ -17,6 +17,7 @@ export default function MiPerfil() {
   const [userSchedule, setUserSchedule] = useState<UserSchedule>();
   const [seccionActiva, setSeccionActiva] = useState("Cuenta");
   const [userInterests, setUserInterests] = useState<string[]>();
+  const [userImages, setUserImages] = useState<UserImage[]>();
   const [usuario, setUsuario] = useState<UsuarioClassmatch>();
   const [idUsuario, setIdUsuario] = useState("");
 
@@ -56,6 +57,21 @@ export default function MiPerfil() {
       })
       .catch((error) => {
         console.error("Error fetching intereses del usuario logueado", error);
+      });
+  }, [idUsuario]);
+
+  useEffect(() => {
+    axios
+      .get("/u/" + idUsuario)
+      .then((response) => {
+        console.log(
+          "Las imágenes del usuario son",
+          response.data.data.USER_IMAGES
+        );
+        setUserImages(response.data.data.USER_IMAGES);
+      })
+      .catch((error) => {
+        console.error("Error fetching imagenes del usuario logueado", error);
       });
   }, [idUsuario]);
 
@@ -105,6 +121,7 @@ export default function MiPerfil() {
                 user={usuario}
                 userSchedule={userSchedule}
                 userInterests={userInterests}
+                userImages={userImages}
               />
             </div>
           </>

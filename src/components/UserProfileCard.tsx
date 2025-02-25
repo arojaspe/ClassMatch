@@ -1,4 +1,4 @@
-import { UsuarioClassmatch } from "../types";
+import { UserImage, UsuarioClassmatch } from "../types";
 import UserImageGallery from "./UserImageGallery";
 import { useMemo } from "react";
 import { useState } from "react";
@@ -16,6 +16,7 @@ type UserCardProps = {
   user?: UsuarioClassmatch; // Define el tipo de usuario si lo tienes
   userSchedule?: UserSchedule; // Define el tipo si lo tienes
   userInterests?: string[];
+  userImages?: UserImage[];
 };
 
 const diasSemana = [
@@ -47,12 +48,14 @@ export default function UserProfileCard({
   user,
   userSchedule,
   userInterests = [],
+  userImages,
 }: UserCardProps) {
   const age = useMemo(
     () => (user?.USER_BIRTHDATE ? calculateAge(user?.USER_BIRTHDATE) : null),
     [user?.USER_BIRTHDATE]
   );
-  console.log(userSchedule);
+
+  console.log("imagenes de usuario desde userProfileCard", userImages);
 
   const [showSchedule, setShowSchedule] = useState(false);
 
@@ -64,7 +67,7 @@ export default function UserProfileCard({
   return (
     <div className="bg-backgroundClassMatch srounded-lg  h-full flex font-KhandRegular py-5">
       <div className="bg-cardClassMatch flex flex-col w-[25%] ml-9 rounded-lg items-center shadow-lg overflow-hidden">
-        <UserImageGallery images={user?.USER_IMAGES ?? []} />
+        <UserImageGallery images={userImages ?? []} />
         <div className="w-[90%] p-4 font-KhandMedium text-lg text-center space-y-2 font-semibold">
           <p className="text-headClassMatch ">{user?.USER_BIRTHDATE}</p>
           <p className="text-buttonClassMatch ">Edad: {age}</p>
@@ -172,7 +175,8 @@ export default function UserProfileCard({
                 {userInterests.map((interest) => (
                   <div
                     key={interest}
-                    className="flex items-center justify-center rounded-md text-base font-KhandMedium transition bg-gray-200 text-black hover:bg-gray-300"
+                    className="flex items-center justify-center rounded-md text-sm font-KhandMedium transition bg-gray-200 text-black hover:bg-gray-300
+                    sm:text-xs md:text-sm lg:text-sm xl:text-sm 2xl:text-lg"
                   >
                     {interest}
                   </div>

@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Interest } from "../types";
 
 export default function PersonalizarPerfil() {
   const [currentPage, setCurrentPage] = useState(0);
   //const [photo, setPhoto] = useState<File | null>(null); // Para manejar la foto
 
   const [message, setMessage] = useState("");
-  const [interests, setInterests] = useState<string[]>([]);
+  const [interests, setInterests] = useState<Interest[]>([]);
   const [errors, setErrors] = useState({
     //photo: false,
 
@@ -22,11 +23,12 @@ export default function PersonalizarPerfil() {
     axios
       .get("/i")
       .then((response) => {
-        const interestsArray = response.data.data.data.map(
-          (interest: { INTEREST_NAME: string }) => interest.INTEREST_NAME
-        );
-        setInterests(interestsArray);
-        console.log("Los Intereses", interestsArray);
+        console.log("Los intereses que existen son", response.data.data.data);
+        // const interestsArray = response.data.data.data.map(
+        //   (interest: { INTEREST_NAME: string }) => interest.INTEREST_NAME
+        // );
+        // setInterests(interestsArray);
+        setInterests(response.data.data.data);
       })
       .catch((error) => {
         console.error("Error fetching intereses:", error);
@@ -75,16 +77,29 @@ export default function PersonalizarPerfil() {
     setDescription(event.target.value);
   };
 
-  const handleInterestClick = (interest: string) => {
+  const handleInterestClick = (interest: Interest) => {
     setSelectedInterests((prev) => {
-      if (prev.includes(interest)) {
-        return prev.filter((item) => item !== interest); // Desmarcar si ya está seleccionado
+      if (prev.includes(interest.INTEREST_ID)) {
+        return prev.filter((id) => id !== interest.INTEREST_ID); // Desmarcar si ya está seleccionado
       } else if (prev.length < 8) {
-        return [...prev, interest]; // Marcar si no está seleccionado y hay menos de 8
+        return [...prev, interest.INTEREST_ID]; // Marcar si no está seleccionado y hay menos de 8
       } else {
         return prev; // No hacer nada si ya hay 8 seleccionados
       }
     });
+    console.log("Los intereses seleccionados son", selectedInterests);
+  };
+
+  const handleInterestButtonClick = () => {
+    console.log("Formateado", selectedInterests);
+    axios
+      .put("/ui", selectedInterests)
+      .then((response) => {
+        console.log("Intereses actualizados con éxito:", response.data);
+      })
+      .catch((error) => {
+        console.error("Error azl actualizar intereses:", error);
+      });
   };
 
   const handleSeleccionarHora = (dia: string, horaIndex: number) => {
@@ -201,16 +216,16 @@ export default function PersonalizarPerfil() {
                   .slice(currentPage * 20, (currentPage + 1) * 20)
                   .map((interest) => (
                     <button
-                      key={interest}
+                      key={interest.INTEREST_ID}
                       type="button"
                       className={`h-16 text-nowrap text-center rounded-md text-lg font-KhandMedium transition ${
-                        selectedInterests.includes(interest)
+                        selectedInterests.includes(interest.INTEREST_ID)
                           ? "bg-buttonClassMatch text-white"
                           : "bg-gray-200 text-black hover:bg-gray-300"
                       }`}
                       onClick={() => handleInterestClick(interest)}
                     >
-                      {interest}
+                      {interest.INTEREST_NAME}
                     </button>
                   ))}
               </div>
@@ -237,6 +252,12 @@ export default function PersonalizarPerfil() {
                   )
                 )}
               </div>
+              <button
+                className="bg-buttonClassMatch place-self-center w-[12rem] hover:bg-headClassMatch text-white font-KhandRegular text-base font-semibold px-6 py-2 rounded-md"
+                onClick={() => handleInterestButtonClick()}
+              >
+                Guardar intereses
+              </button>
             </div>
 
             {/* Sección de descripción */}
