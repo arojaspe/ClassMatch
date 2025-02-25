@@ -39,7 +39,7 @@ class Server {
     middlewares () {
         this.app.use(cors({
                 credentials: true,
-                origin: "*"
+                origin: "http://classmatch.site" // For deploy, use "*" for local
             }
         ));
         this.app.use(cookieParser())
