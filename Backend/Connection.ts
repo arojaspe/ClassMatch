@@ -9,6 +9,8 @@ const dbName = process.env.DB_NAME as string;
 const dbUser = process.env.DB_USER as string;
 const dbPass = process.env.DB_PASSWORD as string;
 const dbHost = process.env.DB_HOST as string;
+export const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN as string;
+export const secretKey = process.env.WEB_HOOK_SECRET as string;
 
 //AWS DB
 const db = new Sequelize(dbName, dbUser, dbPass, {
