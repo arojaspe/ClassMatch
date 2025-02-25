@@ -376,11 +376,13 @@ export const postLogin = async (req: Request, res: Response) => {
                 res.cookie("access_token", value[0], {
                     httpOnly: true,
                     secure: true,
+                    sameSite: "none",
                     maxAge: 60 * 15 * 1000
                 })
                 res.cookie("refresh_token", value[1], {
                     httpOnly: true,
                     secure: true,
+                    sameSite: "none",
                     maxAge: 7000 * 60 * 60 * 24
                 })
                 res.status(200).json(
@@ -405,11 +407,23 @@ export const postLogin = async (req: Request, res: Response) => {
 }
 export const getLogOut = async (req: Request, res: Response) => {
     try {
-        res.cookie("access_token", null, { maxAge: 0 })
-        res.cookie("refresh_token", null, { maxAge: 0 })
+        res.clearCookie("access_token", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            path: "/",
+        });
+        res.clearCookie("refresh_token", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            path: "/",
+        });
+        res.cookie("access_token", null, { maxAge: 0 });
+        res.cookie("refresh_token", null, { maxAge: 0 });
         res.status(200).send({
-            message: "Succesfully signed out"
-        })
+            message: "Succesfully signed out",
+        });
     } catch (error: any) {
         res.status(401).send({
             errors: [{

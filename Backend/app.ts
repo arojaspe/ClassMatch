@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 const app = express();
 
-app.use(cors({ origin: "LINK" }));
+app.use(cors({ origin: "LINK", credentials: true }));
 app.use(express.json());
 
 app.listen(5000, () => {
