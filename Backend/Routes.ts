@@ -34,12 +34,17 @@ router.post("/c", Conts.postColleges)
 
 //Images WIP!!!!
 router.post("/upload", Conts.postImage)
+router.put("/u/pics", Conts.putImage)
+router.delete("/u/pics", Conts.deleteImage)
 
 //Event Management: e
 router.get("/e", Conts.getEvents)
 router.get("/e/:id", Conts.getEvent)
 router.post("/e", Conts.postEvent)
 router.put("/e/:id", Conts.putEvent)
+
+//Event Management: m
+router.post("/m", Conts.postMatch)
 
 //User Event Management: ue
 router.get("/ue/myrequests", Conts.getMyApplications)

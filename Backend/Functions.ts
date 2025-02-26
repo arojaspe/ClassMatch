@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { sign, verify } from "jsonwebtoken";
 import { resend } from "./Connection";
 import RaycastMagicLinkEmail from "../Email_templates/Verification";
-import { FloatDataType, Model, Op, Sequelize} from 'sequelize';
+import { FloatDataType, Model, Op, Sequelize, literal } from 'sequelize';
 import moment from "moment";
 
 //Error showing
@@ -24,8 +24,8 @@ export function str2hsh(str: string): string {
 function shuffleArray<T>(array: T[]): T[] {
     const arr = [...array];
     for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
     }
     return arr;
 }
@@ -169,11 +169,11 @@ export async function authUser(uuid: string) {
             },
             include:
                 [
-                {
-                    model: Models.SCHEDULES_MOD, as: "USER_SCHEDULE",
-                    attributes: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
-                }
-            ]
+                    {
+                        model: Models.SCHEDULES_MOD, as: "USER_SCHEDULE",
+                        attributes: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
+                    }
+                ]
         })
         if (!usuario?.getDataValue("USER_ID")) {
             throw new Error("Email not verified")
@@ -184,74 +184,72 @@ export async function authUser(uuid: string) {
         throw new Error("User not logged in");
     }
 }
-
 export async function findUsersByRating(current_user: string, totalCount: number = 20) {
-  
-  const currentUserData = await Models.USERS_MOD.findOne({
-    where: { USER_ID: current_user },
-    attributes: ["USER_RATING", "USER_FILTER_GENDER", "USER_FILTER_AGE"],
-  });
 
-  const currentRating = currentUserData!.getDataValue("USER_RATING");
-  const currentFiltGen = currentUserData!.getDataValue("USER_FILTER_GENDER");
-  const filtAge = currentUserData!.getDataValue("USER_FILTER_AGE").split("-");
+    const currentUserData = await Models.USERS_MOD.findOne({
+        where: { USER_ID: current_user },
+        attributes: ["USER_RATING", "USER_FILTER_GENDER", "USER_FILTER_AGE"],
+    });
 
-  const mn = moment().subtract(filtAge[0], "years").format("YYYY-MM-DD");
-  const mx = moment().subtract(filtAge[1], "years").format("YYYY-MM-DD");
+    const currentRating = currentUserData!.getDataValue("USER_RATING");
+    const currentFiltGen = currentUserData!.getDataValue("USER_FILTER_GENDER");
+    const filtAge = currentUserData!.getDataValue("USER_FILTER_AGE").split("-");
 
-  const otherUsers = await Models.USERS_MOD.findAll({
-    where: { 
-      USER_ID: { [Op.ne]: current_user },
-      // USER_GENDER: { [Op.eq]: currentFiltGen },
-      // USER_BIRTHDATE: { [Op.between]: [mn, mx] }
-    },
-    attributes: ["USER_ID", "USER_RATING", "USER_FIRSTNAME"]
-  });
+    const mn = moment().subtract(filtAge[0], "years").format("YYYY-MM-DD");
+    const mx = moment().subtract(filtAge[1], "years").format("YYYY-MM-DD");
 
-  const lowerUsers = otherUsers.filter(user => user.getDataValue("USER_RATING") < currentRating);
-  const higherUsers = otherUsers.filter(user => user.getDataValue("USER_RATING") >= currentRating);
+    const otherUsers = await Models.USERS_MOD.findAll({
+        where: {
+            USER_ID: { [Op.ne]: current_user },
+            // USER_GENDER: { [Op.eq]: currentFiltGen },
+            // USER_BIRTHDATE: { [Op.between]: [mn, mx] }
+        },
+        attributes: ["USER_ID", "USER_RATING", "USER_FIRSTNAME"]
+    });
 
-  const sortedByCloseness = [...otherUsers].sort((a, b) => {
-    const diffA = Math.abs(a.getDataValue("USER_RATING") - currentRating);
-    const diffB = Math.abs(b.getDataValue("USER_RATING") - currentRating);
-    return diffA - diffB;
-  });
+    const lowerUsers = otherUsers.filter(user => user.getDataValue("USER_RATING") < currentRating);
+    const higherUsers = otherUsers.filter(user => user.getDataValue("USER_RATING") >= currentRating);
 
-  const countClosest = Math.floor(totalCount * 0.70);
-  const countLower = Math.floor(totalCount * 0.15);
-  const countHigher = totalCount - countClosest - countLower;
+    const sortedByCloseness = [...otherUsers].sort((a, b) => {
+        const diffA = Math.abs(a.getDataValue("USER_RATING") - currentRating);
+        const diffB = Math.abs(b.getDataValue("USER_RATING") - currentRating);
+        return diffA - diffB;
+    });
 
-  const closestUsers = sortedByCloseness.slice(0, countClosest);
+    const countClosest = Math.floor(totalCount * 0.70);
+    const countLower = Math.floor(totalCount * 0.15);
+    const countHigher = totalCount - countClosest - countLower;
 
-  const closestUserIds = new Set(closestUsers.map(u => u.getDataValue("USER_ID")));
-  const lowerUnique = lowerUsers.filter(user => !closestUserIds.has(user.getDataValue("USER_ID")));
-  const higherUnique = higherUsers.filter(user => !closestUserIds.has(user.getDataValue("USER_ID")));
+    const closestUsers = sortedByCloseness.slice(0, countClosest);
 
-  const randomLower = shuffleArray(lowerUnique).slice(0, countLower);
-  const randomHigher = shuffleArray(higherUnique).slice(0, countHigher);
+    const closestUserIds = new Set(closestUsers.map(u => u.getDataValue("USER_ID")));
+    const lowerUnique = lowerUsers.filter(user => !closestUserIds.has(user.getDataValue("USER_ID")));
+    const higherUnique = higherUsers.filter(user => !closestUserIds.has(user.getDataValue("USER_ID")));
 
-  let finalUsers = [...closestUsers, ...randomLower, ...randomHigher];
+    const randomLower = shuffleArray(lowerUnique).slice(0, countLower);
+    const randomHigher = shuffleArray(higherUnique).slice(0, countHigher);
 
-  finalUsers = shuffleArray(finalUsers);
+    let finalUsers = [...closestUsers, ...randomLower, ...randomHigher];
 
-  finalUsers.forEach((E) => {
-    console.log(E.getDataValue("USER_ID"), E.getDataValue("USER_FIRSTNAME"));
-  });
+    finalUsers = shuffleArray(finalUsers);
 
-  return finalUsers;
+    finalUsers.forEach((E) => {
+        console.log(E.getDataValue("USER_ID"), E.getDataValue("USER_FIRSTNAME"));
+    });
+
+    return finalUsers;
 }
-
 export let findUser = async function (id?: string, email?: string) {
     if (id) {
         let usuario = await Models.USERS_MOD.findByPk(id)
         if (!usuario) {
-            throw new Error("No user was found: "+id)
+            throw new Error("No user was found: " + id)
         }
         return usuario
     }
     let usuario = await Models.USERS_MOD.findOne({ where: { USER_EMAIL: email } })
     if (!usuario) {
-        throw new Error("No user was found: "+email)
+        throw new Error("No user was found: " + email)
     }
 
     return usuario
@@ -293,12 +291,12 @@ let addTokens = function (user: Model<any, any>) {
         throw new Error("Unable to update credentials");
     }
 }
-let checkAge= function (birthDate: string) {
+let checkAge = function (birthDate: string) {
     const birth = new Date(birthDate);
     const today = new Date();
 
     let age = today.getFullYear() - birth.getFullYear();
-    const hasBirthdayPassed = (today.getMonth() > birth.getMonth()) || 
+    const hasBirthdayPassed = (today.getMonth() > birth.getMonth()) ||
         (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate());
 
     return hasBirthdayPassed ? age : age - 1;
@@ -420,10 +418,9 @@ export async function updateInterests(userId: string, interestsIds: Array<string
 
     return newUserInterestsIds;
 }
-
 export async function findInterests(userId: String) {
     const interestsList = await Models.USER_INTERESTS_MOD.findAll({
-        attributes : {exclude: ["UINTEREST_ID", "UINTEREST_USER"]},
+        attributes: { exclude: ["UINTEREST_ID", "UINTEREST_USER"] },
         where: {
             UINTEREST_USER: userId,
         }
@@ -432,39 +429,37 @@ export async function findInterests(userId: String) {
 
     let userInterests: Array<string> = [];
 
-    for(let interest of interestsList) {
+    for (let interest of interestsList) {
         let interestRow = await Models.INTERESTS_MOD.findByPk(interest.get("UINTEREST_INTEREST") as string);
-        
-        if(interestRow) {
+
+        if (interestRow) {
             userInterests.push(interestRow.get("INTEREST_NAME") as string);
         }
     }
-    
+
     return userInterests;
 }
-
 export async function findInterestsIds(interests: Array<string>) {
     let ids: Array<string> = [];
 
-    for(let interest of interests) {
+    for (let interest of interests) {
         let interestRow = await Models.INTERESTS_MOD.findOne({
-            where: {INTEREST_NAME: interest}});
-        
-        if(interestRow != null)
+            where: { INTEREST_NAME: interest }
+        });
+
+        if (interestRow != null)
             ids.push(interestRow.get("INTEREST_ID") as string);
     }
 
     return ids;
 }
-
-export async function findUsersByInterests(interestsIds : Array<string>,
-                                          ageL: number,
-                                          ageU: number,
-                                          gender: Array<string>,
-                                          colleges: Array<string>) 
-{
+export async function findUsersByInterests(interestsIds: Array<string>,
+    ageL: number,
+    ageU: number,
+    gender: Array<string>,
+    colleges: Array<string>) {
     const uInterestsRows = await Models.USER_INTERESTS_MOD.findAll({
-        attributes : {exclude: ["UINTEREST_ID", "UINTEREST_INTEREST"]},
+        attributes: { exclude: ["UINTEREST_ID", "UINTEREST_INTEREST"] },
         where: {
             UINTEREST_INTEREST: interestsIds
         },
@@ -477,9 +472,9 @@ export async function findUsersByInterests(interestsIds : Array<string>,
         attributes: { exclude: ["USER_EMAIL", "USER_PASSWORD", "USER_LAST_LOG", "USER_FILTER_AGE", "USER_SUPERMATCHES", "USER_FILTER_GENDER"] },
         where: {
             [Op.and]: [
-                {USER_ID: userIds},
-                {USER_GENDER: gender},
-                {USER_COLLEGE_ID: colleges},
+                { USER_ID: userIds },
+                { USER_GENDER: gender },
+                { USER_COLLEGE_ID: colleges },
                 Sequelize.literal(`TIMESTAMPDIFF(YEAR, USER_BIRTHDATE, CURDATE()) BETWEEN ${Number(ageL)} AND ${Number(ageU)}`),
             ]
         },
@@ -555,9 +550,8 @@ export const getCollege = async (req: Request, res: Response) => {
 }
 
 //Images
-export async function addImage2DB(image_id: string, relation: string, type: string): Promise<{ IMAGE_LINK: string, IMAGE_ORDER: number }> {
+export async function addImage2DB(image_id: string, relation: string, type: string, order: number): Promise<{ IMAGE_LINK: string, IMAGE_ORDER: number }> {
     try {
-        let order = await findAllImages(relation)
         let path: string = `https://storage.googleapis.com/classmatch/${type}/${image_id}_post.jpg`
 
         await Models.IMAGES_MOD.create({
@@ -573,7 +567,45 @@ export async function addImage2DB(image_id: string, relation: string, type: stri
         throw new Error(error)
     }
 }
-let findAllImages = async function (uuid: string): Promise<number> {
+export async function deleteImagefromDB(cur_image_link: string, new_image_link?: string) {
+    if (new_image_link) {
+        await Models.IMAGES_MOD.update(
+            { IMAGE_LINK: new_image_link },
+            { where: { IMAGE_LINK: cur_image_link } }
+        );
+        return
+    }
+    const image = await Models.IMAGES_MOD.findOne({
+        where: { IMAGE_LINK: cur_image_link },
+    });
+
+    if (!image) {
+        throw new Error(`Image record not found for IMAGE_LINK: ${cur_image_link}`);
+    }
+
+    const deletedOrder = image.getDataValue("IMAGE_ORDER");
+
+    await Models.IMAGES_MOD.destroy({
+        where: { IMAGE_LINK: cur_image_link },
+    });
+
+    await Models.IMAGES_MOD.update(
+        { IMAGE_ORDER: literal("IMAGE_ORDER - 1") },
+        { where: { IMAGE_ORDER: { [Op.gt]: deletedOrder } } }
+    );
+}
+export async function modifyImgOrder(CURRENT_USER: string, IMAGE_ID: string, IMAGE_ORDER: number) {
+    if (await isMyImage(CURRENT_USER, IMAGE_ID)) {
+        Models.IMAGES_MOD.update(
+            {
+                IMAGE_ORDER: IMAGE_ORDER
+            },
+            {
+                where: { IMAGE_ID: IMAGE_ID }
+            })
+    }
+}
+export async function findAllImages(uuid: string): Promise<number> {
     let order = await Models.IMAGES_MOD.count({
         where: { IMAGE_RELATION: uuid }
     })
@@ -581,6 +613,11 @@ let findAllImages = async function (uuid: string): Promise<number> {
         throw new Error("Max number of images reached")
     }
     return order + 1
+}
+let isMyImage = async function (current_user: string, image_id: string): Promise<boolean> {
+    return await Models.IMAGES_MOD.findByPk(image_id).then((image) => {
+        return current_user === image?.getDataValue("IMAGE_RELATION")
+    })
 }
 
 //Events
@@ -601,9 +638,7 @@ export async function activeEvents() {
         )
         let allEventsInfo: Model<any, any>[] = []
         await Models.EVENTS_MOD.findAll({
-            include: [{
-                attributes: ["EVENT_ID"],
-            }],
+            attributes: ["EVENT_ID"],
             where: {
                 EVENT_STATUS: 1
             }
@@ -620,18 +655,21 @@ export async function activeEvents() {
 export const allEventInfo = async (event_id: string) => {
     let event = await Models.EVENTS_MOD.findByPk(event_id, {
         include: [{
-            model: Models.USERS_MOD, as: 'EVENT_USERS',
-            attributes: ["USER_ID", "USER_FIRSTNAME", "USER_LASTNAME"]
-        },
-        {
-            model: Models.IMAGES_MOD, as: 'USER_IMAGES',
-            attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-            where: { IMAGE_ORDER: 1 },
-            required: false
+            model: Models.USERS_MOD,
+            attributes: ["USER_ID", "USER_FIRSTNAME", "USER_LASTNAME"],
+            include: [{
+                model: Models.IMAGES_MOD, as: 'USER_IMAGES',
+                attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+                where: { IMAGE_ORDER: 1 },
+                limit: 1,
+                required: false
+            }]
         },
         {
             model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
-            attributes: ["IMAGE_LINK", "IMAGE_ORDER"]
+            attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+            
+            required: false
         }]
     })
     if (event) {
@@ -737,7 +775,7 @@ export async function checkMyApplications(current_user: string) {
             include: [{
                 model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
                 attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-                where: { IMAGE_ORDER: 1 }
+                order: [['IMAGE_ORDER', 'ASC']]
             }]
         }]
     })
@@ -815,9 +853,10 @@ export async function findMyUEventsAdmin(current_user: string) {
             include: [{
                 model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
                 attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-                where: { IMAGE_ORDER: 1 }}]
+                where: { IMAGE_ORDER: 1 }
+            }]
         }]
-        
+
     })
     ueventExpired = await Models.EVENTS_MOD.findAll({
         where: {
@@ -831,11 +870,12 @@ export async function findMyUEventsAdmin(current_user: string) {
             include: [{
                 model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
                 attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-                where: { IMAGE_ORDER: 1 }}]
+                where: { IMAGE_ORDER: 1 }
+            }]
         }]
     })
 
-    if (ueventActive.length+ueventExpired.length ===0 ) {
+    if (ueventActive.length + ueventExpired.length === 0) {
         throw new Error("User has not  organized any Events")
     }
     return {
@@ -864,7 +904,8 @@ export async function findMyUEvents(current_user: string) {
             include: [{
                 model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
                 attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-                where: { IMAGE_ORDER: 1 }}]
+                where: { IMAGE_ORDER: 1 }
+            }]
         }]
     })
     ueventExpired = await Models.USER_EVENTS_MOD.findAll({
@@ -883,11 +924,12 @@ export async function findMyUEvents(current_user: string) {
             include: [{
                 model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
                 attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-                where: { IMAGE_ORDER: 1 }}]
+                where: { IMAGE_ORDER: 1 }
+            }]
         }]
     })
 
-    if (ueventActive.length+ueventExpired.length ===0 ) {
+    if (ueventActive.length + ueventExpired.length === 0) {
         throw new Error("User has not attended any Events")
     }
     return {
@@ -911,7 +953,8 @@ export async function findUEventAttendees(current_user: string, event: string) {
             include: [{
                 model: Models.IMAGES_MOD, as: 'USER_IMAGES',
                 attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-                where: { IMAGE_ORDER: 1 }}]
+                where: { IMAGE_ORDER: 1 }
+            }]
         }]
     })
     if (!attendees) {
@@ -936,7 +979,8 @@ export async function findUEventRequestsAdmin(admin: string, event: string) {
             include: [{
                 model: Models.IMAGES_MOD, as: 'USER_IMAGES',
                 attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-                where: { IMAGE_ORDER: 1 }}]
+                where: { IMAGE_ORDER: 1 }
+            }]
         }]
     })
 
@@ -952,11 +996,12 @@ export async function findUEventRequestsAdmin(admin: string, event: string) {
             include: [{
                 model: Models.IMAGES_MOD, as: 'USER_IMAGES',
                 attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-                where: { IMAGE_ORDER: 1 }}]
+                where: { IMAGE_ORDER: 1 }
+            }]
         }]
     })
 
-    if (ueventAccepted.length+ueventRequested.length ===0 ) {
+    if (ueventAccepted.length + ueventRequested.length === 0) {
         throw new Error("Event has not requests yet")
     }
     return {
@@ -999,14 +1044,15 @@ export const checkMyChats = async (current_user: string) => {
         const subrooms = await Models.ROOMS_MOD.findAll({
             where: { ROOM_USER: current_user },
             attributes: ["ROOM_ID"],
-            group: ["ROOM_ID"]})
-        
+            group: ["ROOM_ID"]
+        })
+
         const roomIds = subrooms.map(room => room.getDataValue("ROOM_ID"));
 
         const rooms = await Models.ROOMS_MOD.findAll({
-            where: { 
-                ROOM_ID: { [Op.in]: roomIds},
-                ROOM_USER: { [Op.ne]: current_user}
+            where: {
+                ROOM_ID: { [Op.in]: roomIds },
+                ROOM_USER: { [Op.ne]: current_user }
             },
             attributes: ["ROOM_ID", "ROOM_EVENT"],
             group: ["ROOM_ID"],
@@ -1041,126 +1087,177 @@ export const checkMyChats = async (current_user: string) => {
             ],
         })
 
-    if (rooms.length === 0) {
-        throw new Error("User has no chats");
-    }
-
-    let user_rooms: { USER_FIRSTNAME: any; ROOM_ID: any; USER_IMAGES: string; }[]= []
-    let event_rooms: { EVENT_TITLE: any; ROOM_ID: any; EVENT_IMAGES: string; }[]= []
-
-    rooms.forEach(room => {
-        if (room.getDataValue("ROOM_EVENT") === null) {
-            user_rooms.push(
-                {
-                    ROOM_ID: room.getDataValue("ROOM_ID"),
-                    USER_FIRSTNAME: room.getDataValue("USER_MOD").getDataValue("USER_FIRSTNAME"),
-                    USER_IMAGES: ""
-                }
-            )
-        } else {
-            event_rooms.push(
-                {
-                    ROOM_ID: room.getDataValue("ROOM_ID"),
-                    EVENT_TITLE: room.getDataValue("EVENT_ROOM").getDataValue("EVENT_TITLE"),
-                    EVENT_IMAGES: ""
-                }
-            )
+        if (rooms.length === 0) {
+            throw new Error("User has no chats");
         }
-    })
 
-    return {
-        users: user_rooms,
-        events: event_rooms,
-    };
-    } catch (error:any) {
+        let user_rooms: { USER_FIRSTNAME: any; ROOM_ID: any; USER_IMAGES: string; }[] = []
+        let event_rooms: { EVENT_TITLE: any; ROOM_ID: any; EVENT_IMAGES: string; }[] = []
+
+        rooms.forEach(room => {
+            if (room.getDataValue("ROOM_EVENT") === null) {
+                user_rooms.push(
+                    {
+                        ROOM_ID: room.getDataValue("ROOM_ID"),
+                        USER_FIRSTNAME: room.getDataValue("USER_MOD").getDataValue("USER_FIRSTNAME"),
+                        USER_IMAGES: ""
+                    }
+                )
+            } else {
+                event_rooms.push(
+                    {
+                        ROOM_ID: room.getDataValue("ROOM_ID"),
+                        EVENT_TITLE: room.getDataValue("EVENT_ROOM").getDataValue("EVENT_TITLE"),
+                        EVENT_IMAGES: ""
+                    }
+                )
+            }
+        })
+
+        return {
+            users: user_rooms,
+            events: event_rooms,
+        };
+    } catch (error: any) {
         console.log(error)
         throw new Error(error)
     }
 };
 export const sendMessage = async (sender: string, room: string, message: string) => {
     const newMessage = await Models.CHATS_MOD.create({
-                    CHAT_ID: uuidv4(),
-                    CHAT_SENDER: sender,
-                    CHAT_ROOM: room,
-                    CHAT_MESSAGE: message
-                });
+        CHAT_ID: uuidv4(),
+        CHAT_SENDER: sender,
+        CHAT_ROOM: room,
+        CHAT_MESSAGE: message
+    });
     return newMessage
 };
 export const getRoomMessages = async (current_user: string, room: string, page: number) => {
-    await UserinRoom(current_user, room);
+    await isUserinRoom(current_user, room);
 
-    const max_pages= await Models.CHATS_MOD.count({
+    const max_pages = await Models.CHATS_MOD.count({
         where: { CHAT_ROOM: room },
     })
 
-    if (page*20 >= max_pages/20 +20) {
+    if (page * 20 >= max_pages / 20 + 20) {
         throw new Error("This room has no more messages")
     }
-  
+
     const messages = await Models.CHATS_MOD.findAll({
-      where: { CHAT_ROOM: room },
-      attributes: ["CHAT_ID", "CHAT_SENDER", "CHAT_MESSAGE", "CHAT_TIMESTAMP"],
-      include: [{
-        model: Models.READ_STATUS_MOD,
-        as: "READ_STATUS",
-        required: false,
-        where: { RS_USER: { [Op.ne]: current_user } },
-        attributes: ["RS_USER", "RS_TIMESTAMP"],
-      }],
-      order: [["CHAT_TIMESTAMP", "ASC"]],
-      limit: 20,
-      offset: (page - 1) * 20
+        where: { CHAT_ROOM: room },
+        attributes: ["CHAT_ID", "CHAT_SENDER", "CHAT_MESSAGE", "CHAT_TIMESTAMP"],
+        include: [{
+            model: Models.READ_STATUS_MOD,
+            as: "READ_STATUS",
+            required: false,
+            where: { RS_USER: { [Op.ne]: current_user } },
+            attributes: ["RS_USER", "RS_TIMESTAMP"],
+        }],
+        order: [["CHAT_TIMESTAMP", "ASC"]],
+        limit: 20,
+        offset: (page - 1) * 20
     });
 
     if (messages.length === 0) {
         throw new Error("No messages found in this room");
     }
-  
+
     const formattedMessages = messages.map((msg) => {
         const obj = msg.toJSON();
         if (obj.CHAT_SENDER !== current_user) {
-          delete obj.READ_STATUS;
+            delete obj.READ_STATUS;
         }
         return obj;
-      });
+    });
     updateReadStatus(current_user, room)
-      return formattedMessages;
+    return formattedMessages;
 };
 export const updateReadStatus = async (current_user: string, room: string) => {
     const messages = await Models.CHATS_MOD.findAll({
-      where: {
-        CHAT_ROOM: room,
-        CHAT_SENDER: { [Op.ne]: current_user }
-      },
-      attributes: ["CHAT_ID"],
-      include: [{
-        model: Models.READ_STATUS_MOD,
-        as: "READ_STATUS",
-        required: false,
-        where: { RS_USER: current_user },
-        attributes: ["RS_CHAT"]
-      }]
+        where: {
+            CHAT_ROOM: room,
+            CHAT_SENDER: { [Op.ne]: current_user }
+        },
+        attributes: ["CHAT_ID"],
+        include: [{
+            model: Models.READ_STATUS_MOD,
+            as: "READ_STATUS",
+            required: false,
+            where: { RS_USER: current_user },
+            attributes: ["RS_CHAT"]
+        }]
     });
-  
+
     const messagesToMarkRead = messages
-      .filter(msg => {
-        const readRecords = msg.get("READ_STATUS");
-        return !readRecords || (Array.isArray(readRecords) && readRecords.length === 0);
-      })
-      .map(msg => ({
-        RS_CHAT: msg.get("CHAT_ID"),
-        RS_USER: current_user,
-        RS_TIMESTAMP: new Date(),
-      }));
-  
+        .filter(msg => {
+            const readRecords = msg.get("READ_STATUS");
+            return !readRecords || (Array.isArray(readRecords) && readRecords.length === 0);
+        })
+        .map(msg => ({
+            RS_CHAT: msg.get("CHAT_ID"),
+            RS_USER: current_user,
+            RS_TIMESTAMP: new Date(),
+        }));
+
     if (messagesToMarkRead.length === 0) return;
     await Models.READ_STATUS_MOD.bulkCreate(messagesToMarkRead, { ignoreDuplicates: true });
-  
+
     return messagesToMarkRead;
 };
 
 //Rooms
-let UserinRoom = async function (user_id: string, room_id: string): Promise<boolean> {
+export async function createRoom(users: string[], event?: string) {
+    const room_id = uuidv4()
+    users.forEach((user) => {
+        if (event) {
+            Models.ROOMS_MOD.create({
+                ROOM_ID: room_id,
+                ROOM_USER: user,
+                ROOM_EVENT: event
+            })
+        } else {
+            Models.ROOMS_MOD.create({
+                ROOM_ID: room_id,
+                ROOM_USER: user,
+            })
+        }
+    })
+    return room_id
+}
+export async function checkRoomAndMatches(current_user: string) {
+    let ignoredUsers: string[]= [current_user]
+    try {
+        const rooms= await Models.ROOMS_MOD.findAll({
+                where: {
+                    ROOM_USER: current_user,
+                    ROOM_EVENT: null
+                },
+                attributes: ["ROOM_ID"]
+            })
+        for (let i= 0; i < rooms.length; i++) {
+            const user= await allUsersinRoomExcept(rooms[i].getDataValue("ROOM_ID"), current_user)
+            ignoredUsers.push(user[0])
+        }
+    } catch(e: any) {
+        console.log(e)
+    }
+    try {
+        const users = await Models.MATCHES_MOD.findAll(
+            {
+                where: {
+                    MATCHING_USER: current_user
+                },
+                attributes: ["MATCHED_USER"]
+            })
+            for (let i= 0; i < users.length; i++) {
+                ignoredUsers.push(users[i].getDataValue("MATCHED_USER"))
+            }
+    } catch(e: any) {
+        console.log(e)
+    }
+    return ignoredUsers
+}
+let isUserinRoom = async function (user_id: string, room_id: string): Promise<boolean> {
     console.log(user_id, room_id)
 
     let room = await Models.ROOMS_MOD.findAll({
@@ -1174,18 +1271,49 @@ let UserinRoom = async function (user_id: string, room_id: string): Promise<bool
     }
     return true
 }
+let allUsersinRoomExcept = async function (room_id: string, current_user: string): Promise<string[]> {
+    let users: string[]= [] 
+
+    let room = await Models.ROOMS_MOD.findAll({
+        where: {
+            ROOM_ID: room_id,
+            ROOM_USER: {[Op.ne]: current_user}
+        }
+    })
+
+    for (let i= 0; i< room.length; i++) {
+        users.push(room[i].getDataValue("ROOM_USER"))
+    }
+    return users
+}
+let findRoom = async function (event: string) {
+    let room = await Models.ROOMS_MOD.findOne({
+        where: {
+            ROOM_EVENT: event
+        }
+    })
+    if (room) {
+        return room
+    }
+    throw new Error("Event room not found")
+}
 
 //Matches
 export async function createMatch(current_user: string, other_user: string, supermatch: boolean) {
     if (await matchAlreadyExists(current_user, other_user)) {
-        console.log("Flag 1")
         return
     } else if (await isAlreadyMatch(current_user, other_user)) {
-        console.log("HEERE")
-        //TO-DO
+        Models.MATCHES_MOD.destroy({
+            where: {
+                MATCING_USER: other_user,
+            MATCHED_USER: current_user}
+        })
+        const room_id = await createRoom([current_user, other_user])
+        return {
+            ROOM_ID: room_id
+        }
     }
     else {
-        console.log(current_user, other_user)
         await Models.MATCHES_MOD.create({
             MATCH_ID: uuidv4(),
             MATCHING_USER: current_user,
@@ -1193,55 +1321,52 @@ export async function createMatch(current_user: string, other_user: string, supe
             SUPERMATCH: supermatch
         })
         ELOUpdate(current_user, other_user, supermatch)
-        return "Match created"
     }
+    return null
 }
+let isAlreadyMatch = async function (current: string, other: string): Promise<boolean> {
 
-let isAlreadyMatch= async function (current:string, other: string): Promise<boolean> {
-
-    let match= await Models.MATCHES_MOD.findOne({
+    let match = await Models.MATCHES_MOD.findOne({
         where: {
             MATCHING_USER: other,
             MATCHED_USER: current
         }
     })
 
-    return match? true : false 
+    return match ? true : false
 }
+let matchAlreadyExists = async function (current: string, other: string): Promise<boolean> {
 
-let matchAlreadyExists= async function (current:string, other: string): Promise<boolean> {
-
-    let match= await Models.MATCHES_MOD.findOne({
+    let match = await Models.MATCHES_MOD.findOne({
         where: {
             MATCHING_USER: current,
             MATCHED_USER: other
         }
     })
 
-    return match? true : false 
+    return match ? true : false
 }
-
 let ELOUpdate = async (current_user: string, other_user: string, supermatch: boolean) => {
-    let users= [current_user, other_user]
-    const current_rating= await Models.USERS_MOD.findOne({
+    let users = [current_user, other_user]
+    const current_rating = await Models.USERS_MOD.findOne({
         where: {
             USER_ID: current_user
         },
         attributes: ["USER_RATING"]
     })
-    const other_rating= await Models.USERS_MOD.findOne({
+    const other_rating = await Models.USERS_MOD.findOne({
         where: {
             USER_ID: other_user
         },
         attributes: ["USER_RATING"]
     })
 
-    const ratings: number[]= ELOcurrrentONother(current_rating?.getDataValue("USER_RATING"), other_rating?.getDataValue("USER_RATING"), supermatch)
+    const ratings: number[] = ELOcurrrentONother(current_rating?.getDataValue("USER_RATING"), other_rating?.getDataValue("USER_RATING"), supermatch)
 
     ratings.forEach(async (rating) => {
-        let ind= ratings.indexOf(rating)
-        await Models.USERS_MOD.update({ 
-            USER_RATING: ratings[ind] 
+        let ind = ratings.indexOf(rating)
+        await Models.USERS_MOD.update({
+            USER_RATING: ratings[ind]
         },
             {
                 where: {
@@ -1251,12 +1376,12 @@ let ELOUpdate = async (current_user: string, other_user: string, supermatch: boo
     })
 };
 let ELOcurrrentONother = function (current_user: number, other_user: number, supermatch: boolean): number[] {
-    let K= 32 //Change standard
+    let K = 32 //Change standard
     if (supermatch) {
-        K= 16
+        K = 16
     }
-    const Pcurrent= current_user - K * (1- 1/(1+Math.pow(10, (other_user-current_user)/400)))
-    const Pother= other_user + K * (1- 1/(1+Math.pow(10, (current_user-other_user)/400)))
-    
+    const Pcurrent = current_user - K * (1 - 1 / (1 + Math.pow(10, (other_user - current_user) / 400)))
+    const Pother = other_user + K * (1 - 1 / (1 + Math.pow(10, (current_user - other_user) / 400)))
+
     return [Pcurrent, Pother]
 }

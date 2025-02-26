@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import {Op, Sequelize} from "sequelize";
+import { Request, Response, RequestHandler } from "express";
+import { Op, Sequelize } from "sequelize";
 import * as Models from "./Models";
 import * as Funcs from "./Functions";
 import * as Schedule from "./scheduleFunctions";
@@ -14,10 +14,10 @@ dotenv.config();
 // Receives object with
 // reportedUserId : id (string)
 // reason: string
-export const postReport = async(req: Request, res: Response) => {
-    const {reportedUserId, reason} = req.body;
+export const postReport = async (req: Request, res: Response) => {
+    const { reportedUserId, reason } = req.body;
     console.log(reason);
-    
+
     try {
         const currUser = await Funcs.isLoggedIn(req, res);
         const reportId = await Funcs.createReport(currUser.USER_ID, reportedUserId, reason);
@@ -45,13 +45,13 @@ export const postReport = async(req: Request, res: Response) => {
 // Interests
 // Receives user id or string "SELF"
 // Returns list of Interests
-export const getUserInterests = async(req: Request, res: Response) => {
+export const getUserInterests = async (req: Request, res: Response) => {
     let { id } = req.params;
 
     try {
         const currUser = await Funcs.isLoggedIn(req, res);
 
-        if(id === "SELF") {
+        if (id === "SELF") {
             id = currUser.USER_ID;
         }
 
@@ -74,12 +74,12 @@ export const getUserInterests = async(req: Request, res: Response) => {
             }]
         })
     }
-    
+
 
 }
 
 // Retreives all possible Interests available
-export const getInterests = async(req: Request, res: Response) => {
+export const getInterests = async (req: Request, res: Response) => {
     try {
         const interestsList = await Models.INTERESTS_MOD.findAll();
 
@@ -104,11 +104,11 @@ export const getInterests = async(req: Request, res: Response) => {
 
 // Receives list of interests Ids
 // Returns ids of interest-user table
-export const putUserInterests = async(req: Request, res: Response) => {
+export const putUserInterests = async (req: Request, res: Response) => {
     const interestsIds = req.body;
     console.log(interestsIds);
 
-    if(interestsIds.length > 8) {
+    if (interestsIds.length > 8) {
         res.status(401).json({
             errors: [{
                 message: "Too many interests. Max 8",
@@ -121,9 +121,9 @@ export const putUserInterests = async(req: Request, res: Response) => {
     else {
         try {
             const currUser = await Funcs.isLoggedIn(req, res);
-            const userInterestsIds = await Funcs.updateInterests(currUser.USER_ID, 
-                                                                 interestsIds);
-            
+            const userInterestsIds = await Funcs.updateInterests(currUser.USER_ID,
+                interestsIds);
+
             //console.log(userInterestsIds);
             res.status(200).send({
                 data: {
@@ -150,9 +150,9 @@ export const putUserInterests = async(req: Request, res: Response) => {
 export const getUserSchedule = async (req: Request, res: Response) => {
     const { id } = req.params;
 
-    const modelSchedule = await Models.SCHEDULES_MOD.findOne({where: {USER_ID: id}});
+    const modelSchedule = await Models.SCHEDULES_MOD.findOne({ where: { USER_ID: id } });
 
-    if(modelSchedule) {
+    if (modelSchedule) {
         const codedSchedule = Schedule.buildCodedSchedule(modelSchedule.toJSON());
         const decodedSchedule = Schedule.decodeSchedule(codedSchedule);
 
@@ -162,7 +162,7 @@ export const getUserSchedule = async (req: Request, res: Response) => {
                 message: "Horario encontrado",
                 data: decodedSchedule
             })
-    } 
+    }
     else {
         res.status(404).json({
             errors: [{
@@ -187,10 +187,10 @@ export const putUserSchedule = async (req: Request, res: Response) => {
     try {
         const currUser = await Funcs.isLoggedIn(req, res);
         const [updatedRows] = await Models.SCHEDULES_MOD.update(newSchedule, {
-            where: {USER_ID: currUser.USER_ID}
+            where: { USER_ID: currUser.USER_ID }
         });
-        
-        const updated = await Models.SCHEDULES_MOD.findOne({where: {USER_ID: currUser.USER_ID}});
+
+        const updated = await Models.SCHEDULES_MOD.findOne({ where: { USER_ID: currUser.USER_ID } });
 
         res.status(200).send({
             data: {
@@ -222,17 +222,17 @@ export const getListaUsuarios = async (req: Request, res: Response) => {
     const currUser = await Funcs.isLoggedIn(req, res);
 
     let gender = req.query.gender as string || ["M", "F", "NB"];
-    if(typeof gender === "string")
-       gender = gender.split(","); 
+    if (typeof gender === "string")
+        gender = gender.split(",");
 
     const iageL = req.query.ageL;
     let ageL = 0;
-    if(iageL != null)
+    if (iageL != null)
         ageL = Number(iageL);
 
     const iageU = req.query.ageU;
     let ageU = 100;
-    if(iageU != null)
+    if (iageU != null)
         ageU = Number(iageU);
 
 
@@ -240,15 +240,16 @@ export const getListaUsuarios = async (req: Request, res: Response) => {
     let users = null;
 
     let colleges = req.query.colleges as string || currUser.USER_COLLEGE_ID;
-    colleges = colleges.split(","); 
+    colleges = colleges.split(",");
 
-    if(interests === "any") {
+    if (interests === "any") {
         users = await Models.USERS_MOD.findAll({
             attributes: { exclude: ["USER_EMAIL", "USER_PASSWORD", "USER_LAST_LOG", "USER_FILTER_AGE", "USER_SUPERMATCHES", "USER_FILTER_GENDER"] },
             where: {
                 [Op.and]: [
-                    {USER_GENDER: gender},
-                    {USER_COLLEGE_ID: colleges},
+                    { USER_GENDER: gender },
+                    { USER_COLLEGE_ID: colleges },
+                    { USER_ID: { [Op.notIn]: await Funcs.checkRoomAndMatches(currUser.USER_ID) } },
                     Sequelize.literal(`TIMESTAMPDIFF(YEAR, USER_BIRTHDATE, CURDATE()) BETWEEN ${Number(ageL)} AND ${Number(ageU)}`),
                 ]
             },
@@ -258,7 +259,9 @@ export const getListaUsuarios = async (req: Request, res: Response) => {
             },
             {
                 model: Models.SCHEDULES_MOD, as: "USER_SCHEDULE",
-                attributes: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
+                attributes: {
+                    exclude: ["SCHEDULE_ID", "USER_ID"]
+                }
             }
             ],
             order: [[{
@@ -273,9 +276,9 @@ export const getListaUsuarios = async (req: Request, res: Response) => {
         users = await Funcs.findUsersByInterests(interestsArray, ageL, ageU, gender, colleges);
     }
 
-    if(users) {
+    if (users) {
         const otherUsers = users.map(user => user.toJSON());
-        const userScheduleModel = await Models.SCHEDULES_MOD.findOne({where: {USER_ID: currUser.USER_ID}});
+        const userScheduleModel = await Models.SCHEDULES_MOD.findOne({ where: { USER_ID: currUser.USER_ID } });
         const currUserSchedule = Schedule.buildCodedSchedule(userScheduleModel!.toJSON());
         console.log(currUserSchedule);
 
@@ -480,7 +483,7 @@ export const postRegister = async (req: Request, res: Response) => {
             errors: [{
                 message: error.message,
                 extensions: {
-                   code: "Controller issue"
+                    code: "Controller issue"
                 }
             }]
         })
@@ -625,9 +628,9 @@ export const postColleges = async (req: Request, res: Response) => {
 export const postImage = async (req: Request, res: Response) => {
     try {
         let current_user = await Funcs.isLoggedIn(req, res)
-
-        var upload = Storage.multer.fields([{ name: 'image' }, { name: 'relation' }, { name: "type" }])
+        var upload = Storage.multer.fields([{ name: 'relation' }, { name: "type" }, { name: 'images' }])
         upload(req, res, async function (error) {
+            let relation = req.body.relation ?? current_user.USER_ID
             if (error) {
                 res.status(401).send({
                     errors: [{
@@ -641,49 +644,181 @@ export const postImage = async (req: Request, res: Response) => {
                 try {
                     if (req.files) {
                         const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-                        const img = files['image'][0];
-                        if (!img.mimetype.startsWith('image/')) {
+                        const imgs = files['images'];
+                        const current_images: number = await Funcs.findAllImages(relation)
+                        let data: { IMAGE_LINK: string; IMAGE_ORDER: number; }[] = []
+                        if (imgs.length + current_images - 1 > 8) {
                             return res.status(400).send({
                                 errors: [{
-                                    message: 'Only image files are allowed',
+                                    message: `Cantidad máxima de imagenes es 8. Las imagenes no sen enviaron`,
                                     extensions: {
-                                        code: 'InvalidFileType'
+                                        code: 'MaxNumbImgs'
                                     }
                                 }]
                             })
                         }
-                        let img_id = uuidv4()
-                        let relation = req.body.relation ?? current_user.USER_ID
-                        console.log(relation)
-                        let data = await Funcs.addImage2DB(img_id, relation, req.body.type)
-                        const blob = Storage.bucket.file(`${req.body.type + "/" + img_id}_post.jpg`);
-                        const blobStream = blob.createWriteStream({
-                            resumable: false,
-                            gzip: true
-                        });
-                        blobStream.end(img.buffer);
-                        try {
-                            res.status(200).send({
-                                message: "Image added to the DB",
-                                data: data
-                            })
-                        } catch (error) {
-                            res.status(401).send({
-                                errors: [{
-                                    message: error,
-                                    extensions: {
-                                        code: "Could not connect to GCP"
-                                    }
-                                }]
-                            })
+                        for (let ind = 0; ind < imgs.length; ind++) {
+                            let img = imgs[ind];
+
+                            if (!img.mimetype.startsWith('image/')) {
+                                return res.status(400).send({
+                                    errors: [{
+                                        message: `Solo archivos de tipo imagen, el archivo ${ind} no es válido. Las imágenes anteriores se enviaron.`,
+                                        extensions: {
+                                            code: 'InvalidFileType'
+                                        }
+                                    }]
+                                });
+                            }
+                            let img_id = uuidv4();
+                            const blob = Storage.bucket.file(`${req.body.type + "/" + img_id}_post.jpg`);
+                            const blobStream = blob.createWriteStream({
+                                resumable: false,
+                                gzip: true
+                            });
+                            blobStream.end(img.buffer);
+                            data.push(await Funcs.addImage2DB(img_id, relation, req.body.type, current_images + ind));
                         }
+                        return res.status(200).send({
+                            message: "Images added to the DB",
+                            data: data
+                        })
+
                     } else throw new Error("Issue with files");
                 } catch (error: any) {
+                    console.log("We are here 1")
                     res.status(401).send({
                         errors: [{
                             message: error.message,
                             extensions: {
                                 code: "Conts.postImage"
+                            }
+                        }]
+                    });
+                }
+            }
+        })
+    } catch (error: any) {
+        res.status(401).send({
+            errors: [{
+                message: error.message,
+                extensions: {
+                    code: "Controller issue"
+                }
+            }]
+        });
+    }
+}
+export const putImage = async (req: Request, res: Response) => {
+    const { image_ids, image_orders } = req.body;
+
+    try {
+        let current_user = await Funcs.isLoggedIn(req, res)
+        if (image_ids.length !== image_orders.length) {
+            throw new Error("Image ids and image orders must have the same length");
+        }
+        for (let i = 0; i < image_ids.length; i++) {
+            Funcs.modifyImgOrder(current_user.USER_ID, image_ids[i], image_orders[i])
+        }
+        res.status(200).send({
+            message: "Imagenes actualizadas"
+        })
+    } catch (error) {
+        res.status(401).send({
+            message: "Error al actualizar Imagenes: " + error,
+            data: {
+                error: "Funcs.modImgOr"
+            }
+        })
+    }
+}
+export const deleteImage = async (req: Request, res: Response) => {
+    try {
+        let current_user = await Funcs.isLoggedIn(req, res)
+        var upload = Storage.multer.fields([{ name: 'curr_images' }, { name: "new_images" }])
+        upload(req, res, async function (error) {
+            if (error) {
+                res.status(401).send({
+                    errors: [{
+                        message: error,
+                        extensions: {
+                            code: "Could not delete images"
+                        }
+                    }]
+                })
+            } else {
+                try {
+                    let old_imgs = req.body.curr_images
+                    old_imgs= old_imgs.filter((n: any) => n != "")
+                    const count_images: number = await Funcs.findAllImages(current_user.USER_ID)
+                    
+                    let data: any = []
+                    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+                    let imgs: any = files['new_images'];                 
+                    if (imgs === undefined) {
+                        imgs = []
+                        console.log("No new images")
+                    }
+                    console.log(old_imgs)
+                    if ((count_images-old_imgs.length-1) + imgs.length === 0) {
+                            return res.status(400).send({
+                                errors: [{
+                                    message: `Tienes que tener una imagen por lo menos`,
+                                    extensions: {
+                                        code: 'MinNumbImgs'
+                                    }
+                                }]
+                            })
+                        }
+                        for (let ind = 0; ind < old_imgs.length; ind++) {
+                            if (imgs[ind]) {
+                                let img = imgs[ind];
+                                if (!img.mimetype.startsWith('image/')) {
+                                    return res.status(400).send({
+                                        errors: [{
+                                            message: `Solo archivos de tipo imagen, el archivo ${ind} no es válido. Las imágenes anteriores se enviaron.`,
+                                            extensions: {
+                                                code: 'InvalidFileType'
+                                            }
+                                        }]
+                                    });
+                                }
+                                let img_id = uuidv4();
+                                const blob = Storage.bucket.file(`USER/${img_id}_post.jpg`);
+                                const blobStream = blob.createWriteStream({
+                                    resumable: false,
+                                    gzip: true
+                                });
+                                blobStream.end(img.buffer);
+                                let path = `https://storage.googleapis.com/classmatch/USER/${img_id}_post.jpg`
+                                await Funcs.deleteImagefromDB(old_imgs[ind], path)
+                                data.push({
+                                    OLD: old_imgs[ind],
+                                    NEW: path
+                                })
+                            } else {
+                                await Funcs.deleteImagefromDB(old_imgs[ind])
+                                data.push({
+                                    OLD: old_imgs[ind],
+                                    NEW: ""
+                                });
+                            }
+                            const oldFile = Storage.bucket.file(old_imgs[ind].split("classmatch/")[1]);
+                            await oldFile.delete().catch((err) =>
+                                console.error(`Error deleting file for IMAGE_ID ${old_imgs[ind]}:`, err)
+                            );
+                            console.log("Deleted: "+ind)
+                        }
+                        return res.status(200).send({
+                            message: "Images deleted from DB",
+                            data: data
+                        })
+                } catch (error: any) {
+                    res.status(401).send({
+                        errors: [{
+                            message: error.message,
+                            extensions: {
+                                code: "Conts.deleteImage"
                             }
                         }]
                     });
@@ -977,6 +1112,35 @@ export const getUEReqsAdmin = async (req: Request, res: Response) => {
             message: "Error al encontrar solicitudes: " + error.message,
             data: {
                 error: "Funcs.fUERAdm"
+            }
+        })
+    }
+}
+
+//Matches
+export const postMatch = async (req: Request, res: Response) => {
+    const { other_user, supermatch} = req.body;
+
+    try {
+        let current_user = await Funcs.isLoggedIn(req, res)
+
+        if (current_user.USER_ID === other_user) {
+            throw new Error("User is the same person")
+        }
+        let data = await Funcs.createMatch(current_user.USER_ID, other_user, supermatch)
+        data ? 
+        res.status(200).send({
+            message: "Hay match entre usuarios",
+            data: data
+        }):
+        res.status(200).send({
+            message: "Match enviado"
+        })
+    } catch (error: any) {
+        res.status(401).send({
+            message: "Error al crear Match: "+error.message,
+            data: {
+                error: "Funcs.crMtc"
             }
         })
     }
