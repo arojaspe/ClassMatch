@@ -10,6 +10,9 @@ export default function Busqueda() {
   const [direction, setDirection] = useState<"left" | "right">("right");
   const [userInterests, setUserInterests] = useState<string[]>();
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+
   useEffect(() => {
     axios
       .get("/us")
@@ -32,7 +35,7 @@ export default function Busqueda() {
   const currentCommonSchedule = usuarios[currentIndex]?.commonSchedule;
   const currentId = currentUser?.USER_ID;
 
-  console.log(currentUser);
+  //console.log("El usuario actual es ", currentUser);
 
   useEffect(() => {
     axios
@@ -76,15 +79,75 @@ export default function Busqueda() {
     }),
   };
 
+  const handleReportButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+
+    axios
+      .post("/r", { reportedUserId: currentId, reason: reportReason })
+      .then(() => {
+        alert("Usuario reportado con éxito");
+        setIsModalOpen(false);
+        setReportReason("");
+      })
+      .catch((error) => {
+        console.error("Error al reportar al usuario:", error);
+      });
+  };
+
   return (
     <div className="h-screen pt-[9%] bg-mainClassMatch flex justify-center">
       <div className="flex flex-col h-[85%] w-[90%] items-center bg-backgroundClassMatch rounded-lg">
-        <aside className="w-full bg-accentClassMatch rounded-t-lg justify-self-start h-[10%] flex items-center px-4">
+        <aside className="w-full bg-accentClassMatch rounded-t-lg justify-between h-[10%] flex items-center px-4">
           <h1 className="text-black text-2xl font-KhandMedium">
             ¡Veamos qué personas puedes encontrar en ClassMatch!
           </h1>
+          <button
+            className="bg-buttonClassMatch place-self-center w-[12rem] hover:bg-headClassMatch text-white font-KhandRegular text-base font-semibold px-6 py-2 rounded-md"
+            onClick={() => setIsModalOpen(true)}
+          >
+            Reportar
+          </button>
+          {isModalOpen && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="bg-white p-6 rounded-lg w-[30%]">
+                <h2 className="text-xl font-KhandSemiBold mb-4">
+                  Reportar al Usuario {currentUser.USER_FIRSTNAME}{" "}
+                  {currentUser.USER_LASTNAME}
+                </h2>
+                <textarea
+                  className="w-full p-2 border rounded-md font-KhandMedium"
+                  rows={4}
+                  placeholder="Escribe la razón del reporte..."
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                />
+                <div className="flex justify-end mt-4">
+                  <button
+                    className="bg-gray-300 hover:bg-gray-400 text-black font-semibold px-4 py-2 rounded-md mr-2"
+                    onClick={() => {
+                      setIsModalOpen(false);
+                      setReportReason("");
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className="bg-buttonClassMatch hover:bg-headClassMatch text-white font-semibold px-4 py-2 rounded-md"
+                    onClick={handleReportButtonClick}
+                  >
+                    Enviar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </aside>
-        <div className="h-[90%] w-full flex justify-between items-center ">
+        <div
+          id="slider de usuarios"
+          className="h-[90%] w-full flex justify-between items-center "
+        >
           <button
             className="bg-mainClassMatch bg-opacity-20 w-[5%] text-white h-[70%] rounded-r-lg hover:bg-opacity-30"
             onClick={handlePrevious}

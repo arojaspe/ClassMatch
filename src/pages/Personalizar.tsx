@@ -276,14 +276,14 @@ export default function PersonalizarPerfil() {
           <form className="mb-4 mt-5 w-full flex flex-col">
             {/* Sección para subir una foto */}
             <h2 className="font-KhandSemiBold text-4xl text-black font-bold pb-3">
-              Selecciona tu foto de perfil
+              Agrega una foto a tu perfil
             </h2>
             <div className="mb-6">
               <label
                 htmlFor="photo"
                 className="block text-xl font-KhandRegular mb-2"
               >
-                Subir foto de perfil
+                Sube una foto aquí
               </label>
               <div
                 className={`flex items-center justify-center w-full ${

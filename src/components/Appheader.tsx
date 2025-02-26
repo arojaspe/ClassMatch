@@ -9,6 +9,8 @@ export default function Appheader() {
   const [menuVisible, setMenuVisible] = useState(false); // Estado para mostrar/ocultar el menú
   const menuRef = useRef<HTMLDivElement | null>(null); // Referencia al menú desplegable
   const buttonRef = useRef<HTMLDivElement | null>(null); // Referencia al área que activa el menú (nombre + foto)
+  const [idUsuario, setIdusuario] = useState("");
+  const [userImage, setUserImage] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,6 +19,7 @@ export default function Appheader() {
         const response = await axios.get("/auth", { withCredentials: true });
         if (response.status === 200) {
           setIsAuthenticated(true);
+          setIdusuario(response.data.data.USER_ID);
         }
         console.log("El usuario está autenticado", response.status);
       } catch (error) {
@@ -47,6 +50,33 @@ export default function Appheader() {
       document.removeEventListener("click", handleClickOutside);
     };
   });
+
+  useEffect(() => {
+    axios
+      .get("/u/" + idUsuario)
+      .then((response) => {
+        console.log(
+          "Las imágenes del usuario son",
+          response.data.data.USER_IMAGES
+        );
+        setUserImage(response.data.data.USER_IMAGES[0].IMAGE_LINK);
+      })
+      .catch((error) => {
+        console.error("Error fetching imagenes del usuario logueado", error);
+      });
+  }, [idUsuario]);
+
+  useEffect(() => {
+    axios
+      .get("/plan")
+      .then((response) => {
+        console.log("El plan del usuario es", response.data.data.USER_IMAGES);
+        setUserImage(response.data.data.USER_IMAGES[0].IMAGE_LINK);
+      })
+      .catch((error) => {
+        console.error("Error fetching imagenes del usuario logueado", error);
+      });
+  }, [idUsuario]);
 
   const toggleMenu = (event: React.MouseEvent) => {
     event.preventDefault(); // Evita que se haga una navegación
@@ -129,8 +159,8 @@ export default function Appheader() {
                 </p>
                 <div className="flex items-center space-x-2">
                   <img
-                    className="img-fluid h-16 rounded-full"
-                    src={`/img/Profile.png`}
+                    className="h-16 w-16 object-cover rounded-full"
+                    src={userImage}
                     alt="imagen perfil"
                   />
                 </div>
