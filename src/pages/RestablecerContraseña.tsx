@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import {SetStateAction, useState } from "react";
+import { SetStateAction, useState } from "react";
 
 export default function RecuperarContraseña() {
   const [email, setEmail] = useState("");
@@ -7,8 +7,8 @@ export default function RecuperarContraseña() {
 
   // Función para manejar el cambio en el campo de correo electrónico
   const handleEmailChange = (event: {
-      target: { value: SetStateAction<string> };
-    }) => {
+    target: { value: SetStateAction<string> };
+  }) => {
     setEmail(event.target.value);
   };
 
@@ -36,7 +36,10 @@ export default function RecuperarContraseña() {
               Ingresa tu correo electrónico, te enviaremos un código de
               recuperación para reestablecer la contraseña.
             </p>
-            <form className="mt-4 w-full flex flex-col" onSubmit={handleSendCode}>
+            <form
+              className="mt-4 w-full flex flex-col"
+              onSubmit={handleSendCode}
+            >
               <div className="mb-6">
                 <input
                   className="w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline"
@@ -63,6 +66,7 @@ export default function RecuperarContraseña() {
                 >
                   Enviar código
                 </button>
+                <p>{message}</p>
               </div>
             </form>
           </div>

@@ -2,12 +2,15 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function RecuperarContraseñaCodigo() {
-  const [email, setEmail] = useState(""); // Este es solo un ejemplo, puedes cambiarlo según tu lógica
+  const email = ""; // Este es solo un ejemplo, puedes cambiarlo según tu lógica
   const [message, setMessage] = useState("");
   const [code, setCode] = useState(["", "", "", ""]); // Array para almacenar el código
 
   // Función para manejar el cambio en las casillas del código
-  const handleCodeChange = (event: React.ChangeEvent<HTMLInputElement>, id: string) => {
+  const handleCodeChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    id: string
+  ) => {
     const value = event.target.value;
 
     // Validamos que solo se pueda escribir un solo dígito en cada input
@@ -27,7 +30,7 @@ export default function RecuperarContraseñaCodigo() {
   // Función para manejar el envío del código
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    const fullCode = code.join('');
+    const fullCode = code.join("");
     if (fullCode === "1234") {
       setMessage("Código correcto, redirigiendo...");
       // Aquí podrías hacer una acción adicional como redirigir o mostrar un mensaje de éxito
@@ -37,7 +40,10 @@ export default function RecuperarContraseñaCodigo() {
   };
 
   // Función para manejar el cambio de casilla con las teclas de dirección
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>, id: string) => {
+  const handleKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>,
+    id: string
+  ) => {
     const key = event.key;
 
     if (key === "ArrowRight" && parseInt(id) < 3) {
@@ -113,7 +119,13 @@ export default function RecuperarContraseñaCodigo() {
             </form>
 
             {message && (
-              <p className={`text-center mt-4 font-KhandRegular text-lg ${message.includes("incorrecto") ? "text-red-600" : "text-green-600"}`}>
+              <p
+                className={`text-center mt-4 font-KhandRegular text-lg ${
+                  message.includes("incorrecto")
+                    ? "text-red-600"
+                    : "text-green-600"
+                }`}
+              >
                 {message}
               </p>
             )}
