@@ -33,3 +33,13 @@ export interface Interest {
   INTEREST_ID: string;
   INTEREST_NAME: string;
 }
+export type ScheduleType = {
+  [key in
+    | "MONDAY"
+    | "TUESDAY"
+    | "WEDNESDAY"
+    | "THURSDAY"
+    | "FRIDAY"
+    | "SATURDAY"
+    | "SUNDAY"]: boolean[];
+};
