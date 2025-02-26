@@ -11,6 +11,7 @@ export default function Appheader() {
   const buttonRef = useRef<HTMLDivElement | null>(null); // Referencia al área que activa el menú (nombre + foto)
   const [idUsuario, setIdusuario] = useState("");
   const [userImage, setUserImage] = useState("");
+  const [plan, setPlan] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -70,11 +71,11 @@ export default function Appheader() {
     axios
       .get("/plan")
       .then((response) => {
-        console.log("El plan del usuario es", response.data.data.USER_IMAGES);
-        setUserImage(response.data.data.USER_IMAGES[0].IMAGE_LINK);
+        console.log("El plan del usuario es", response.data.data);
+        setPlan(response.data.data);
       })
       .catch((error) => {
-        console.error("Error fetching imagenes del usuario logueado", error);
+        console.error("Error fetching el plan del usuario logueado", error);
       });
   }, [idUsuario]);
 
@@ -137,12 +138,14 @@ export default function Appheader() {
                 >
                   Eventos
                 </Link>
-                <Link
-                  to="/premium"
-                  className="px-8 py-2 bg-premiumButtonClassMatch font-KhandMedium text-lg text-white rounded-md hover:bg-gray-100 hover:text-black transition"
-                >
-                  Premium
-                </Link>
+                {plan !== "Premium" && (
+                  <Link
+                    to="/premium"
+                    className="px-8 py-2 bg-gradient-to-r from-premiumButtonClassMatch via-teal-600 to-cyan-600 font-KhandMedium text-lg text-white rounded-md hover:bg-gray-100 hover:text-black transition"
+                  >
+                    Premium
+                  </Link>
+                )}
               </nav>
 
               <div
@@ -150,16 +153,29 @@ export default function Appheader() {
                 ref={buttonRef} // Referencia al contenedor
                 onClick={toggleMenu} // Alterna la visibilidad del menú
               >
-                <p>
-                  Hola, {""}
-                  {
-                    JSON.parse(localStorage.getItem("user") || "{}")
-                      .USER_FIRSTNAME
+                <div
+                  className={`flex items-center space-x-2 p-1 rounded-full ${
+                    plan === "Premium"
+                      ? "bg-gradient-to-r from-premiumButtonClassMatch via-teal-600 to-cyan-600"
+                      : ""
+                  }`}
+                  style={
+                    plan === "Premium"
+                      ? { boxShadow: "0 0 10px 0 rgba(0, 255, 255, 0.5)" }
+                      : {}
                   }
-                </p>
-                <div className="flex items-center space-x-2">
+                >
+                  <p className={plan === "Premium" ? "text-white ml-3" : ""}>
+                    Hola, {""}
+                    {
+                      JSON.parse(localStorage.getItem("user") || "{}")
+                        .USER_FIRSTNAME
+                    }
+                  </p>
                   <img
-                    className="h-16 w-16 object-cover rounded-full"
+                    className={`h-16 w-16 object-cover rounded-full ${
+                      plan === "Premium" ? "" : ""
+                    }`}
                     src={userImage}
                     alt="imagen perfil"
                   />
