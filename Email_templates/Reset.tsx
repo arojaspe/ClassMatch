@@ -17,12 +17,12 @@ import {
     magicLink?: string;
   }
   
-  export const VerifyEmail = ({
+  export const ResetPass = ({
     magicLink,
   }: RaycastMagicLinkEmailProps) => (
     <Html>
       <Head />
-      <Preview>Verifica tu email</Preview>
+      <Preview>Reestablece tu contraseña</Preview>
       <Body style={main}>
         <Container style={container}>
           <Img
@@ -31,10 +31,10 @@ import {
             height={50}
             alt='ClassMatch'
           />
-          <Heading style={heading}>Tu link de ingreso</Heading>
+          <Heading style={heading}>Reestable la contraseña aquí</Heading>
           <Section style={body}>
             <Text style={paragraph}>
-            <Link style={link} href={`http://localhost:5000/api/verify/${magicLink}`}>
+            <Link style={link} href={`https://classmatch.site/api/resetp/${magicLink}`}>
                 {' '}
                 👉 Haz click aquí 👈
               </Link>
@@ -70,8 +70,8 @@ import {
     </Html>
   );
   
-  VerifyEmail.PreviewProps = {
-    magicLink: 'http://localhost:5000/verification/test-token', // Local testing
+  ResetPass.PreviewProps = {
+    magicLink: 'https://classmatch.site/resetp/test-token', // Local testing
   } as RaycastMagicLinkEmailProps;
   
   const main = {

@@ -3,7 +3,8 @@ import * as Models from "./Models";
 import { v4 as uuidv4 } from 'uuid';
 import { sign, verify } from "jsonwebtoken";
 import { resend } from "./Connection";
-import RaycastMagicLinkEmail from "../Email_templates/Verification";
+import {ResetPass} from "../Email_templates/Reset";
+import {VerifyEmail} from "../Email_templates/Verification";
 import { FloatDataType, Model, Op, Sequelize, literal } from 'sequelize';
 import moment from "moment";
 
@@ -304,7 +305,7 @@ let checkAge = function (birthDate: string) {
 
 //Emails
 export async function verifyEmail(email: string) {
-    let confirmaiton_token = sign({
+    let confirmation_token = sign({
         uuid: uuidv4(),
         email: email,
     }, "id_secret", { expiresIn: "30m" });
@@ -313,8 +314,8 @@ export async function verifyEmail(email: string) {
         from: 'team@classmatch.site',
         to: email,
         subject: 'Email de Verificación',
-        react: RaycastMagicLinkEmail({
-            magicLink: confirmaiton_token,
+        react: VerifyEmail({
+            magicLink: confirmation_token,
         })
     })
 }
@@ -359,7 +360,7 @@ export async function checkVerification(token: string) {
     return payload.uuid
 }
 export async function resetPassword(email: string) {
-    let confirmaiton_token = sign({
+    let confirmation_token = sign({
         password: uuidv4().substring(0, 7),
         email: email,
     }, "password_reset", { expiresIn: "10m" });
@@ -368,8 +369,8 @@ export async function resetPassword(email: string) {
         from: 'onboarding@resend.dev',
         to: email,
         subject: 'Restablecer tu contraseña',
-        react: RaycastMagicLinkEmail({
-            magicLink: confirmaiton_token,
+        react: ResetPass({
+            magicLink: confirmation_token,
         })
     })
 }
