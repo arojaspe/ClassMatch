@@ -29,7 +29,7 @@ class Server {
         this.io= new SocketIOServer(this.server, {
             cors: {
                 credentials: true,
-                origin: "https://www.classmatch.site",
+                origin: "https://www.classmatch.site", // Use "*" for local
             },
             path: "/socket.io"
         });
@@ -40,8 +40,8 @@ class Server {
         this.app.use(cors({
                 credentials: true,
                 origin: "https://www.classmatch.site", // For deploy, use "*" for local
-		methods: 'GET,POST,PUT,DELETE,OPTIONS',
-    		allowedHeaders: 'Authorization,Content-Type'
+		        methods: 'GET,POST,PUT,DELETE,OPTIONS',
+    		    allowedHeaders: 'Authorization,Content-Type'
             }
         ));
         this.app.use(cookieParser())
