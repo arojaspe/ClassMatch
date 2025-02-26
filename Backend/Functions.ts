@@ -894,12 +894,13 @@ export async function findMyUEvents(current_user: string) {
             UEVENTS_ACCEPTED: 1
         },
         attributes: [],
-        include: [{
+        include: [
+            {
             model: Models.EVENTS_MOD, as: "EVENTS",
             where: {
                 EVENT_STATUS: 1
             },
-            attributes: ["EVENT_ID", "EVENT_TITLE", "EVENT_DATE", "EVENT_ADMIN", "EVENT_STATUS"],
+            attributes: ["EVENT_ID", "EVENT_TITLE", "EVENT_DATE", "EVENT_STATUS"],
             order: [['EVENT_DATE', 'DESC']],
             include: [{
                 model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
@@ -908,7 +909,12 @@ export async function findMyUEvents(current_user: string) {
                 limit: 1,
                 required: false
             }]
-        }]
+        },
+        {
+            model: Models.USERS_MOD,
+            attributes: ["USER_ID", "USER_FIRSTNAME", "USER_LASTNAME"]
+        }
+    ]
     })
     ueventExpired = await Models.USER_EVENTS_MOD.findAll({
         where: {
@@ -921,7 +927,7 @@ export async function findMyUEvents(current_user: string) {
             where: {
                 EVENT_STATUS: 0
             },
-            attributes: ["EVENT_ID", "EVENT_TITLE", "EVENT_DATE", "EVENT_ADMIN", "EVENT_STATUS"],
+            attributes: ["EVENT_ID", "EVENT_TITLE", "EVENT_DATE", "EVENT_STATUS"],
             order: [['EVENT_DATE', 'DESC']],
             include: [{
                 model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
@@ -930,6 +936,10 @@ export async function findMyUEvents(current_user: string) {
                 limit: 1,
                 required: false
             }]
+        },
+        {
+            model: Models.USERS_MOD,
+            attributes: ["USER_ID" ,"USER_FIRSTNAME", "USER_LASTNAME"]
         }]
     })
 
