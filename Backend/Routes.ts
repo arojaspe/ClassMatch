@@ -34,6 +34,7 @@ router.post("/c", Conts.postColleges)
 
 //Images WIP!!!!
 router.post("/upload", Conts.postImage)
+router.post("/BULK/upload", Conts.BULKTestImage)
 router.put("/u/pics", Conts.putImage)
 router.delete("/u/pics", Conts.deleteImage)
 

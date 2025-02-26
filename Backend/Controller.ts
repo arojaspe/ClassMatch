@@ -1,4 +1,4 @@
-import { Request, Response, RequestHandler } from "express";
+import { Request, Response} from "express";
 import { Op, Sequelize } from "sequelize";
 import * as Models from "./Models";
 import * as Funcs from "./Functions";
@@ -8,6 +8,91 @@ import { v4 as uuidv4 } from 'uuid';
 
 import dotenv from "dotenv";
 dotenv.config();
+
+// BULK
+export const BULKTestImage = async (req: Request, res: Response) => {
+    try {
+        var upload = Storage.multer.fields([{ name: 'relation' }, { name: "type" }, { name: 'images' }])
+        upload(req, res, async function (error) {
+            let relation = req.body.relation
+            if (error) {
+                res.status(401).send({
+                    errors: [{
+                        message: error,
+                        extensions: {
+                            code: "Could not upload image"
+                        }
+                    }]
+                })
+            } else {
+                try {
+                    if (req.files) {
+                        const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+                        const imgs = files['images'];
+                        const current_images: number = await Funcs.findAllImages(relation)
+                        let data: { IMAGE_LINK: string; IMAGE_ORDER: number; }[] = []
+                        if (imgs.length + current_images - 1 > 8) {
+                            return res.status(400).send({
+                                errors: [{
+                                    message: `Cantidad máxima de imagenes es 8. Las imagenes no sen enviaron`,
+                                    extensions: {
+                                        code: 'MaxNumbImgs'
+                                    }
+                                }]
+                            })
+                        }
+                        for (let ind = 0; ind < imgs.length; ind++) {
+                            let img = imgs[ind];
+
+                            if (!img.mimetype.startsWith('image/')) {
+                                return res.status(400).send({
+                                    errors: [{
+                                        message: `Solo archivos de tipo imagen, el archivo ${ind} no es válido. Las imágenes anteriores se enviaron.`,
+                                        extensions: {
+                                            code: 'InvalidFileType'
+                                        }
+                                    }]
+                                });
+                            }
+                            let img_id = uuidv4();
+                            const blob = Storage.bucket.file(`${req.body.type + "/" + img_id}_post.jpg`);
+                            const blobStream = blob.createWriteStream({
+                                resumable: false,
+                                gzip: true
+                            });
+                            blobStream.end(img.buffer);
+                            data.push(await Funcs.addImage2DB(img_id, relation, req.body.type, current_images + ind));
+                        }
+                        return res.status(200).send({
+                            message: "Images added to the DB",
+                            data: data
+                        })
+
+                    } else throw new Error("Issue with files");
+                } catch (error: any) {
+                    console.log("We are here 1")
+                    res.status(401).send({
+                        errors: [{
+                            message: error.message,
+                            extensions: {
+                                code: "Conts.postImage"
+                            }
+                        }]
+                    });
+                }
+            }
+        })
+    } catch (error: any) {
+        res.status(401).send({
+            errors: [{
+                message: error.message,
+                extensions: {
+                    code: "Controller issue"
+                }
+            }]
+        });
+    }
+}
 
 // Reports
 
@@ -1037,7 +1122,7 @@ export const postRequestAdmin = async (req: Request, res: Response) => {
 export const getUEventsAdmin = async (req: Request, res: Response) => {
     try {
         let current_user = await Funcs.isLoggedIn(req, res)
-        const data = await Funcs.findMyUEventsAdmin(current_user)
+        const data = await Funcs.findMyUEventsAdmin(current_user.USER_ID)
         data ?
             res.status(200).send({
                 message: "Eventos organizados encontrados",

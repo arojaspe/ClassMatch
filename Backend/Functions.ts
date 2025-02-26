@@ -847,16 +847,16 @@ export async function findMyUEventsAdmin(current_user: string) {
             EVENT_ADMIN: current_user,
             EVENT_STATUS: 1
         },
-        include: [{
-            model: Models.EVENTS_MOD,
+    
             attributes: ["EVENT_ID", "EVENT_TITLE", "EVENT_DATE", "EVENT_STATUS"],
             order: [['EVENT_DATE', 'DESC']],
             include: [{
                 model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
                 attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-                where: { IMAGE_ORDER: 1 }
+                where: { IMAGE_ORDER: 1 },
+                limit: 1,
+                required: false
             }]
-        }]
 
     })
     ueventExpired = await Models.EVENTS_MOD.findAll({
@@ -864,16 +864,15 @@ export async function findMyUEventsAdmin(current_user: string) {
             EVENT_ADMIN: current_user,
             EVENT_STATUS: 0
         },
-        include: [{
-            model: Models.EVENTS_MOD,
             attributes: ["EVENT_ID", "EVENT_TITLE", "EVENT_DATE", "EVENT_STATUS"],
             order: [['EVENT_DATE', 'ASC']],
             include: [{
                 model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
                 attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-                where: { IMAGE_ORDER: 1 }
+                where: { IMAGE_ORDER: 1 },
+                limit: 1,
+                required: false
             }]
-        }]
     })
 
     if (ueventActive.length + ueventExpired.length === 0) {
@@ -896,7 +895,7 @@ export async function findMyUEvents(current_user: string) {
         },
         attributes: [],
         include: [{
-            model: Models.EVENTS_MOD,
+            model: Models.EVENTS_MOD, as: "EVENTS",
             where: {
                 EVENT_STATUS: 1
             },
@@ -905,7 +904,9 @@ export async function findMyUEvents(current_user: string) {
             include: [{
                 model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
                 attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-                where: { IMAGE_ORDER: 1 }
+                where: { IMAGE_ORDER: 1 },
+                limit: 1,
+                required: false
             }]
         }]
     })
@@ -916,16 +917,18 @@ export async function findMyUEvents(current_user: string) {
         },
         attributes: [],
         include: [{
-            model: Models.EVENTS_MOD,
+            model: Models.EVENTS_MOD, as: "EVENTS",
             where: {
                 EVENT_STATUS: 0
             },
             attributes: ["EVENT_ID", "EVENT_TITLE", "EVENT_DATE", "EVENT_ADMIN", "EVENT_STATUS"],
-            order: [['EVENT_DATE', 'ASC']],
+            order: [['EVENT_DATE', 'DESC']],
             include: [{
                 model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
                 attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-                where: { IMAGE_ORDER: 1 }
+                where: { IMAGE_ORDER: 1 },
+                limit: 1,
+                required: false
             }]
         }]
     })
