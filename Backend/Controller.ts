@@ -219,7 +219,8 @@ export const putUserSchedule = async (req: Request, res: Response) => {
 //interests: adfasfas,adfafs,afdsfaf ... (Ids)
 //colleges: asdfasdfsaf,adfafdssa,adfasf... (Ids)
 export const getListaUsuarios = async (req: Request, res: Response) => {
-    const currUser = await Funcs.isLoggedIn(req, res);
+    try {
+        const currUser = await Funcs.isLoggedIn(req, res);
 
     let gender = req.query.gender as string || ["M", "F", "NB"];
     if (typeof gender === "string")
@@ -241,6 +242,8 @@ export const getListaUsuarios = async (req: Request, res: Response) => {
 
     let colleges = req.query.colleges as string || currUser.USER_COLLEGE_ID;
     colleges = colleges.split(",");
+    const ignoredUsers= await Funcs.checkRoomAndMatches(currUser.USER_ID)
+    console.log(ignoredUsers)
 
     if (interests === "any") {
         users = await Models.USERS_MOD.findAll({
@@ -249,7 +252,7 @@ export const getListaUsuarios = async (req: Request, res: Response) => {
                 [Op.and]: [
                     { USER_GENDER: gender },
                     { USER_COLLEGE_ID: colleges },
-                    { USER_ID: { [Op.notIn]: await Funcs.checkRoomAndMatches(currUser.USER_ID) } },
+                    { USER_ID: { [Op.notIn]:  ignoredUsers} },
                     Sequelize.literal(`TIMESTAMPDIFF(YEAR, USER_BIRTHDATE, CURDATE()) BETWEEN ${Number(ageL)} AND ${Number(ageU)}`),
                 ]
             },
@@ -301,6 +304,17 @@ export const getListaUsuarios = async (req: Request, res: Response) => {
             }]
         });
     }
+    } catch (error: any) {
+        res.status(401).json({
+            errors: [{
+                message: "Error: " + error.message,
+                extensions: {
+                    code: "Funcs.auth"
+                }
+            }]
+        })
+    }
+    
 } // Add Schedule match
 export const getUsuario = async (req: Request, res: Response) => {
 

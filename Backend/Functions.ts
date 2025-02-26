@@ -1225,7 +1225,7 @@ export async function createRoom(users: string[], event?: string) {
     return room_id
 }
 export async function checkRoomAndMatches(current_user: string) {
-    let ignoredUsers: string[]= [current_user]
+    let ignoredUsers: string[]= []
     try {
         const rooms= await Models.ROOMS_MOD.findAll({
                 where: {
@@ -1305,7 +1305,7 @@ export async function createMatch(current_user: string, other_user: string, supe
     } else if (await isAlreadyMatch(current_user, other_user)) {
         Models.MATCHES_MOD.destroy({
             where: {
-                MATCING_USER: other_user,
+                MATCHING_USER: other_user,
             MATCHED_USER: current_user}
         })
         const room_id = await createRoom([current_user, other_user])
