@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import axios from "axios";
 import { Interest } from "../types";
 
@@ -16,6 +16,8 @@ export default function PersonalizarPerfil() {
     horario: false,
   });
   const [description, setDescription] = useState(""); // Para manejar la descripción
+  const [filterAge, setFilterAge] = useState("");
+  const [filterGender, setFilterGender] = useState("");
 
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]); // Para manejar los intereses seleccionados
 
@@ -77,6 +79,13 @@ export default function PersonalizarPerfil() {
     setDescription(event.target.value);
   };
 
+  const handleFilterAgeChange = (event: {
+    target: { value: SetStateAction<string> };
+  }) => setFilterAge(event.target.value);
+  const handleFilterGenderChange = (event: {
+    target: { value: SetStateAction<string> };
+  }) => setFilterGender(event.target.value);
+
   const handleInterestClick = (interest: Interest) => {
     setSelectedInterests((prev) => {
       if (prev.includes(interest.INTEREST_ID)) {
@@ -114,6 +123,34 @@ export default function PersonalizarPerfil() {
       })
       .catch((error) => {
         console.error("Error al actualizar la descripción:", error);
+      });
+  };
+
+  const handleFilterAgeButtonClick = () => {
+    console.log("El filtro de edad es", filterAge);
+    axios
+      .put("/u", { filter_age: filterAge })
+      .then(() => {
+        setMessage("Filtro de edad guardado correctamente");
+        alert("Filtro de edad actualizado con éxito");
+        setFilterAge("");
+      })
+      .catch((error) => {
+        console.error("Error al actualizar el filtro de edad:", error);
+      });
+  };
+
+  const handleFilterGenderButtonClick = () => {
+    console.log("El filtro de género es", filterGender);
+    axios
+      .put("/u", { filter_gender: filterGender })
+      .then(() => {
+        setMessage("Filtro de género guardado correctamente");
+        alert("Filtro de género actualizado con éxito");
+        setFilterGender("");
+      })
+      .catch((error) => {
+        console.error("Error al actualizar el filtro de género:", error);
       });
   };
 
@@ -303,6 +340,68 @@ export default function PersonalizarPerfil() {
             >
               Guardar descripción
             </button>
+
+            <div className="mb-6 flex items-center space-x-2">
+              <input
+                className="w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline"
+                type="number"
+                name="filterAgeMin"
+                id="filterAgeMin"
+                placeholder="Edad mínima"
+                value={filterAge.split("-")[0]}
+                onChange={(e) =>
+                  handleFilterAgeChange({
+                    target: {
+                      value: `${e.target.value}-${filterAge.split("-")[1]}`,
+                    },
+                  })
+                }
+              />
+              <input
+                className="w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline"
+                type="number"
+                name="filterAgeMax"
+                id="filterAgeMax"
+                placeholder="Edad máxima"
+                value={filterAge.split("-")[1]}
+                onChange={(e) =>
+                  handleFilterAgeChange({
+                    target: {
+                      value: `${filterAge.split("-")[0]}-${e.target.value}`,
+                    },
+                  })
+                }
+              />
+              <button
+                className="bg-buttonClassMatch w-[23rem] hover:bg-headClassMatch text-white font-KhandRegular text-base font-semibold px-6 py-2 rounded-md"
+                onClick={() => handleFilterAgeButtonClick()}
+              >
+                Guardar filtro de edad
+              </button>
+            </div>
+            <div className="mb-6 flex items-center space-x-2 ">
+              <select
+                className="w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline"
+                name="filtergender"
+                id="filtergender"
+                value={filterGender}
+                onChange={handleFilterGenderChange}
+              >
+                <option value="" disabled>
+                  Filtro de género
+                </option>
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+                <option value="NB">No binario</option>
+              </select>
+
+              <button
+                className="bg-buttonClassMatch w-[15rem] hover:bg-headClassMatch text-white font-KhandRegular text-base font-semibold px-6 py-2 rounded-md"
+                onClick={() => handleFilterGenderButtonClick()}
+              >
+                Guardar filtro de género
+              </button>
+            </div>
 
             {/* Sección para seleccionar horarios */}
             <h2 className="font-KhandSemiBold text-4xl text-black font-bold">
