@@ -4,7 +4,7 @@ import { Interest, ScheduleType } from "../types";
 
 export default function PersonalizarPerfil() {
   const [currentPage, setCurrentPage] = useState(0);
-  //const [photo, setPhoto] = useState<File | null>(null); // Para manejar la foto
+  const [photo, setPhoto] = useState<File | null>(null); // Para manejar la foto
   const [interests, setInterests] = useState<Interest[]>([]);
   const [description, setDescription] = useState(""); // Para manejar la descripción
   const [filterAge, setFilterAge] = useState("");
@@ -56,16 +56,49 @@ export default function PersonalizarPerfil() {
   ];
   const horas = Array.from({ length: 24 }, (_, index) => `${index}:00`);
 
-  // const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = event.target.files ? event.target.files[0] : null;
+  const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
 
-  //   if (file && file.type.startsWith("image/")) {
-  //     setPhoto(file);
-  //   } else {
-  //     setPhoto(null);
-  //     setMessage("Por favor, selecciona un archivo de imagen.");
-  //   }
-  // };
+    if (file && file.type.startsWith("image/")) {
+      setPhoto(file);
+    } else {
+      setPhoto(null);
+      alert("Por favor, sube una imagen.");
+    }
+  };
+
+  const handleImageButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+    if (!photo) {
+      alert("Por favor, selecciona una imagen.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("images", photo);
+    formData.append("relation", idUsuario);
+    formData.append("type", "USER");
+
+    axios
+      .post("/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          alert("Foto de perfil actualizada con éxito");
+        } else {
+          alert("Hubo un problema al subir la foto. Inténtalo de nuevo.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error al actualizar la foto:", error);
+        alert("Hubo un problema al subir la foto. Inténtalo de nuevo.");
+      });
+  };
 
   const handleDescriptionChange = (
     event: React.ChangeEvent<HTMLTextAreaElement>
@@ -93,7 +126,10 @@ export default function PersonalizarPerfil() {
     console.log("Los intereses seleccionados son", selectedInterests);
   };
 
-  const handleInterestButtonClick = () => {
+  const handleInterestButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
     if (selectedInterests.length === 0) {
       alert("Por favor, selecciona al menos un interés.");
     }
@@ -109,9 +145,13 @@ export default function PersonalizarPerfil() {
       });
   };
 
-  const handleDescriptionButtonClick = () => {
+  const handleDescriptionButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
     if (!description.trim()) {
       alert("Por favor, ingresa una descripción.");
+      return;
     }
     axios
       .put("/u", { bio: description })
@@ -124,7 +164,10 @@ export default function PersonalizarPerfil() {
       });
   };
 
-  const handleFilterAgeButtonClick = () => {
+  const handleFilterAgeButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
     if (
       !filterAge.includes("-") ||
       filterAge.split("-").some((age) => !age.trim())
@@ -143,7 +186,10 @@ export default function PersonalizarPerfil() {
       });
   };
 
-  const handleFilterGenderButtonClick = () => {
+  const handleFilterGenderButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
     if (!filterGender) {
       alert("Por favor, selecciona un filtro de género.");
     }
@@ -159,7 +205,10 @@ export default function PersonalizarPerfil() {
       });
   };
 
-  const handleScheduleButtonClick = () => {
+  const handleScheduleButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
     const selectedHours = Object.values(selectedSchedule)
       .flat()
       .filter(Boolean).length;
@@ -182,6 +231,20 @@ export default function PersonalizarPerfil() {
         console.error("Error al actualizar el horario:", error);
       });
   };
+
+  // const handleImageButtonClick = () => {
+  //   if (!photo) {
+  //     alert("Por favor, selecciona una imagen.");
+  //   }
+  //   axios
+  //     .post("/upload", photo)
+  //     .then(() => {
+  //       alert("Foto de perfil actualizada con éxito");
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error al actualizar el horario:", error);
+  //     });
+  // };
 
   const [selectedSchedule, setSelectedSchedule] = useState<ScheduleType>(
     diasSemana.reduce<ScheduleType>(
@@ -212,7 +275,7 @@ export default function PersonalizarPerfil() {
           </p>
           <form className="mb-4 mt-5 w-full flex flex-col">
             {/* Sección para subir una foto */}
-            {/* <h2 className="font-KhandSemiBold text-4xl text-black font-bold pb-3">
+            <h2 className="font-KhandSemiBold text-4xl text-black font-bold pb-3">
               Selecciona tu foto de perfil
             </h2>
             <div className="mb-6">
@@ -225,9 +288,7 @@ export default function PersonalizarPerfil() {
               <div
                 className={`flex items-center justify-center w-full ${
                   photo ? "h-72" : "h-32"
-                } border-2 rounded-lg cursor-pointer ${
-                  errors.photo ? "border-red-500" : "border-gray-300"
-                } ${photo ? "border-none" : "border-dashed"}`}
+                } border-2 rounded-lg cursor-pointer `}
                 onClick={() => document.getElementById("photo")?.click()} // Activar clic manualmente
               >
                 <input
@@ -249,10 +310,13 @@ export default function PersonalizarPerfil() {
                   />
                 )}
               </div>
-              {errors.photo && (
-                <p className="text-red-500">Por favor, sube una foto.</p>
-              )}
-            </div> */}
+            </div>
+            <button
+              className="bg-buttonClassMatch mb-5 place-self-center w-[12rem] hover:bg-headClassMatch text-white font-KhandRegular text-base font-semibold px-6 py-2 rounded-md"
+              onClick={(event) => handleImageButtonClick(event)}
+            >
+              Guardar foto
+            </button>
 
             {/* Sección para universidad */}
 
@@ -310,7 +374,7 @@ export default function PersonalizarPerfil() {
             <div className="flex flex-col items-center justify-center space-x-4 space-y-3">
               <button
                 className="bg-buttonClassMatch mb-5 place-self-center w-[12rem] hover:bg-headClassMatch text-white font-KhandRegular text-base font-semibold px-6 py-2 rounded-md"
-                onClick={() => handleInterestButtonClick()}
+                onClick={(event) => handleInterestButtonClick(event)}
               >
                 Guardar intereses
               </button>
@@ -338,7 +402,7 @@ export default function PersonalizarPerfil() {
             </div>
             <button
               className="bg-buttonClassMatch mb-5 place-self-center w-[12rem] hover:bg-headClassMatch text-white font-KhandRegular text-base font-semibold px-6 py-2 rounded-md"
-              onClick={() => handleDescriptionButtonClick()}
+              onClick={(event) => handleDescriptionButtonClick(event)}
             >
               Guardar descripción
             </button>
@@ -386,7 +450,7 @@ export default function PersonalizarPerfil() {
               />
               <button
                 className="bg-buttonClassMatch w-[23rem] hover:bg-headClassMatch text-white font-KhandRegular text-base font-semibold px-6 py-2 rounded-md"
-                onClick={() => handleFilterAgeButtonClick()}
+                onClick={(event) => handleFilterAgeButtonClick(event)}
               >
                 Guardar filtro de edad
               </button>
@@ -409,7 +473,7 @@ export default function PersonalizarPerfil() {
 
               <button
                 className="bg-buttonClassMatch w-[15rem] hover:bg-headClassMatch text-white font-KhandRegular text-base font-semibold px-6 py-2 rounded-md"
-                onClick={() => handleFilterGenderButtonClick()}
+                onClick={(event) => handleFilterGenderButtonClick(event)}
               >
                 Guardar filtro de género
               </button>
@@ -425,7 +489,7 @@ export default function PersonalizarPerfil() {
               </p>
               <button
                 className="bg-buttonClassMatch w-[15rem] hover:bg-headClassMatch text-white font-KhandRegular text-base font-semibold px-6 py-2 rounded-md"
-                onClick={() => handleScheduleButtonClick()}
+                onClick={(event) => handleScheduleButtonClick(event)}
               >
                 Guardar horario
               </button>
