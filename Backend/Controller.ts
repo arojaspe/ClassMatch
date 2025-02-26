@@ -1067,7 +1067,7 @@ export const postRequestEvent = async (req: Request, res: Response) => {
 
     try {
         let current_user = await Funcs.isLoggedIn(req, res)
-        const data = await Funcs.requestAttendEvent(current_user, event_id)
+        const data = await Funcs.requestAttendEvent(current_user.USER_ID, event_id)
         if (data) {
             let result = data == 1 ? "Aceptado" : "Pendiente"
             res.status(200).send({
@@ -1099,7 +1099,7 @@ export const postRequestAdmin = async (req: Request, res: Response) => {
 
     try {
         let current_user = await Funcs.isLoggedIn(req, res)
-        const data = await Funcs.requestDecision(current_user, req_uevent, req_user, Number(decision))
+        const data = await Funcs.requestDecision(current_user.USER_ID, req_uevent, req_user, Number(decision))
         data ?
             res.status(200).send({
                 message: "Solicitud de evento respondida",
@@ -1145,7 +1145,7 @@ export const getUEventsAdmin = async (req: Request, res: Response) => {
 export const getUEvents = async (req: Request, res: Response) => {
     try {
         let current_user = await Funcs.isLoggedIn(req, res)
-        const data = await Funcs.findMyUEvents(current_user)
+        const data = await Funcs.findMyUEvents(current_user.USER_ID)
         data ?
             res.status(200).send({
                 message: "Eventos asistidos encontrados",
@@ -1170,7 +1170,7 @@ export const getUEventAttendees = async (req: Request, res: Response) => {
 
     try {
         let current_user = await Funcs.isLoggedIn(req, res)
-        const data = await Funcs.findUEventAttendees(current_user, event_id)
+        const data = await Funcs.findUEventAttendees(current_user.USER_ID, event_id)
         data ?
             res.status(200).send({
                 message: "Usuarios asistentes encontrados",
@@ -1195,7 +1195,7 @@ export const getUEReqsAdmin = async (req: Request, res: Response) => {
 
     try {
         let current_user = await Funcs.isLoggedIn(req, res)
-        const data = await Funcs.findUEventRequestsAdmin(current_user, event_id)
+        const data = await Funcs.findUEventRequestsAdmin(current_user.USER_ID, event_id)
         data ?
             res.status(200).send({
                 message: "Solicitudes de evento encontradas",

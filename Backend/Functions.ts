@@ -957,7 +957,9 @@ export async function findUEventAttendees(current_user: string, event: string) {
             include: [{
                 model: Models.IMAGES_MOD, as: 'USER_IMAGES',
                 attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-                where: { IMAGE_ORDER: 1 }
+                where: { IMAGE_ORDER: 1 },
+                limit: 1,
+                required: false
             }]
         }]
     })
@@ -983,7 +985,9 @@ export async function findUEventRequestsAdmin(admin: string, event: string) {
             include: [{
                 model: Models.IMAGES_MOD, as: 'USER_IMAGES',
                 attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
-                where: { IMAGE_ORDER: 1 }
+                where: { IMAGE_ORDER: 1 },
+                limit: 1,
+                required: false
             }]
         }]
     })
