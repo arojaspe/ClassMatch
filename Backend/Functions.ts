@@ -240,6 +240,10 @@ export async function findUsersByRating(current_user: string, totalCount: number
 
     return finalUsers;
 }
+export let isPremium = async function (id: string): Promise<boolean> {
+    const result = await Models.SUBSCRIPTIONS_MOD.findOne({ where: { SUBSCRIPTION_USER: id } })
+    return result? true: false
+}
 export let findUser = async function (id?: string, email?: string) {
     if (id) {
         let usuario = await Models.USERS_MOD.findByPk(id)
@@ -255,6 +259,7 @@ export let findUser = async function (id?: string, email?: string) {
 
     return usuario
 }
+
 let addTokens = function (user: Model<any, any>) {
     try {
         const access_token = sign({
@@ -1080,13 +1085,13 @@ export const checkMyChats = async (current_user: string) => {
                     attributes: ["USER_FIRSTNAME"],
                     order: [["USER_LAST_LOG", "DESC"]],
                     required: false,
-                    /*
                     include: [{
                         model: Models.IMAGES_MOD, as: 'USER_IMAGES',
                         attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
                         where: { IMAGE_ORDER: 1 },
+                        limit: 1,
                         required: false
-                    }] */
+                    }]
                 },
                 {
                     model: Models.EVENTS_MOD,
@@ -1094,13 +1099,13 @@ export const checkMyChats = async (current_user: string) => {
                     attributes: ["EVENT_TITLE"],
                     order: [["EVENT_DATE", "DESC"]],
                     required: false,
-                    /*
                     include: [{
                         model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
                         attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
                         where: { IMAGE_ORDER: 1 },
+                        limit: 1,
                         required: false
-                    }]*/
+                    }]
                 },
             ],
         })

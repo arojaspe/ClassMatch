@@ -7,6 +7,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import http from "http";
 import { Server as SocketIOServer } from "socket.io";
+import { testFilterAge } from "../Bulk/BULKFunctions";
 
 // Global error handlers
 process.on('uncaughtException', (err) => {
@@ -40,8 +41,7 @@ class Server {
             cors: {
                 credentials: true,
                 origin: "https://www.classmatch.site", // Use "*" for local
-            },
-            path: "/socket.io"
+            }
         });
         socketHandler(this.io);
     };
@@ -67,6 +67,7 @@ class Server {
             await db.authenticate();
             console.log("Database Online");
             console.log("Hello There")
+            await testFilterAge()
         } catch (error) {
             console.error("Error connecting to the database:", error);
         };

@@ -5,7 +5,7 @@ import * as Funcs from "./Functions";
 export const socketHandler = (io: Server) => {
     const onlineUsers: { [userId: string]: string } = {};
 
-    io.of("/socket.io").on("connection", (socket: Socket) => {
+    io.on("connection", (socket: Socket) => {
         console.log(`User connected: ${socket.id}`);
 
         // Register

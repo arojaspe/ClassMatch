@@ -7,6 +7,7 @@ import * as Storage from "./Connection";
 import { v4 as uuidv4 } from 'uuid';
 
 import dotenv from "dotenv";
+import { errorMonitor } from "events";
 dotenv.config();
 
 // BULK
@@ -992,6 +993,9 @@ export const postEvent = async (req: Request, res: Response) => {
     try {
         let current_user = await Funcs.isLoggedIn(req, res)
 
+        if (! await Funcs.isPremium(current_user.USER_ID)) {
+            throw new Error("Debes ser usuario premium para crear eventos")
+        }
         let event = await Funcs.createEvent(current_user.USER_ID, title, description, date, location, capacity, lock)
         res.status(200).send({
             message: "Evento creado",
@@ -999,9 +1003,9 @@ export const postEvent = async (req: Request, res: Response) => {
                 event: event
             }
         })
-    } catch (error) {
+    } catch (error: any) {
         res.status(401).send({
-            message: "Error al crear Evento",
+            message: "Error al crear Evento: "+error.mesage,
             data: {
                 error: "Funcs.createEvent"
             }
