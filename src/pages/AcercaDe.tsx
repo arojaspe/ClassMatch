@@ -1,6 +1,6 @@
 export default function AcercaDe() {
   return (
-    <div className="flex justify-center items-center min-h-screen bg-backgroundClassMatch">
+    <div className="flex flex-col justify-center items-center min-h-screen bg-backgroundClassMatch">
       {/* Contenedor de las tres tarjetas con grid */}
       <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8 p-8 ">
         {/* Sobre nosotros */}
@@ -51,9 +51,58 @@ export default function AcercaDe() {
           </p>
         </div>
       </div>
+      <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
+        <div className="p-4 bg-mainClassMatch bg-opacity-40 shadow-lg rounded-xl flex flex-col items-center transition-transform duration-300 transform hover:scale-105 hover:shadow-2xl hover:bg-opacity-25">
+          <h2 className="font-KhandBold text-[3vh] text-headClassMatch font-semibold">
+            Carlos Andres Rios Rojas
+          </h2>
+          <a
+            href="https://github.com/dafty-punky-boy"
+            className="font-KhandRegular text-[2vh] text-headClassMatch"
+            target="_blank"
+          >
+            GitHub
+          </a>
+        </div>
+        <div className="p-4 bg-mainClassMatch bg-opacity-40 shadow-lg rounded-xl flex flex-col items-center transition-transform duration-300 transform hover:scale-105 hover:shadow-2xl hover:bg-opacity-25">
+          <h2 className="font-KhandBold text-[3vh] text-headClassMatch font-semibold">
+            Andres Rojas Pedroza
+          </h2>
+          <a
+            href="https://github.com/arojaspe"
+            className="font-KhandRegular text-[2vh] text-headClassMatch"
+            target="_blank"
+          >
+            GitHub
+          </a>
+        </div>
+        <div className="p-4 bg-mainClassMatch bg-opacity-40 shadow-lg rounded-xl flex flex-col items-center transition-transform duration-300 transform hover:scale-105 hover:shadow-2xl hover:bg-opacity-25">
+          <h2 className="font-KhandBold text-[3vh] text-headClassMatch font-semibold">
+            David García Pardo
+          </h2>
+          <a
+            href="https://github.com/7BatStrokes"
+            className="font-KhandRegular text-[2vh] text-headClassMatch"
+            target="_blank"
+          >
+            GitHub
+          </a>
+        </div>
+        <div className="p-4 bg-mainClassMatch bg-opacity-40 shadow-lg rounded-xl flex flex-col items-center transition-transform duration-300 transform hover:scale-105 hover:shadow-2xl hover:bg-opacity-25">
+          <h2 className="font-KhandBold text-[3vh] text-headClassMatch font-semibold">
+            Luis Esteban León Rojas
+          </h2>
+          <a
+            href="https://github.com/luleonr"
+            className="font-KhandRegular text-[2vh] text-headClassMatch"
+            target="_blank"
+          >
+            GitHub
+          </a>
+        </div>
+      </div>
     </div>
   );
 }
-
 
 // Las tarjetas se sobreponen arriba y abajo en pantallas pequeñas, corregir eso
