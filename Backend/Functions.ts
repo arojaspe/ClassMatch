@@ -343,13 +343,13 @@ export async function checkVerification(token: string) {
             await Models.SCHEDULES_MOD.create({
                 SCHEDULE_ID: uuidv4(),
                 USER_ID: payload.uuid,
-                MONDAY: null,
-                TUESDAY: null,
-                WEDNESDAY: null,
-                THURSDAY: null,
-                FRIDAY: null,
-                SATURDAY: null,
-                SUNDAY: null
+                MONDAY: 4000,
+                TUESDAY: 4000,
+                WEDNESDAY: 4000,
+                THURSDAY: 4000,
+                FRIDAY: 4000,
+                SATURDAY: 4000,
+                SUNDAY: 4000
             });
 
             await Models.SUBSCRIPTIONS_MOD.create({
