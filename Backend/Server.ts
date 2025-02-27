@@ -67,7 +67,7 @@ class Server {
             await db.authenticate();
             console.log("Database Online");
             console.log("Hello There")
-            await testFilterAge()
+            //await testFilterAge()
         } catch (error) {
             console.error("Error connecting to the database:", error);
         };
