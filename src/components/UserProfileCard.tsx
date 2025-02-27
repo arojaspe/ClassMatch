@@ -68,7 +68,7 @@ export default function UserProfileCard({
     <div className="bg-backgroundClassMatch srounded-lg  h-full flex font-KhandRegular py-5">
       <div className="bg-cardClassMatch flex flex-col w-[25%] ml-9 rounded-lg items-center shadow-lg overflow-hidden">
         <UserImageGallery images={userImages ?? []} />
-        <div className="w-[90%] p-4 font-KhandMedium text-lg text-center space-y-2 font-semibold">
+        <div className="w-[90%] p-4 font-KhandMedium text-lg text-center font-semibold">
           <p className="text-headClassMatch ">{user?.USER_BIRTHDATE}</p>
           <p className="text-buttonClassMatch ">Edad: {age}</p>
           <p className="text-headClassMatch">

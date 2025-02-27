@@ -49,7 +49,7 @@ export default function UserImageGallery({
                     images[currentIndex]?.IMAGE_LINK
                   }?random=${Math.random()}`}
                   alt={"Imagen"}
-                  className="rounded-lg object-cover w-full h-full"
+                  className="rounded-lg object-cover w-full h-full mx-auto"
                 />
               )}
             </div>

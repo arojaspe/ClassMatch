@@ -116,11 +116,11 @@ export default function Premium() {
                   className="rounded-3xl w-20 h-20"
                 />
                 <div className="ml-5">
-                  <span className="block text-4xl font-KhandBold">
+                  <span className="block text-4xl font-KhandBold bg-gradient-to-r from-premiumButtonClassMatch via-teal-600 to-cyan-600 text-transparent bg-clip-text">
                     {premiumMembership.name}
                   </span>
                   <span>
-                    <span className="text-3xl font-KhandSemiBold">
+                    <span className="text-3xl font-KhandSemiBold ">
                       {premiumMembership.price.toLocaleString("es-CO", {
                         style: "currency",
                         currency: "COP",
@@ -156,7 +156,7 @@ export default function Premium() {
               <div className="flex justify-center items-center space-x-4">
                 <button
                   onClick={createPreference}
-                  className="flex justify-center items-center font-KhandSemiBold bg-headClassMatch rounded-xl py-5 px-4 text-center text-white text-2xl"
+                  className="flex justify-center items-center font-KhandSemiBold bg-gradient-to-r from-premiumButtonClassMatch via-teal-600 to-cyan-600 rounded-xl py-5 px-4 text-center text-white text-2xl"
                 >
                   Suscribirse
                 </button>
@@ -165,7 +165,7 @@ export default function Premium() {
 
                   {preferenceId && (
                     <button
-                      className="flex justify-center items-center font-KhandSemiBold bg-headClassMatch rounded-xl py-5 px-4 text-center text-white text-2xl"
+                      className="flex justify-center items-center font-KhandSemiBold bg-gradient-to-r from-premiumButtonClassMatch via-teal-600 to-cyan-600 rounded-xl py-5 px-4 text-center text-white text-2xl"
                       onClick={() => window.open(preferenceId, "_self")}
                     >
                       {" "}
