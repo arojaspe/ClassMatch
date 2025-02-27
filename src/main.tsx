@@ -6,7 +6,6 @@ import Appheader from "./components/Appheader.js";
 import Appfooter from "./components/Appfooter.tsx";
 import AcercaDe from "./pages/AcercaDe.tsx";
 import Busqueda from "./pages/Busqueda.tsx";
-import MisMatch from "./pages/MisMatch.tsx";
 import Eventos from "./pages/Eventos.tsx";
 import Premium from "./pages/Premium.tsx";
 import Contacto from "./pages/Contacto.tsx";
@@ -22,6 +21,7 @@ import PrivateRoute from "./middleware/PrivateRoute.tsx";
 import NuevaContraseña from "./pages/NuevaContraseña.tsx";
 import axios from "axios";
 import Personalizar from "./pages/Personalizar.tsx";
+import ChatPage from "./pages/ChatPage.tsx";
 
 axios.defaults.baseURL = "https://classmatch.site/api";
 axios.defaults.withCredentials = true;
@@ -68,7 +68,7 @@ const router = createBrowserRouter([
         path: "/mismatch",
         element: (
           <PrivateRoute>
-            <MisMatch />
+            <ChatPage />
           </PrivateRoute>
         ),
       },

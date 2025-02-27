@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 export default function Appfooter() {
   return (
     <header className="py-3 bg-headClassMatch text-white shadow-md fixed bottom-0 w-full h-auto">
-      <div className="mx-auto px-10">
+      <div className="mx-auto px-10 flex justify-between">
         <div className="flex justify-start items-center">
           {/* Navigation */}
           <nav className="flex space-x-10">
@@ -27,6 +27,18 @@ export default function Appfooter() {
             </Link>
           </nav>
         </div>
+        <a
+          href="https://www.instagram.com/_classmatch"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-4 font-KhandMedium text-lg text-gray-400 hover:text-white transition flex items-center"
+        >
+          <img
+            src="https://img.icons8.com/?size=100&id=85154&format=png&color=E0ECF0"
+            alt="Instagram"
+            className="h-8 w-8"
+          />
+        </a>
       </div>
     </header>
   );
