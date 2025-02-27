@@ -1123,7 +1123,7 @@ export const checkMyChats = async (current_user: string) => {
                     {
                         ROOM_ID: room.getDataValue("ROOM_ID"),
                         USER_FIRSTNAME: room.getDataValue("USER_MOD").getDataValue("USER_FIRSTNAME"),
-                        USER_IMAGES: room.getDataValue("USER_MOD").getDataValue("USER_IMAGES")[0].IMAGE_LINK
+                        USER_IMAGES: room.getDataValue("USER_MOD").getDataValue("USER_IMAGES")[0].IMAGE_LINK ?? "https://picsum.photos/255"
                     }
                 )
             } else {
@@ -1131,7 +1131,7 @@ export const checkMyChats = async (current_user: string) => {
                     {
                         ROOM_ID: room.getDataValue("ROOM_ID"),
                         EVENT_TITLE: room.getDataValue("EVENT_ROOM").getDataValue("EVENT_TITLE"),
-                        EVENT_IMAGES: room.getDataValue("EVENT_MOD").getDataValue("EVENT_IMAGES")[0].IMAGE_LINK
+                        EVENT_IMAGES: room.getDataValue("EVENT_ROOM").getDataValue("EVENT_IMAGES")[0].IMAGE_LINK ?? "https://picsum.photos/255"
                     }
                 )
             }
