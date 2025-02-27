@@ -1082,12 +1082,12 @@ export const checkMyChats = async (current_user: string) => {
             include: [
                 {
                     model: Models.USERS_MOD,
-                    attributes: ["USER_FIRSTNAME"],
+                    attributes: ["USER_ID", "USER_FIRSTNAME"],
                     order: [["USER_LAST_LOG", "DESC"]],
                     required: false,
                     include: [{
                         model: Models.IMAGES_MOD, as: 'USER_IMAGES',
-                        attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+                        attributes: ["IMAGE_LINK"],
                         where: { IMAGE_ORDER: 1 },
                         limit: 1,
                         required: false
@@ -1096,12 +1096,12 @@ export const checkMyChats = async (current_user: string) => {
                 {
                     model: Models.EVENTS_MOD,
                     as: "EVENT_ROOM",
-                    attributes: ["EVENT_TITLE"],
+                    attributes: ["EVENT_ID", "EVENT_TITLE"],
                     order: [["EVENT_DATE", "DESC"]],
                     required: false,
                     include: [{
                         model: Models.IMAGES_MOD, as: 'EVENT_IMAGES',
-                        attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
+                        attributes: ["IMAGE_LINK"],
                         where: { IMAGE_ORDER: 1 },
                         limit: 1,
                         required: false
@@ -1123,7 +1123,7 @@ export const checkMyChats = async (current_user: string) => {
                     {
                         ROOM_ID: room.getDataValue("ROOM_ID"),
                         USER_FIRSTNAME: room.getDataValue("USER_MOD").getDataValue("USER_FIRSTNAME"),
-                        USER_IMAGES: ""
+                        USER_IMAGES: room.getDataValue("USER_MOD").getDataValue("USER_IMAGES")[0].IMAGE_LINK
                     }
                 )
             } else {
@@ -1131,7 +1131,7 @@ export const checkMyChats = async (current_user: string) => {
                     {
                         ROOM_ID: room.getDataValue("ROOM_ID"),
                         EVENT_TITLE: room.getDataValue("EVENT_ROOM").getDataValue("EVENT_TITLE"),
-                        EVENT_IMAGES: ""
+                        EVENT_IMAGES: room.getDataValue("EVENT_MOD").getDataValue("EVENT_IMAGES")[0].IMAGE_LINK
                     }
                 )
             }
