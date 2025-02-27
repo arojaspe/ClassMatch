@@ -11,6 +11,7 @@ export default function Busqueda() {
   const [userInterests, setUserInterests] = useState<string[]>();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMatchModalOpen, setIsMatchModalOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
 
   useEffect(() => {
@@ -96,6 +97,36 @@ export default function Busqueda() {
       });
   };
 
+  const handleMatchButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+
+    axios
+      .post("/m", { other_user: currentId, supermatch: false })
+      .then(() => {
+        alert("Match realizado con éxito");
+      })
+      .catch((error) => {
+        console.error("Error al hacer match con el usuario:", error);
+      });
+  };
+
+  const handleSuperMatchButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+
+    axios
+      .post("/m", { other_user: currentId, supermatch: true })
+      .then(() => {
+        alert("SuperMatch realizado con éxito");
+      })
+      .catch((error) => {
+        console.error("Error al hacer supermatch con el usuario:", error);
+      });
+  };
+
   return (
     <div className="h-screen pt-[9%] bg-mainClassMatch flex justify-center">
       <div className="flex flex-col h-[85%] w-[90%] items-center bg-backgroundClassMatch rounded-lg">
@@ -161,7 +192,7 @@ export default function Busqueda() {
               initial="enter"
               animate="center"
               exit="exit"
-              className="w-[100%] h-[100%] flex justify-center items-center"
+              className="w-[100%] h-[100%] flex flex-col justify-center items-center"
             >
               <UserCard
                 user={currentUser}
@@ -169,6 +200,40 @@ export default function Busqueda() {
                 commonSchedule={currentCommonSchedule}
                 userInterests={userInterests}
               />
+              <button
+                className="bg-buttonClassMatch hover:bg-gradient-to-r hover:from-premiumButtonClassMatch hover:via-teal-600 hover:to-cyan-600 place-self-center w-[8rem]  text-white font-KhandRegular text-base font-semibold px-6 py-2 rounded-md mt-4 transition duration-2000"
+                onClick={() => {
+                  setIsMatchModalOpen(true);
+                }}
+              >
+                Match
+              </button>
+              {isMatchModalOpen && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                  <div className="bg-white p-6 rounded-lg w-[15%]">
+                    <div className="flex justify-center space-x-4">
+                      <button
+                        className="bg-gray-300 hover:bg-gray-400 text-black font-semibold px-4 py-2 rounded-md mr-2"
+                        onClick={(event) => {
+                          handleMatchButtonClick(event);
+                          setIsMatchModalOpen(false);
+                        }}
+                      >
+                        Match
+                      </button>
+                      <button
+                        className="bg-gradient-to-r from-premiumButtonClassMatch via-teal-600 to-cyan-600 text-white font-semibold px-4 py-2 rounded-md"
+                        onClick={(event) => {
+                          handleSuperMatchButtonClick(event);
+                          setIsMatchModalOpen(false);
+                        }}
+                      >
+                        SuperMatch
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </motion.div>
           </AnimatePresence>
 
