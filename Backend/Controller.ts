@@ -167,7 +167,9 @@ export const getUserInterests = async (req: Request, res: Response) => {
 // Retreives all possible Interests available
 export const getInterests = async (req: Request, res: Response) => {
     try {
-        const interestsList = await Models.INTERESTS_MOD.findAll();
+        const interestsList = await Models.INTERESTS_MOD.findAll({
+            order: [['INTEREST_NAME', 'ASC']]
+        });
 
         res.status(200).send({
             data: {

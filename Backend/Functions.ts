@@ -429,7 +429,8 @@ export async function findInterests(userId: String) {
         attributes: { exclude: ["UINTEREST_ID", "UINTEREST_USER"] },
         where: {
             UINTEREST_USER: userId,
-        }
+        },
+        order: [['UINTEREST_INTEREST', 'ASC']]
     });
 
 
