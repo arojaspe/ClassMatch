@@ -162,7 +162,6 @@ export function refreshToken(req: Request, res: Response): string {
 }
 export async function authUser(uuid: string) {
     try {
-        console.log("Here: " + uuid)
         const usuario = await Models.USERS_MOD.findByPk(uuid, {
             attributes: {
                 exclude:
@@ -745,7 +744,7 @@ let isEventFull = async function (id: string) {
 
     let ans: string = `Max capacity not reached ${attendees} out of ${max_capacity}`;
 
-    if (max_capacity >= attendees) {
+    if (max_capacity <= attendees) {
         ans = await denyAllRequests(id)
     }
     return ans
@@ -789,19 +788,16 @@ export async function checkMyApplications(current_user: string) {
     return applications
 }
 export async function requestAttendEvent(user: string, event: string) {
-    try {
         let uevent_ = await checkUserUEvent(user, event)
         if (uevent_) {
-            throw new Error("User has requested to atend this event already")
+            throw new Error("User has requested to attend this event already")
         }
-    } catch (error) {
         let ans = await isEventFull(event)
         if (ans[0] == "M") {
             let event_ = await Models.EVENTS_MOD.findByPk(event)
             if (event_?.getDataValue("EVENT_STATUS") == 0) {
                 throw new Error("Event has expired already")
             }
-
             let id: string = uuidv4()
             let accepted = null
             if (event_?.getDataValue("EVENT_LOCK") == 0) {
@@ -810,7 +806,7 @@ export async function requestAttendEvent(user: string, event: string) {
             await Models.USER_EVENTS_MOD.create({
                 UEVENTS_ID: id,
                 UEVENTS_EVENT: event,
-                UEVENTS_USER: user,
+                UEVENTS_ATTENDEE: user,
                 UEVENTS_ACCEPTED: accepted
             })
             return (accepted)
@@ -818,28 +814,28 @@ export async function requestAttendEvent(user: string, event: string) {
             throw new Error(ans)
         }
     }
-}
-export async function requestDecision(current_user: string, uevent_id: string, user: string, decision: number) {
+export async function requestDecision(current_user: string, uevent_id: string, decision: string) {
     let uevent = await Models.USER_EVENTS_MOD.findOne({
-        where: { UEVENTS_ID: uevent_id, UEVENTS_ATTENDEE: user }
+        where: { UEVENTS_ID: uevent_id, UEVENTS_ACCEPTED: null }
     })
+    console.log(decision, typeof(decision))
     if (!uevent) {
         throw new Error("User not found in event")
-    } else if (await !isAdmin(current_user, uevent?.getDataValue("UEVENT_EVENT"))) {
+    } else if (await !isAdmin(current_user, uevent.getDataValue("UEVENTS_EVENT"))) {
         throw new Error("You are not the admin of this event")
-    } else if ([0, 1].includes(decision)!) {
+    } else if (!["0", "1"].includes(decision)) {
         throw new Error("Decision must be 0 or 1")
     }
+    console.log(uevent.toJSON())
 
+    let ans = await isEventFull(uevent.getDataValue("UEVENTS_EVENT"))
     uevent.set({
         UEVENTS_ACCEPTED: decision
     })
-    uevent.save()
-
-    let ans = await isEventFull(uevent.getDataValue("UEVENTS_EVENT"))
+    uevent.save()    
     return {
-        user: user,
-        decision: decision == 0 ? "Solicitud denegada" : "Solicitud aprobada",
+        user: uevent.getDataValue("UEVENTS_ATTENDEE"),
+        decision: decision == "0" ? "Solicitud denegada" : "Solicitud aprobada",
         note: ans
     }
 }
@@ -963,8 +959,8 @@ export async function findUEventAttendees(current_user: string, event: string) {
     attendees = await Models.USER_EVENTS_MOD.findAll({
         where: {
             UEVENTS_EVENT: event,
-            UEVENT_ACCEPTED: 1,
-            UEVENTS_USER: { [Op.ne]: current_user }
+            UEVENTS_ACCEPTED: 1,
+            UEVENTS_ATTENDEE: { [Op.ne]: current_user }
         },
         attributes: [],
         include: [{
@@ -1013,7 +1009,7 @@ export async function findUEventRequestsAdmin(admin: string, event: string) {
             UEVENTS_EVENT: event,
             UEVENTS_ACCEPTED: null
         },
-        attributes: ["UEVENT_ID"],
+        attributes: ["UEVENTS_ID"],
         include: [{
             model: Models.USERS_MOD,
             attributes: ["USER_ID", "USER_FIRSTNAME", "USER_LASTNAME"],
@@ -1050,15 +1046,13 @@ let denyAllRequests = async function (event_id: string) {
     return uevent.length + " requests have been denied. Max capacity was reached"
 }
 let checkUserUEvent = async function (user_id: string, event_id: string) {
+    console.log(user_id)
     let uevent = await Models.USER_EVENTS_MOD.findOne({
         where: {
             UEVENTS_ATTENDEE: user_id,
             UEVENTS_EVENT: event_id
         }
     })
-    if (!uevent) {
-        throw new Error("User has not requested to attend Event")
-    }
     return uevent
 }
 
@@ -1081,6 +1075,20 @@ export const checkMyChats = async (current_user: string) => {
             attributes: ["ROOM_ID", "ROOM_EVENT"],
             group: ["ROOM_ID"],
             include: [
+                {
+                    model: Models.CHATS_MOD,
+                    attributes: ["CHAT_ROOM", "CHAT_ID", "CHAT_SENDER"],
+                    order: [["CHAT_TIMESTAMP", "DESC"]],
+                    where: { CHAT_SENDER: { [Op.ne]: current_user } },
+                    include: [{
+                        model: Models.READ_STATUS_MOD, as: 'READ_STATUS',
+                        attributes: ["RS_USER"],
+                        where: { RS_USER: current_user},
+                        required: false
+                    }],
+                    limit: 1,
+                    required: false
+                },
                 {
                     model: Models.USERS_MOD,
                     attributes: ["USER_ID", "USER_FIRSTNAME"],
@@ -1115,24 +1123,34 @@ export const checkMyChats = async (current_user: string) => {
             throw new Error("User has no chats");
         }
 
-        let user_rooms: { USER_FIRSTNAME: any; ROOM_ID: any; USER_IMAGES: string; }[] = []
-        let event_rooms: { EVENT_TITLE: any; ROOM_ID: any; EVENT_IMAGES: string; }[] = []
+        let user_rooms: { NEW: Boolean; ROOM_ID: any; USER_FIRSTNAME: any;  USER_IMAGE: string; }[] = []
+        let event_rooms: { NEW: Boolean; EVENT_TITLE: any; ROOM_ID: any; EVENT_IMAGE: string; }[] = []
 
         rooms.forEach(room => {
-            if (room.getDataValue("ROOM_EVENT") === null) {
+            let new_message: any = false
+            if (room.getDataValue("CHATS_MODs")[0]) {
+                if (room.getDataValue("CHATS_MODs")[0].getDataValue("CHAT_SENDER") !== current_user) {
+                    if (!room.getDataValue("CHATS_MODs")[0].getDataValue("READ_STATUS")[0]) {
+                    new_message= true
+                }
+            }
+            }            
+            if (room.getDataValue("ROOM_EVENT") === null) {                
                 user_rooms.push(
                     {
+                        NEW: new_message,
                         ROOM_ID: room.getDataValue("ROOM_ID"),
                         USER_FIRSTNAME: room.getDataValue("USER_MOD").getDataValue("USER_FIRSTNAME"),
-                        USER_IMAGES: room.getDataValue("USER_MOD").getDataValue("USER_IMAGES")[0].IMAGE_LINK ?? "https://picsum.photos/255"
+                        USER_IMAGE: room.getDataValue("USER_MOD").getDataValue("USER_IMAGES")[0].IMAGE_LINK ?? "https://picsum.photos/255"
                     }
                 )
             } else {
                 event_rooms.push(
                     {
+                        NEW: new_message,
                         ROOM_ID: room.getDataValue("ROOM_ID"),
                         EVENT_TITLE: room.getDataValue("EVENT_ROOM").getDataValue("EVENT_TITLE"),
-                        EVENT_IMAGES: room.getDataValue("EVENT_ROOM").getDataValue("EVENT_IMAGES")[0].IMAGE_LINK ?? "https://picsum.photos/255"
+                        EVENT_IMAGE: room.getDataValue("EVENT_ROOM").getDataValue("EVENT_IMAGES")[0].IMAGE_LINK ?? "https://picsum.photos/255"
                     }
                 )
             }
@@ -1178,8 +1196,8 @@ export const getRoomMessages = async (current_user: string, room: string, page: 
             attributes: ["RS_USER", "RS_TIMESTAMP"],
         }],
         order: [["CHAT_TIMESTAMP", "ASC"]],
-        limit: 20,
-        offset: (page - 1) * 20
+        limit: 50,
+        offset: (page - 1) * 50
     });
 
     if (messages.length === 0) {
@@ -1295,7 +1313,7 @@ let isUserinRoom = async function (user_id: string, room_id: string): Promise<bo
     }
     return true
 }
-let allUsersinRoomExcept = async function (room_id: string, current_user: string): Promise<string[]> {
+export async function allUsersinRoomExcept(room_id: string, current_user: string): Promise<string[]> {
     let users: string[]= [] 
 
     let room = await Models.ROOMS_MOD.findAll({

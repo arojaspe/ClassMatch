@@ -7,7 +7,6 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import http from "http";
 import { Server as SocketIOServer } from "socket.io";
-import { testFilterAge } from "../Bulk/BULKFunctions";
 
 // Global error handlers
 process.on('uncaughtException', (err) => {
@@ -40,7 +39,7 @@ class Server {
         this.io= new SocketIOServer(this.server, {
             cors: {
                 credentials: true,
-                origin: "https://www.classmatch.site", // Use "*" for local
+                origin: "http://localhost:5173", // For deploy https://www.classmatch.site, use "*" for local
             }
         });
         socketHandler(this.io);
@@ -49,9 +48,8 @@ class Server {
     middlewares () {
         this.app.use(cors({
                 credentials: true,
-                origin: "https://www.classmatch.site", // For deploy, use "*" for local
-		        methods: 'GET,POST,PUT,DELETE,OPTIONS',
-    		    allowedHeaders: 'Authorization,Content-Type'
+                origin: "http://localhost:5173", // For deploy https://www.classmatch.site, use "*" for local
+		        methods: 'GET,POST,PUT,DELETE,OPTIONS'
             }
         ));
         this.app.use(cookieParser())

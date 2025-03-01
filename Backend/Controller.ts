@@ -6,10 +6,6 @@ import * as Schedule from "./scheduleFunctions";
 import * as Storage from "./Connection";
 import { v4 as uuidv4 } from 'uuid';
 
-import dotenv from "dotenv";
-import { errorMonitor } from "events";
-dotenv.config();
-
 // BULK
 export const BULKTestImage = async (req: Request, res: Response) => {
     try {
@@ -542,6 +538,7 @@ export const getLogOut = async (req: Request, res: Response) => {
 }
 export const getAuthenticate = async (req: Request, res: Response) => {
     try {
+        console.log("Here")
         const current_user = await Funcs.isLoggedIn(req, res)
         res.status(200).send({
             message: "User is logged in",
@@ -1069,10 +1066,11 @@ export const getMyApplications = async (req: Request, res: Response) => {
     }
 }
 export const postRequestEvent = async (req: Request, res: Response) => {
-    const event_id = req.params.event
+    const event_id = req.body.event
 
     try {
         let current_user = await Funcs.isLoggedIn(req, res)
+        console.log(current_user.USER_ID)
         const data = await Funcs.requestAttendEvent(current_user.USER_ID, event_id)
         if (data) {
             let result = data == 1 ? "Aceptado" : "Pendiente"
@@ -1101,11 +1099,11 @@ export const postRequestEvent = async (req: Request, res: Response) => {
     }
 }
 export const postRequestAdmin = async (req: Request, res: Response) => {
-    const { req_uevent, req_user, decision } = req.body
+    const { req_uevent, decision } = req.body
 
     try {
         let current_user = await Funcs.isLoggedIn(req, res)
-        const data = await Funcs.requestDecision(current_user.USER_ID, req_uevent, req_user, Number(decision))
+        const data = await Funcs.requestDecision(current_user.USER_ID, req_uevent, decision.toString())
         data ?
             res.status(200).send({
                 message: "Solicitud de evento respondida",

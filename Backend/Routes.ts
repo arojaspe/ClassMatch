@@ -49,12 +49,12 @@ router.post("/m", Conts.postMatch)
 
 //User Event Management: ue
 router.get("/ue/myrequests", Conts.getMyApplications)
-router.post("/ue.us/:id", Conts.postRequestEvent)
+router.post("/ue.us/", Conts.postRequestEvent)
 router.post('/ue.ad/req', Conts.postRequestAdmin)
 router.get('/ue.ad/my-events', Conts.getUEventsAdmin)
 router.get('/ue.us/my-events', Conts.getUEvents)
-router.get('/ue.us/attendees/:id', Conts.getUEventAttendees)
-router.get('/ue.ad/requests/:id', Conts.getUEReqsAdmin)
+router.get('/ue.us/attendees/:event', Conts.getUEventAttendees)
+router.get('/ue.ad/requests/:event', Conts.getUEReqsAdmin)
 
 //Mercadopago suscription management: 
 //router.post("/payment", Conts.postPaySuscription)

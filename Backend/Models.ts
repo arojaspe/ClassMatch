@@ -428,6 +428,10 @@ ROOMS_MOD.belongsTo(EVENTS_MOD, {foreignKey: 'ROOM_EVENT', as: "EVENT_ROOM"});
 USERS_MOD.hasMany(READ_STATUS_MOD, {foreignKey: 'RS_USER'});
 READ_STATUS_MOD.belongsTo(USERS_MOD, {foreignKey: 'RS_USER'});
 
+// Rooms-Chats
+ROOMS_MOD.hasMany(CHATS_MOD, { foreignKey: 'CHAT_ROOM', sourceKey: 'ROOM_ID'});
+CHATS_MOD.belongsTo(ROOMS_MOD, { foreignKey: 'CHAT_ROOM', targetKey: 'ROOM_ID'});
+
 // Chats-Read_Status
 CHATS_MOD.hasMany(READ_STATUS_MOD, { foreignKey: "RS_CHAT", as: "READ_STATUS" });
 READ_STATUS_MOD.belongsTo(CHATS_MOD, { foreignKey: "RS_CHAT", as: "chat" });
