@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import UserImageGallery from "../components/UserImageGallery"; // Importamos la galería de imágenes
+import EventsImageGallery from "../components/EventsImageGallery"; // Importamos la galería de imágenes
 import api from "../api/axiosConfig"; // Importamos la configuración de axios
 
 interface Event {
@@ -53,7 +53,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
   };
 
   return (
-    <div className="bg-white shadow-md p-6 rounded-lg mb-4">
+    <div className="bg-white shadow-md p-6 rounded-lg mb-4 h-auto">
       {/* Título del evento */}
       <h3 className="text-xl font-KhandBold">{event.EVENT_TITLE}</h3>
 
@@ -61,8 +61,8 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
       <p className="text-gray-600">{event.EVENT_DESCRIPTION}</p>
 
       {/* Galería de imágenes del evento */}
-      <div className="mt-4 max-w-full">
-        <UserImageGallery images={event.EVENT_IMAGES} /> {/* Implementamos la galería */}
+      <div className="mt-4 h-[200px]">
+        <EventsImageGallery images={event.EVENT_IMAGES} /> {/* Implementamos la galería */}
       </div>
 
       {/* Información adicional del evento */}
@@ -99,7 +99,6 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
           </svg>
           <p className="text-sm text-gray-500">{event.EVENT_LOCK ? "Cerrado" : "Abierto"}</p>
         </div>
-      </div>
 
       {/* Información del dueño del evento */}
       <div className="mt-4 flex items-center">
@@ -124,6 +123,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
           {loading ? "Enviando..." : "Enviar solicitud"}
         </button>
       </div>
+    </div>
     </div>
   );
 };
