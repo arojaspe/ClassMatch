@@ -39,7 +39,7 @@ class Server {
         this.io= new SocketIOServer(this.server, {
             cors: {
                 credentials: true,
-                origin: "http://localhost:5173", // For deploy https://www.classmatch.site, use "*" for local
+                origin: "https://www.classmatch.site", // For deploy https://www.classmatch.site, use "*" for local
             }
         });
         socketHandler(this.io);
@@ -48,8 +48,9 @@ class Server {
     middlewares () {
         this.app.use(cors({
                 credentials: true,
-                origin: "http://localhost:5173", // For deploy https://www.classmatch.site, use "*" for local
-		        methods: 'GET,POST,PUT,DELETE,OPTIONS'
+                origin: "https://www.classmatch.site", // For deploy https://www.classmatch.site, use "*" for local
+		        methods: 'GET,POST,PUT,DELETE,OPTIONS',
+                allowedHeaders: 'Authorization,Content-Type'
             }
         ));
         this.app.use(cookieParser())

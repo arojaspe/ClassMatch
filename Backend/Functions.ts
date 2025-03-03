@@ -984,7 +984,6 @@ export async function findUEventRequestsAdmin(admin: string, event: string) {
     if (!isAdmin(admin, event)) {
         throw new Error("Current user is not the Admin of this Event")
     }
-
     let ueventAccepted = await Models.USER_EVENTS_MOD.findAll({
         where: {
             UEVENTS_EVENT: event,
