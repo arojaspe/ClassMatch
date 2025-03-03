@@ -558,24 +558,13 @@ export const getAuthenticate = async (req: Request, res: Response) => {
 export const postRegister = async (req: Request, res: Response) => {
     const { firstname, lastname, email, password, college_id, gender, birthdate, bio, filter_age, filter_gender } = req.body;
     try {
-        Funcs.createUser(firstname, lastname, email, password, gender, birthdate, college_id, bio, filter_age, filter_gender).then((value) => {
-            if (typeof (value) == "string") {
-                res.status(401).json({
-                    errors: [{
-                        message: value,
-                        extensions: {
-                            code: "Funcs.createUser"
-                        }
-                    }]
-                })
-            } else {
-                res.status(200).json({
-                    data: {
-                        message: "Succesfully Created",
-                        pending_verification: value
-                    }
-                });
-            }
+        await Funcs.createUser(firstname, lastname, email, password, gender, birthdate, college_id, bio, filter_age, filter_gender).then((value) => {
+            res.status(200).json({
+                data: {
+                    message: "Succesfully Created",
+                    pending_verification: value
+                }
+            });
         })
     } catch (error: any) {
         res.status(401).json({

@@ -48,16 +48,20 @@ export function TestInterests() {
 //Users !!!!!!!!!!
 export async function createUser(firstname: string, lastname: string, email: string, password: string, gender: string,
     birthdate: Date, college: string, bio: string, filter_age: string, filter_gender: string) {
-    let usuario = await findUser(undefined, email)
+    let usuario = await emailinUse(email)
     let college_domain = await findCollege(college).then((college) => college?.getDataValue("COLLEGE_DOMAIN"))
-    if (usuario) {
-        throw new Error("User with that email already exists")
+    if (usuario!=  "New") {
+        if (usuario=== "Pending") {
+            throw new Error("Pending verification email")
+        } else {
+            throw new Error("User with that email already exists")
+        }
     } else if (email.split("@").at(-1) != college_domain) {
         throw new Error("Email is not valid for this college")
     }
     else {
         await Models.USERS_MOD.create({
-            USER_ID: null,
+            USER_ID: "",
             USER_FIRSTNAME: firstname,
             USER_LASTNAME: lastname,
             USER_EMAIL: email,
@@ -117,7 +121,7 @@ export async function isLoggedIn(req: Request, res: Response) {
     }
     try {
         payload = verify(req.cookies["access_token"], "access_secret")
-        if (!payload.USER_ID) {
+        if (!payload.USER_ID || payload.USER_ID==="") {
             throw new Error("Email has not been verified")
         }
     } catch (accessTokenError: any) {
@@ -258,7 +262,19 @@ export let findUser = async function (id?: string, email?: string) {
 
     return usuario
 }
-
+let emailinUse= async function (email: string): Promise<string> {
+    let result= "New"
+    let user= await Models.USERS_MOD.findOne({ where: { USER_EMAIL: email } })
+    console.log(user?.getDataValue("USER_ID"), typeof(user?.getDataValue("USER_ID")))
+    if (user) {
+        if (user.getDataValue("USER_ID")!= "") {
+            result= "Old"
+        } else {
+            result= "Pending"
+        }
+    }
+    return result
+}
 let addTokens = function (user: Model<any, any>) {
     try {
         const access_token = sign({

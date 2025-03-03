@@ -34,7 +34,7 @@ import {
           <Heading style={heading}>Tu link de ingreso</Heading>
           <Section style={body}>
             <Text style={paragraph}>
-            <Link style={link} href={`http://localhost:5000/api/verify/${magicLink}`}>
+            <Link style={link} href={`https://classmatch.siteapi/verify/${magicLink}`}>
                 {' '}
                 👉 Haz click aquí 👈
               </Link>
@@ -71,7 +71,7 @@ import {
   );
   
   VerifyEmail.PreviewProps = {
-    magicLink: 'http://localhost:5000/verification/test-token', // Local testing
+    magicLink: 'https://classmatch.site/verification/test-token', // Local testing
   } as RaycastMagicLinkEmailProps;
   
   const main = {
