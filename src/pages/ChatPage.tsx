@@ -21,7 +21,7 @@ interface Event {
   EVENT_IMAGES: string;
 }
 
-const socketUrl = "http://localhost:5000";
+const socketUrl = "https://www.classmatch.site";
 
 const ChatPage: React.FC = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
