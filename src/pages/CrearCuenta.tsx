@@ -1,12 +1,14 @@
 import { SetStateAction, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axiosConfig";
 
 export default function CrearCuenta() {
+  const navigate = useNavigate();
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [collegeId, setCollegeId] = useState("");
   const [gender, setGender] = useState("");
   const [birthdate, setBirthdate] = useState("");
@@ -43,6 +45,9 @@ export default function CrearCuenta() {
   const handlePasswordChange = (event: {
     target: { value: SetStateAction<string> };
   }) => setPassword(event.target.value);
+  const handleConfirmPasswordChange = (event: {
+    target: { value: SetStateAction<string> };
+  }) => setConfirmPassword(event.target.value);
   const handleCollegeIdChange = (event: {
     target: { value: SetStateAction<string> };
   }) => setCollegeId(event.target.value);
@@ -105,12 +110,13 @@ export default function CrearCuenta() {
         withCredentials: true,
       });
 
-      if (!response || response.status !== 200) {
+      if (!response || response.status !== 201) {
         throw new Error("Error en el registro");
       }
 
       setMessage("Registro exitoso");
-      // Redirigir o realizar alguna acción adicional
+
+      navigate("/verificacionregistro");
     } catch {
       setMessage("Error en el registro:");
     }
@@ -126,21 +132,25 @@ export default function CrearCuenta() {
   };
 
   return (
-    <main className="text-gray-900 w-lvw bg-backgroundClassMatch">
+    <main className="w-lvw font-KhandMedium text-xl text-headClassMatch bg-backgroundClassMatch">
       <div className="w-full pt-20 pb-14">
         <div className="w-full flex shadow-xl flex-col items-center bg-cardClassMatch rounded-2xl p-8 m-4 md:max-w-3xl md:mx-auto">
-          <h2 className="font-KhandSemiBold text-5xl text-headClassMatch font-bold">
+          <h2 className="font-KhandSemiBold text-5xl text-buttonClassMatch font-bold">
             Registro
           </h2>
-          <p className="w-full text-xl mt-4 font-KhandRegular">
-            ¡Crea tu cuenta de ClassMatch! <br /> <br />
+          <p className="w-full text-xl mt-4 font-KhandMedium">
+            ¡Crea tu cuenta de ClassMatch! <br />
             Recuerda que debes usar el correo de tu institución universitaria.
           </p>
+          <hr className="w-full border-t-2 border-headClassMatch my-2" />
           <form
-            className="mb-4 mt-5 w-full flex flex-col"
+            className="mb-4 mt-2 w-full flex flex-col"
             onSubmit={handleRegister}
           >
-            <div className="mb-6">
+            <h3 className="text-center mb-2">
+              Iniciemos poniendo tus datos básicos
+            </h3>
+            <div id="Nombre" className="mb-4">
               <input
                 className={`w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline ${
                   errors.firstname ? "border-red-500" : ""
@@ -153,7 +163,7 @@ export default function CrearCuenta() {
                 onChange={handleFirstnameChange}
               />
             </div>
-            <div className="mb-6">
+            <div id="Apellido" className="mb-4">
               <input
                 className={`w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline ${
                   errors.lastname ? "border-red-500" : ""
@@ -166,7 +176,8 @@ export default function CrearCuenta() {
                 onChange={handleLastnameChange}
               />
             </div>
-            <div className="mb-6">
+
+            <div id="Email" className="mb-4">
               <input
                 className={`w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline ${
                   errors.email ? "border-red-500" : ""
@@ -179,21 +190,70 @@ export default function CrearCuenta() {
                 onChange={handleEmailChange}
               />
             </div>
-            <div className="mb-6">
-              <p>f639a03f-2496-4b7d-8665-d2c748cd837f</p>
-              <input
+            <div id="Universidad" className="mb-4">
+              <select
                 className={`w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline ${
                   errors.collegeId ? "border-red-500" : ""
                 }`}
-                type="text"
                 name="collegeId"
                 id="collegeId"
-                placeholder="ID de la universidad"
                 value={collegeId}
                 onChange={handleCollegeIdChange}
+              >
+                <option value="" disabled>
+                  Selecciona tu universidad
+                </option>
+                <option value="f639a03f-2496-4b7d-8665-d2c748cd837f">
+                  UNAL Bogotá
+                </option>
+                <option value="42dea2d2-97ee-4647-a8b5-e51060881f5a">
+                  UNAL Medellín
+                </option>
+                <option value="1ad6fbb4-09f4-467d-aa5c-50b9d80aea01">
+                  UNAL Palmira
+                </option>
+              </select>
+            </div>
+            <div className="mb-4">
+              <select
+                className={`w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline ${
+                  errors.gender ? "border-red-500" : ""
+                }`}
+                name="gender"
+                id="gender"
+                value={gender}
+                onChange={handleGenderChange}
+              >
+                <option value="" disabled>
+                  Selecciona tu género
+                </option>
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+                <option value="NB">No binario</option>
+              </select>
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="birthdate"
+                className="text-base font-KhandRegular"
+              >
+                Fecha de nacimiento
+              </label>
+              <input
+                className={`w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline ${
+                  errors.birthdate ? "border-red-500" : ""
+                }`}
+                type="date"
+                name="birthdate"
+                id="birthdate"
+                value={birthdate}
+                onChange={handleBirthdateChange}
               />
             </div>
-            <div className="mb-6">
+            <h3 className="text-center mb-2">
+              Ahora cuéntanos un poco más sobre ti
+            </h3>
+            <div className="mb-4">
               <textarea
                 className={`w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline ${
                   errors.bio ? "border-red-500" : ""
@@ -206,7 +266,11 @@ export default function CrearCuenta() {
                 rows={5}
               />
             </div>
-            <div className="mb-6 flex space-x-2">
+            <h3 className="text-center mb-2">
+              Ahora escoge tus preferencias de búsqueda: edad máxima, mínima y
+              género
+            </h3>
+            <div id="FilterGender" className="mb-4 flex space-x-2">
               <input
                 className={`w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline ${
                   errors.filterAge ? "border-red-500" : ""
@@ -242,7 +306,7 @@ export default function CrearCuenta() {
                 }
               />
             </div>
-            <div className="mb-6">
+            <div className="mb-4">
               <select
                 className={`w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline ${
                   errors.gender ? "border-red-500" : ""
@@ -260,17 +324,35 @@ export default function CrearCuenta() {
                 <option value="NB">No binario</option>
               </select>
             </div>
-            <div className="mb-6 relative">
+            <h3 className="text-center">Ahora crea tu contraseña</h3>
+            <p className="text-center text-base font-KhandRegular">
+              La contraseña debe tener al menos 8 caracteres, una mayúscula, una
+              minúscula, un número y un caracter especial.
+            </p>
+            <div className="mb-4 relative">
               <input
                 className={`w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline ${
-                  errors.password ? "border-red-500" : ""
+                  errors.password
+                    ? "border-red-500"
+                    : "border-premiumButtonClassMatch"
                 }`}
                 type={showPassword ? "text" : "password"}
                 name="password"
                 id="password"
                 placeholder="Contraseña"
                 value={password}
-                onChange={handlePasswordChange}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  const isValid =
+                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
+                      value
+                    );
+                  setPassword(value);
+                  setErrors((prevErrors) => ({
+                    ...prevErrors,
+                    password: !isValid,
+                  }));
+                }}
               />
               <button
                 type="button"
@@ -315,7 +397,7 @@ export default function CrearCuenta() {
                 )}
               </button>
             </div>
-            <div className="mb-6 relative">
+            <div className="mb-4 relative">
               <input
                 className={`w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline ${
                   errors.password ? "border-red-500" : ""
@@ -323,9 +405,9 @@ export default function CrearCuenta() {
                 type={showConfirmPassword ? "text" : "password"}
                 name="confirmpassword"
                 id="confirmpassword"
-                placeholder="Confirma tu ontraseña"
-                value={password}
-                onChange={handlePasswordChange}
+                placeholder="Confirma tu contraseña"
+                value={confirmPassword}
+                onChange={handleConfirmPasswordChange}
               />
               <button
                 type="button"
@@ -370,40 +452,8 @@ export default function CrearCuenta() {
                 )}
               </button>
             </div>
-            <div className="mb-6">
-              <label htmlFor="birthdate" className="text-lg font-KhandRegular">
-                Fecha de nacimiento
-              </label>
-              <input
-                className={`w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline ${
-                  errors.birthdate ? "border-red-500" : ""
-                }`}
-                type="date"
-                name="birthdate"
-                id="birthdate"
-                value={birthdate}
-                onChange={handleBirthdateChange}
-              />
-            </div>
-            <div className="mb-6">
-              <select
-                className={`w-full border rounded font-KhandRegular text-lg p-2 outline-none focus:shadow-outline ${
-                  errors.gender ? "border-red-500" : ""
-                }`}
-                name="gender"
-                id="gender"
-                value={gender}
-                onChange={handleGenderChange}
-              >
-                <option value="" disabled>
-                  Selecciona tu género
-                </option>
-                <option value="M">Masculino</option>
-                <option value="F">Femenino</option>
-                <option value="NB">No binario</option>
-              </select>
-            </div>
-            <div className="mb-6 flex items-center">
+
+            <div className="mb-4 flex items-center">
               <input
                 type="checkbox"
                 id="terms"
@@ -435,11 +485,11 @@ export default function CrearCuenta() {
               Continuar
             </button>
           </form>
-          {message && (
+          {/* {message && (
             <p className="text-center mt-4 font-KhandRegular text-red-900">
               {message}
             </p>
-          )}
+          )} */}
           <a
             className="text-black font-KhandRegular text-center text-lg"
             href="/login"
