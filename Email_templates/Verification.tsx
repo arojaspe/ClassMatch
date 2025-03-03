@@ -34,7 +34,7 @@ import {
           <Heading style={heading}>Tu link de ingreso</Heading>
           <Section style={body}>
             <Text style={paragraph}>
-            <Link style={link} href={`https://classmatch.siteapi/verify/${magicLink}`}>
+            <Link style={link} href={`https://classmatch.site/verificaremail/${magicLink}`}
                 {' '}
                 👉 Haz click aquí 👈
               </Link>
