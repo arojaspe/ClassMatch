@@ -111,7 +111,7 @@ export default function CrearCuenta() {
         withCredentials: true,
       });
 
-      if (!response || response.status !== 201) {
+      if (!response || response.status !== 200) {
         throw new Error("Error en el registro");
       }
 
