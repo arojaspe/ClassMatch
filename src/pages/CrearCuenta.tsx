@@ -32,6 +32,7 @@ export default function CrearCuenta() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  console.log(message);
 
   const handleFirstnameChange = (event: {
     target: { value: SetStateAction<string> };
@@ -42,9 +43,9 @@ export default function CrearCuenta() {
   const handleEmailChange = (event: {
     target: { value: SetStateAction<string> };
   }) => setEmail(event.target.value);
-  const handlePasswordChange = (event: {
-    target: { value: SetStateAction<string> };
-  }) => setPassword(event.target.value);
+  // const handlePasswordChange = (event: {
+  //   target: { value: SetStateAction<string> };
+  // }) => setPassword(event.target.value);
   const handleConfirmPasswordChange = (event: {
     target: { value: SetStateAction<string> };
   }) => setConfirmPassword(event.target.value);

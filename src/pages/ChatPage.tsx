@@ -28,7 +28,9 @@ const socketUrl = "https://www.classmatch.site";
 
 const ChatPage: React.FC = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [messages, setMessages] = useState<{ [roomId: string]: ChatMessage[] }>({});
+  const [messages, setMessages] = useState<{ [roomId: string]: ChatMessage[] }>(
+    {}
+  );
   const [messageText, setMessageText] = useState("");
   const [rooms, setRooms] = useState<Room[]>([]);
   const [roomsLoading, setRoomsLoading] = useState(true);
@@ -122,9 +124,9 @@ const ChatPage: React.FC = () => {
       // Compare with the ref value
       if (newMessage.CHAT_ROOM.toString() !== currentRoom) return;
 
-      setMessages(prev => ({
+      setMessages((prev) => ({
         ...prev,
-        [currentRoom]: [...(prev[currentRoom] || []), newMessage]
+        [currentRoom]: [...(prev[currentRoom] || []), newMessage],
       }));
     });
 
@@ -134,19 +136,22 @@ const ChatPage: React.FC = () => {
 
     // New message notification handler
     newSocket.on("new_message_notification", ({ roomId }) => {
-      setRooms(prevRooms => prevRooms.map(room => {
-        // Only mark as new if NOT the current room
-        if (room.ROOM_ID === roomId && roomId !== currentRoomRef.current) {
-          return { ...room, NEW: true };
-        }
-        return room;
-      }));
+      setRooms((prevRooms) =>
+        prevRooms.map((room) => {
+          // Only mark as new if NOT the current room
+          if (room.ROOM_ID === roomId && roomId !== currentRoomRef.current) {
+            return { ...room, NEW: true };
+          }
+          return room;
+        })
+      );
     });
 
     return () => {
       newSocket.disconnect();
     };
   }, [userId]);
+  console.log(onlineUsers);
 
   useEffect(() => {
     if (socket && currentRoom) {
@@ -176,9 +181,11 @@ const ChatPage: React.FC = () => {
     setCurrentRoom(room.ROOM_ID);
     setPersonaChat(room.USER_FIRSTNAME);
     setLinkImagen(room.USER_IMAGE);
-    setRooms(prevRooms => prevRooms.map(r =>
-      r.ROOM_ID === room.ROOM_ID ? { ...r, NEW: false } : r
-    ));
+    setRooms((prevRooms) =>
+      prevRooms.map((r) =>
+        r.ROOM_ID === room.ROOM_ID ? { ...r, NEW: false } : r
+      )
+    );
   };
 
   const handleSendMessage = () => {
@@ -209,7 +216,8 @@ const ChatPage: React.FC = () => {
 
   useEffect(() => {
     if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
     }
   }, [messages, currentRoom]);
 
@@ -229,18 +237,20 @@ const ChatPage: React.FC = () => {
               {rooms.map((room) => (
                 <div
                   key={room.ROOM_ID}
-                  className={`p-3 rounded-lg cursor-pointer transition duration-300 flex items-center justify-between ${currentRoom === room.ROOM_ID
+                  className={`p-3 rounded-lg cursor-pointer transition duration-300 flex items-center justify-between ${
+                    currentRoom === room.ROOM_ID
                       ? "bg-mainClassMatch text-white text-lg font-KhandSemiBold shadow-md"
                       : "bg-white text-lg font-KhandSemiBold hover:bg-gray-200"
-                    }`}
+                  }`}
                   onClick={() => handleRoomClick(room)}
                 >
                   <span>{room.USER_FIRSTNAME}</span>
                   <img
-                    className={`h-16 w-16 object-cover rounded-full ${room.NEW && currentRoom !== room.ROOM_ID
+                    className={`h-16 w-16 object-cover rounded-full ${
+                      room.NEW && currentRoom !== room.ROOM_ID
                         ? "border-4 border-green-500"
                         : "border-2 border-white"
-                      }`}
+                    }`}
                     src={room.USER_IMAGE}
                     alt="imagen perfil"
                   />
@@ -255,7 +265,9 @@ const ChatPage: React.FC = () => {
           {currentRoom ? (
             <>
               <div className="p-5 border-b flex items-center justify-between bg-headClassMatch shadow-sm">
-                <h1 className="text-xl font-semibold text-gray-100">{personaChat}</h1>
+                <h1 className="text-xl font-semibold text-gray-100">
+                  {personaChat}
+                </h1>
                 <img
                   className="h-16 w-16 object-cover border-white border-2 rounded-full"
                   src={linkImagen}
@@ -290,9 +302,13 @@ const ChatPage: React.FC = () => {
                     )
                     .map((msg, index, arr) => {
                       const parsedDate = new Date(msg.CHAT_TIMESTAMP);
-                      const msgDate = isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
+                      const msgDate = isNaN(parsedDate.getTime())
+                        ? new Date()
+                        : parsedDate;
                       const prevMsgDate =
-                        index > 0 ? new Date(arr[index - 1].CHAT_TIMESTAMP) : null;
+                        index > 0
+                          ? new Date(arr[index - 1].CHAT_TIMESTAMP)
+                          : null;
                       const isNewDay =
                         !prevMsgDate ||
                         msgDate.toLocaleDateString("es-CO", {
@@ -300,13 +316,14 @@ const ChatPage: React.FC = () => {
                           month: "long",
                           year: "numeric",
                         }) !==
-                        prevMsgDate.toLocaleDateString("es-CO", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        });
+                          prevMsgDate.toLocaleDateString("es-CO", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          });
                       const isMine = msg.CHAT_SENDER === userId;
-                      const isRead = msg.READ_STATUS && msg.READ_STATUS.length > 0;
+                      const isRead =
+                        msg.READ_STATUS && msg.READ_STATUS.length > 0;
 
                       return (
                         <React.Fragment key={index}>
@@ -317,15 +334,24 @@ const ChatPage: React.FC = () => {
                               </span>
                             </div>
                           )}
-                          <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+                          <div
+                            className={`flex ${
+                              isMine ? "justify-end" : "justify-start"
+                            }`}
+                          >
                             <div
-                              className={`p-3 max-w-xs rounded-lg shadow-md ${isMine
+                              className={`p-3 max-w-xs rounded-lg shadow-md ${
+                                isMine
                                   ? "bg-headClassMatch text-white"
                                   : "bg-accentClassMatch text-gray-800"
-                                }`}
+                              }`}
                             >
                               <p className="text-md">{msg.CHAT_MESSAGE}</p>
-                              <span className={`text-xs ${isMine ? "text-gray-200" : "text-gray-500"}`}>
+                              <span
+                                className={`text-xs ${
+                                  isMine ? "text-gray-200" : "text-gray-500"
+                                }`}
+                              >
                                 {msgDate.toLocaleTimeString("es-CO", {
                                   hour: "2-digit",
                                   minute: "2-digit",
