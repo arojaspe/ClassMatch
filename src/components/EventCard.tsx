@@ -33,24 +33,31 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
   const handleSendRequest = async () => {
     setLoading(true); // Activar el estado de carga
     setMessage(""); // Limpiar mensaje previo
-
+  
     try {
-      // Realizamos la solicitud POST enviando el event_id como parámetro en la URL
-      const response = await api.post(`/ue.us/${event.EVENT_ID}`, {
-  withCredentials: true, // Asegúrate de incluir esta opción para enviar las cookies
-});
-
+      // Realizamos la solicitud POST enviando el event_id en el cuerpo de la solicitud
+      const response = await api.post(
+        "/ue.us/",  // No es necesario incluir el event_id en la URL
+        {
+          event: event.EVENT_ID,  // Enviar el ID del evento en el cuerpo
+        },
+        {
+          withCredentials: true, // Asegúrate de incluir esta opción para enviar las cookies
+        }
+      );
+  
       if (response && response.data && response.data.data) {
         setMessage(`Solicitud enviada con éxito. Estado: ${response.data.data.aceptacion}`);
       } else {
         setMessage("No se pudo procesar la solicitud correctamente.");
       }
     } catch (error) {
-      setMessage("Error al enviar la solicitud. Inténtalo nuevamente.");
+      //setMessage("Error al enviar la solicitud. Inténtalo nuevamente.");
     } finally {
       setLoading(false); // Desactivar el estado de carga
     }
   };
+  
 
   return (
     <div className="bg-white shadow-md p-6 rounded-lg mb-4 h-auto">
@@ -117,7 +124,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
       <div className="mt-4 text-center">
         <button
           onClick={handleSendRequest}
-          className={`bg-blue-600 text-white font-semibold py-2 px-6 rounded-full hover:bg-blue-700 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+          className={`bg-teal-700 text-white font-semibold py-2 px-6 rounded-full hover:bg-teal-950 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
           disabled={loading} // Deshabilitar el botón mientras se realiza la solicitud
         >
           {loading ? "Enviando..." : "Enviar solicitud"}

@@ -75,13 +75,13 @@ export default function CreateEventCard() {
           console.log(`Foto ${i + 1} subida con éxito.`);
         } else {
           console.error(`Error al subir la foto ${i + 1}.`);
-          //alert(`Hubo un problema al subir la foto ${i + 1}.`);
+          alert(`Hubo un problema al subir la foto ${i + 1}.`);
         }
       }
       //alert("Todas las fotos fueron subidas con éxito.");
     } catch (error) {
       console.error("Error al subir las fotos:", error);
-      //alert("Hubo un problema al subir las fotos.");
+      alert("Hubo un problema al subir las fotos.");
     }
   };
 
