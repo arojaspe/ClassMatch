@@ -19,18 +19,20 @@ interface Event {
 
 type MyEventCardProps = {
   event: Event;
+  aceptado: boolean;
 };
 
-const MyEventCard: React.FC<MyEventCardProps> = ({ event }) => {
+const MyEventCard: React.FC<MyEventCardProps> = ({ event, aceptado }) => {
   const eventOwnerName = `${event.USER_MOD.USER_FIRSTNAME} ${event.USER_MOD.USER_LASTNAME}`;
+  const eventOwnerImage = event.USER_MOD.USER_IMAGES[0]?.IMAGE_LINK || "default-avatar.png";
 
   return (
-    <div className="bg-white shadow-md p-6 rounded-lg mb-4">
+    <div className="bg-white shadow-md p-6 rounded-lg mb-4 transition-transform transform hover:scale-105">
       {/* Título del evento */}
-      <h3 className="text-xl font-KhandBold">{event.EVENT_TITLE}</h3>
+      <h3 className="text-xl font-KhandBold text-gray-800">{event.EVENT_TITLE}</h3>
 
       {/* Descripción corta del evento */}
-      <p className="text-gray-600">{event.EVENT_DESCRIPTION}</p>
+      <p className="text-gray-600 mt-2">{event.EVENT_DESCRIPTION}</p>
 
       {/* Información adicional del evento */}
       <div className="mt-4">
@@ -50,21 +52,22 @@ const MyEventCard: React.FC<MyEventCardProps> = ({ event }) => {
       {/* Información del dueño del evento */}
       <div className="mt-4 flex items-center">
         <img
-          src={event.USER_MOD.USER_IMAGES[0]?.IMAGE_LINK || "default-avatar.png"}
+          src={eventOwnerImage}
           alt="Foto del dueño"
           className="w-10 h-10 rounded-full mr-3"
         />
-        <p className="text-sm font-semibold">{eventOwnerName}</p>
+        <p className="text-sm font-semibold text-gray-700">{eventOwnerName}</p>
       </div>
 
       {/* Sección de estado de solicitud (si el evento está cerrado y el usuario ha solicitado asistir) */}
       <div className="mt-4">
-        {event.EVENT_LOCK ? (
+        {!aceptado ? (
           <p className="text-sm text-yellow-500">Solicitud enviada</p>
         ) : (
           <p className="text-sm text-green-500">Asistencia confirmada</p>
         )}
       </div>
+
     </div>
   );
 };
