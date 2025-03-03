@@ -36,11 +36,11 @@ export default function CreateEventCard() {
 
         // Subir las fotos después de crear el evento
         if (fotos.length > 0 && eventoId) {
-            await handleImageUpload(response.data.data.event[1]);
-          }
+          await handleImageUpload(response.data.data.event[1]);
+        }
 
         setShowPopup(true);
-        
+
         // Limpiar el formulario
         setTitulo("");
         setDescripcion("");
@@ -49,7 +49,6 @@ export default function CreateEventCard() {
         setFecha("");
         setTipoEvento("Abierto");
         setFotos([]);
-
       }
     } catch (error) {
       console.error("Error al crear el evento:", error);
@@ -149,7 +148,9 @@ export default function CreateEventCard() {
             type="number"
             id="capacidad"
             value={capacidad}
-            onChange={(e) => setCapacidad(Math.min(8, Math.max(1, parseInt(e.target.value))))} // Limita entre 1 y 8
+            onChange={(e) =>
+              setCapacidad(Math.min(8, Math.max(1, parseInt(e.target.value))))
+            } // Limita entre 1 y 8
             className="w-full p-2 border border-gray-300 rounded mt-2"
             min="1"
             max="8"
@@ -239,7 +240,10 @@ export default function CreateEventCard() {
         </div>
 
         <div className="flex justify-center">
-          <button type="submit" className="w-1/5 bg-blue-500 text-white py-2 rounded mt-4 hover:bg-blue-700">
+          <button
+            type="submit"
+            className="w-1/5 bg-headClassMatch text-white py-2 rounded mt-4 hover:bg-blue-700"
+          >
             Crear Evento
           </button>
         </div>

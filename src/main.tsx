@@ -22,6 +22,8 @@ import NuevaContraseña from "./pages/NuevaContraseña.tsx";
 import axios from "axios";
 import Personalizar from "./pages/Personalizar.tsx";
 import ChatPage from "./pages/ChatPage.tsx";
+import EsperaVerificacion from "./pages/EsperaVerificacion.tsx";
+import { VerificarEmail } from "./pages/VerificarEmail.tsx";
 
 axios.defaults.baseURL = "http://127.0.0.1:5000/api";
 axios.defaults.withCredentials = true;
@@ -131,6 +133,14 @@ const router = createBrowserRouter([
       {
         path: "/nuevacontraseña",
         element: <NuevaContraseña />,
+      },
+      {
+        path: "/verificacionregistro",
+        element: <EsperaVerificacion />,
+      },
+      {
+        path: "verificaremail/:magiclink",
+        element: <VerificarEmail />,
       },
     ],
   },

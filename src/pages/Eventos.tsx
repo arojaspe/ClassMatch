@@ -11,7 +11,9 @@ export default function Eventos() {
   const [aplicadosEventos, setAplicadosEventos] = useState<any[]>([]); // Eventos a los que se ha aplicado
   const [eventosAsistidos, setEventosAsistidos] = useState<any[]>([]); // Eventos que el usuario ha asistido
   const [seccionActiva, setSeccionActiva] = useState("Feed");
-  const [eventosOrganizadosIds, setEventosOrganizadosIds] = useState<string[]>([]);
+  const [eventosOrganizadosIds, setEventosOrganizadosIds] = useState<string[]>(
+    []
+  );
 
   // Obtener eventos aplicados
   useEffect(() => {
@@ -19,7 +21,9 @@ export default function Eventos() {
       try {
         const response = await api.get("/ue.myrequests");
         if (response && response.data && response.data.data) {
-          const eventosAplicados = response.data.data.map((evento: any) => evento.EVENT_ID);
+          const eventosAplicados = response.data.data.map(
+            (evento: any) => evento.EVENT_ID
+          );
           setAplicadosEventos(eventosAplicados); // Guardamos los eventos a los que se ha aplicado
         } else {
           console.error("No se ha podido obtener los eventos aplicados.");
@@ -38,7 +42,9 @@ export default function Eventos() {
       try {
         const response = await api.get("/ue.ad/my-events");
         const misEventosData = response.data.data.active;
-        const misEventosIds = misEventosData.map((evento: any) => evento.EVENT_ID);
+        const misEventosIds = misEventosData.map(
+          (evento: any) => evento.EVENT_ID
+        );
         setEventosOrganizadosIds(misEventosIds);
       } catch (error) {
         console.error("Error al obtener mis eventos:", error);
@@ -75,13 +81,19 @@ export default function Eventos() {
           const response = await api.get("/e");
           if (response && response.data) {
             const eventosData = response.data.data.events;
-            const eventosNoPropios = eventosData.filter((evento: any) => !eventosOrganizadosIds.includes(evento.EVENT_ID));
+            const eventosNoPropios = eventosData.filter(
+              (evento: any) => !eventosOrganizadosIds.includes(evento.EVENT_ID)
+            );
 
             // Filtrar eventos no aplicados (es decir, aquellos a los que no se ha enviado solicitud)
-            const eventosNoAplicados = eventosNoPropios.filter((evento: any) => !aplicadosEventos.includes(evento.EVENT_ID));
+            const eventosNoAplicados = eventosNoPropios.filter(
+              (evento: any) => !aplicadosEventos.includes(evento.EVENT_ID)
+            );
 
             setEventos(eventosNoAplicados); // Solo los eventos no aplicados
-            const eventosPropios = eventosData.filter((evento: any) => eventosOrganizadosIds.includes(evento.EVENT_ID));
+            const eventosPropios = eventosData.filter((evento: any) =>
+              eventosOrganizadosIds.includes(evento.EVENT_ID)
+            );
             setMisEventos(eventosPropios);
           } else {
             console.error("Error: La respuesta de la API no contiene eventos.");
@@ -105,16 +117,30 @@ export default function Eventos() {
   );
 
   return (
-    <div className="flex w-full h-screen bg-mainClassMatch pt-28 pb-20 p-16">
+    <div className="flex w-full h-screen font-KhandMedium bg-mainClassMatch pt-28 pb-20 p-16">
       <div className="w-1/6 bg-backgroundClassMatch p-8 rounded-l-xl flex flex-col justify-start">
-        <h2 className="text-6xl font-KhandBold mb-6 text-headClassMatch">Eventos</h2>
+        <h2 className="text-6xl font-KhandBold mb-6 text-headClassMatch">
+          Eventos
+        </h2>
         <ul className="space-y-4">
-          {["Feed", "Mis eventos", "Gestión de eventos", "Creación de eventos"].map((item) => (
+          {[
+            "Feed",
+            "Mis eventos",
+            "Gestión de eventos",
+            "Creación de eventos",
+          ].map((item) => (
             <li
               key={item}
               className={`font-KhandSemiBold text-black cursor-pointer p-2 rounded text-xl 
                 ${seccionActiva === item ? "bg-gray-200 " : ""} 
-                ${item === "Creación de eventos" || item === "Gestión de eventos" ? (seccionActiva === item ? "bg-cyan-700 text-white" : "bg-buttonClassMatch text-white") : ""}`}
+                ${
+                  item === "Creación de eventos" ||
+                  item === "Gestión de eventos"
+                    ? seccionActiva === item
+                      ? "bg-cyan-700 text-white"
+                      : "bg-buttonClassMatch text-white"
+                    : ""
+                }`}
               onClick={() => setSeccionActiva(item)}
             >
               {item}
@@ -140,7 +166,9 @@ export default function Eventos() {
               {/* Mostrar eventos a los que el usuario ha asistido */}
               {eventosAsistidosFiltrados.length > 0 && (
                 <div>
-                  <h3 className="text-2xl font-KhandSemiBold mb-4">Eventos Asistidos</h3>
+                  <h3 className="text-2xl font-KhandSemiBold mb-4">
+                    Eventos Asistidos
+                  </h3>
                   {eventosAsistidosFiltrados.map((evento) => (
                     <MyEventCard key={evento.EVENT_ID} event={evento} />
                   ))}
@@ -150,7 +178,9 @@ export default function Eventos() {
               {/* Mostrar eventos a los que el usuario ha solicitado asistir */}
               {misEventosFiltrados.length > 0 && (
                 <div>
-                  <h3 className="text-2xl font-KhandSemiBold mb-4">Mis Solicitudes</h3>
+                  <h3 className="text-2xl font-KhandSemiBold mb-4">
+                    Mis Solicitudes
+                  </h3>
                   {misEventosFiltrados.map((evento) => (
                     <MyEventCard key={evento.EVENT_ID} event={evento} />
                   ))}
