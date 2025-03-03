@@ -1211,7 +1211,7 @@ export const getUEReqsAdmin = async (req: Request, res: Response) => {
                 }
             })
     } catch (error: any) {
-        res.status(401).send({
+        res.status(400).send({
             message: "Error al encontrar solicitudes: " + error.message,
             data: {
                 error: "Funcs.fUERAdm"

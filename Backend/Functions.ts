@@ -1022,7 +1022,7 @@ export async function findUEventRequestsAdmin(admin: string, event: string) {
     })
 
     if (ueventAccepted.length + ueventRequested.length === 0) {
-        throw new Error("Event has not requests yet")
+        throw new Error("Event has no requests yet")
     }
     return {
         accepted: ueventAccepted,
