@@ -12,6 +12,7 @@ export const VerificarEmail = () => {
     const verifyEmail = async () => {
       try {
         const response = await axios.get(`/verify/${magicLink}`);
+        console.log("Esto se obtiene en verifyemail", response);
         if (response.status === 200) {
           setIsVerified(true);
         } else {
