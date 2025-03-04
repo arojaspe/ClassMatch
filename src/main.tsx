@@ -142,6 +142,10 @@ const router = createBrowserRouter([
         path: "verify/:magicLink",
         element: <VerificarEmail />,
       },
+      {
+        path: "verifysuccess",
+        element: <VerificarEmail />,
+      },
     ],
   },
 ]);
