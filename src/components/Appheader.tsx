@@ -207,7 +207,7 @@ export default function Appheader() {
                   </p>
                   <img
                     className={`h-16 w-16 object-cover rounded-full`}
-                    src={userImage}
+                    src={userImage || "/img/noimage.png"}
                     alt="imagen perfil"
                   />
                 </div>
