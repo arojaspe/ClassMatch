@@ -619,13 +619,9 @@ export const postVerification = async (req: Request, res: Response) => {
 }
 export const getVerification = async (req: Request, res: Response) => {
     try {
-        let uuid: string = await Funcs.checkVerification(req.params.token)
-        res.status(200).send({
-            message: "User has been verified!",
-            data: {
-                user_id: uuid
-            }
-        })
+        console.log("Token: ", req.params.token)
+        await Funcs.checkVerification(req.params.token)
+        res.status(200).redirect(`https://classmatch.site/verify`)
     } catch (error: any) {
         res.status(401).json({
             errors: [{
