@@ -621,7 +621,7 @@ export const getVerification = async (req: Request, res: Response) => {
     try {
         console.log("Token: ", req.params.token)
         await Funcs.checkVerification(req.params.token)
-        res.status(200).redirect(`https://classmatch.site/verify`)
+        res.status(200).redirect(`https://classmatch.site/verifysuccess`)
     } catch (error: any) {
         res.status(401).json({
             errors: [{
