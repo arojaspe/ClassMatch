@@ -20,6 +20,7 @@ export const VerificarEmail = () => {
         }
       } catch (error) {
         console.error("Error verifying email:", error);
+        console.log("Esto se obtiene en verifyemail er", response);
         setIsVerified(false);
       } finally {
         setLoading(false);
