@@ -337,6 +337,7 @@ export const getListaUsuarios = async (req: Request, res: Response) => {
                     { USER_GENDER: gender },
                     { USER_COLLEGE_ID: colleges },
                     { USER_ID: { [Op.notIn]:  ignoredUsers} },
+                    { USER_ID: { [Op.not]: { [Op.startsWith]: "!!!" }} },
                     Sequelize.literal(`TIMESTAMPDIFF(YEAR, USER_BIRTHDATE, CURDATE()) BETWEEN ${Number(ageL)} AND ${Number(ageU)}`),
                 ]
             },

@@ -62,7 +62,7 @@ export async function createUser(firstname: string, lastname: string, email: str
     }
     else {
         await Models.USERS_MOD.create({
-            USER_ID: "",
+            USER_ID: "!!!"+uuidv4(),
             USER_FIRSTNAME: firstname,
             USER_LASTNAME: lastname,
             USER_EMAIL: email,
@@ -122,7 +122,7 @@ export async function isLoggedIn(req: Request, res: Response) {
     }
     try {
         payload = verify(req.cookies["access_token"], "access_secret")
-        if (!payload.USER_ID || payload.USER_ID==="") {
+        if (!payload.USER_ID || payload.USER_ID.substring(0,3)==="!!!") {
             throw new Error("Email has not been verified")
         }
     } catch (accessTokenError: any) {
@@ -180,7 +180,7 @@ export async function authUser(uuid: string) {
                     }
                 ]
         })
-        if (!usuario?.getDataValue("USER_ID") || usuario?.getDataValue("USER_ID")==="") {
+        if (!usuario?.getDataValue("USER_ID") || usuario?.getDataValue("USER_ID").substring(0,3)==="!!!") {
             throw new Error("Email not verified")
         } else {
             return usuario
@@ -205,10 +205,11 @@ export async function findUsersByRating(current_user: string, totalCount: number
 
     const otherUsers = await Models.USERS_MOD.findAll({
         where: {
-            USER_ID: { [Op.notIn]: [current_user, ""] },
-            // USER_GENDER: { [Op.eq]: currentFiltGen },
-            // USER_BIRTHDATE: { [Op.between]: [mn, mx] }
-        },
+            [Op.and]: [
+              { USER_ID: { [Op.notIn]: [current_user] } },
+              { USER_ID: { [Op.not]: { [Op.startsWith]: "!!!" } } }
+            ]
+          },
         attributes: ["USER_ID", "USER_RATING", "USER_FIRSTNAME"]
     });
 
@@ -267,7 +268,7 @@ export let emailinUse= async function (email: string): Promise<string> {
     let result= "New"
     let user= await Models.USERS_MOD.findOne({ where: { USER_EMAIL: email } })
     if (user) {
-        if (user.getDataValue("USER_ID")!= "") {
+        if (user.getDataValue("USER_ID").substring(0,3)!= "!!!") {
             result= "Old"
         } else {
             result= "Pending"
@@ -346,7 +347,7 @@ export async function checkVerification(token: string) {
     if (payload) {
         let new_user = await Models.USERS_MOD.findOne({ where: { USER_EMAIL: payload.email } })
         if (new_user) {
-            if (new_user?.getDataValue("USER_ID") && new_user?.getDataValue("USER_ID")!="") {
+            if (new_user?.getDataValue("USER_ID") && new_user?.getDataValue("USER_ID").substring(0,3)!="!!!") {
                 throw new Error("User is verified already")
             }
             await Models.USERS_MOD.update({ USER_ID: payload.uuid },
@@ -1283,7 +1284,7 @@ export async function createRoom(users: string[], event?: string) {
     return room_id
 }
 export async function checkRoomAndMatches(current_user: string) {
-    let ignoredUsers: string[]= [""]
+    let ignoredUsers: string[]= []
     try {
         const rooms= await Models.ROOMS_MOD.findAll({
                 where: {
