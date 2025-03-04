@@ -406,7 +406,7 @@ export const getUsuario = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const user = await Models.USERS_MOD.findByPk(id, {
-        attributes: { exclude: ["USER_GENDER", "USER_PASSWORD"] },
+        attributes: { exclude: ["USER_PASSWORD"] },
         include: [{
             model: Models.IMAGES_MOD, as: 'USER_IMAGES',
             attributes: ["IMAGE_LINK", "IMAGE_ORDER"],
