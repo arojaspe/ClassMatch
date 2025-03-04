@@ -1,7 +1,7 @@
 export default function Contacto() {
   return <div className="flex justify-center items-center min-h-screen bg-backgroundClassMatch">
   {/* Contenedor principal */}
-  <div className="w-full flex flex-col md:flex-row p-8 space-y-8 md:space-y-0">
+  <div className="w-full flex flex-col md:flex-row p-8 space-y-8 md:space-y-0 max-sm:mt-32 mb-20">
     
     {/* Sección izquierda: Texto */}
     <div className="flex-1 pl-6 flex flex-col justify-center ">

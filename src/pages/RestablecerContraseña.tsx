@@ -28,7 +28,7 @@ export default function RecuperarContraseña() {
     <>
       <main className="text-gray-900 w-lvw flex items-center h-screen bg-backgroundClassMatch">
         <div className="w-full py-14">
-          <div className="w-full flex shadow-xl flex-col items-center bg-cardClassMatch rounded-2xl p-8 m-4 md:max-w-md md:mx-auto">
+          <div className="w-80% flex shadow-xl flex-col items-center bg-cardClassMatch rounded-2xl p-8 m-4 md:max-w-md md:mx-auto">
             <h2 className="font-KhandSemiBold text-5xl text-headClassMatch font-bold">
               Recuperar contraseña
             </h2>

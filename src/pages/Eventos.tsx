@@ -186,108 +186,111 @@ export default function Eventos() {
   }, []);
 
   return (
-    <div className="flex w-full h-screen font-KhandMedium bg-mainClassMatch pt-28 pb-20 p-16">
-      <div className="w-1/6 bg-backgroundClassMatch p-8 rounded-l-xl flex flex-col justify-start">
-        <h2 className="text-6xl font-KhandBold mb-6 text-headClassMatch">
-          Eventos
-        </h2>
-        <ul className="space-y-4">
-          {[
-            "Feed",
-            "Mis eventos",
-            "Gestión de eventos",
-            "Creación de eventos",
-          ].map((item) => (
-            <li
-              key={item}
-              className={`font-KhandSemiBold text-black cursor-pointer p-2 rounded text-xl 
-                ${seccionActiva === item ? "bg-gray-200 " : ""} 
-                ${item === "Creación de eventos" || item === "Gestión de eventos" 
-                  ? (seccionActiva === item && plan === "Premium" ? "bg-cyan-700 text-white" : "bg-buttonClassMatch text-white") 
-                  : ""}`}
-              onClick={() => {
-                if (plan === "Premium" || item !== "Gestión de eventos" && item !== "Creación de eventos") {
-                  setSeccionActiva(item);
-                }
-              }}
-              style={{
-                pointerEvents: (plan !== "Premium" && (item === "Gestión de eventos" || item === "Creación de eventos")) ? 'none' : 'auto', 
-                opacity: (plan !== "Premium" && (item === "Gestión de eventos" || item === "Creación de eventos")) ? 0.5 : 1
-              }}
-            >
-              {item}
-            </li>
-          ))}
-        </ul>
+    <div className="flex w-full h-screen font-KhandMedium bg-mainClassMatch pt-28 pb-20 p-16 flex-col sm:flex-row max-sm:h-auto min-h-screen mt-10 mb-10">
+  {/* Menú de navegación */}
+  <div className="w-full sm:w-1/6 bg-backgroundClassMatch p-8 rounded-tl-xl sm:rounded-l-xl flex flex-col justify-start sm:h-auto max-sm:rounded-tr-xl">
+    <h2 className="text-6xl font-KhandBold mb-6 text-headClassMatch text-center sm:text-left">
+      Eventos
+    </h2>
+    <ul className="space-y-4">
+      {[
+        "Feed",
+        "Mis eventos",
+        "Gestión de eventos",
+        "Creación de eventos",
+      ].map((item) => (
+        <li
+          key={item}
+          className={`font-KhandSemiBold text-black cursor-pointer p-2 rounded text-xl 
+            ${seccionActiva === item ? "bg-gray-200 " : ""} 
+            ${item === "Creación de eventos" || item === "Gestión de eventos" 
+              ? (seccionActiva === item && plan === "Premium" ? "bg-cyan-700 text-white" : "bg-buttonClassMatch text-white") 
+              : ""}`}
+          onClick={() => {
+            if (plan === "Premium" || item !== "Gestión de eventos" && item !== "Creación de eventos") {
+              setSeccionActiva(item);
+            }
+          }}
+          style={{
+            pointerEvents: (plan !== "Premium" && (item === "Gestión de eventos" || item === "Creación de eventos")) ? 'none' : 'auto', 
+            opacity: (plan !== "Premium" && (item === "Gestión de eventos" || item === "Creación de eventos")) ? 0.5 : 1
+          }}
+        >
+          {item}
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  {/* Contenedor de la sección activa */}
+  <div className="w-full sm:w-5/6 bg-accentClassMatch p-6 rounded-br-xl sm:rounded-r-xl shadow-md flex flex-col max-sm:rounded-bl-xl">
+    <h2 className="text-3xl font-KhandBold mb-6">{seccionActiva}</h2>
+
+    {/* Sección de Creación de Eventos */}
+    {seccionActiva === "Creación de eventos" && plan === "Premium" && (
+      <div className="h-full overflow-y-auto">
+        <CreateEventCard />
       </div>
+    )}
 
-      <div className="w-5/6 bg-accentClassMatch p-6 rounded-r-xl shadow-md flex flex-col">
-        <h2 className="text-3xl font-KhandBold mb-6">{seccionActiva}</h2>
-
-        {/* Sección de Creación de Eventos */}
-        {seccionActiva === "Creación de eventos" && plan === "Premium" && (
-          <div className="h-full overflow-y-auto">
-            <CreateEventCard />
-          </div>
-        )}
-
-        {/* Sección de Mis Eventos */}
-        {seccionActiva === "Mis eventos" && (
-          <div className="overflow-x-auto">
-            <div className="space-y-6">
-              {/* Sección de Eventos Asistidos */}
-              <div className="flex flex-col">
-                <h3 className="text-2xl font-KhandSemiBold mb-4">Eventos Asistidos</h3>
-                {eventosAsistidos.length > 0 && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {eventosAsistidos.map((evento) => (
-                      <MyEventCard key={evento.EVENT_ID} event={evento} aceptado={true}/>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Sección de Mis Solicitudes */}
-              <div className="flex flex-col">
-                <h3 className="text-2xl font-KhandSemiBold mb-4">Mis Solicitudes</h3>
-                {eventosAplicados.length > 0 && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {eventosAplicados.map((evento) => (
-                      <MyEventCard key={evento.EVENT_ID} event={evento} aceptado={false}/>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Sección de Feed */}
-        {seccionActiva === "Feed" ? (
-          loading ? (
-            <div> Cargando eventos... </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mr-2">
-                {eventos.map((evento) => (
-                  <EventCard key={evento.EVENT_ID} event={evento} />
+    {/* Sección de Mis Eventos */}
+    {seccionActiva === "Mis eventos" && (
+      <div className="overflow-x-auto">
+        <div className="space-y-6">
+          {/* Sección de Eventos Asistidos */}
+          <div className="flex flex-col">
+            <h3 className="text-2xl font-KhandSemiBold mb-4">Eventos Asistidos</h3>
+            {eventosAsistidos.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {eventosAsistidos.map((evento) => (
+                  <MyEventCard key={evento.EVENT_ID} event={evento} aceptado={true} />
                 ))}
               </div>
-            </div>
-          )
-        ) : null}
-
-        {/* Sección de Gestión de Eventos */}
-        {seccionActiva === "Gestión de eventos" && plan === "Premium" && (
-          <div className="overflow-y-auto">
-            <div className="flex flex-col space-y-4">
-              {misEventos.map((evento) => (
-                <OwnedEventCard key={evento.EVENT_ID} event={evento} />
-              ))}
-            </div>
+            )}
           </div>
-        )}
+
+          {/* Sección de Mis Solicitudes */}
+          <div className="flex flex-col">
+            <h3 className="text-2xl font-KhandSemiBold mb-4">Mis Solicitudes</h3>
+            {eventosAplicados.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {eventosAplicados.map((evento) => (
+                  <MyEventCard key={evento.EVENT_ID} event={evento} aceptado={false} />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    )}
+
+    {/* Sección de Feed */}
+    {seccionActiva === "Feed" ? (
+      loading ? (
+        <div> Cargando eventos... </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mr-2">
+            {eventos.map((evento) => (
+              <EventCard key={evento.EVENT_ID} event={evento} />
+            ))}
+          </div>
+        </div>
+      )
+    ) : null}
+
+    {/* Sección de Gestión de Eventos */}
+    {seccionActiva === "Gestión de eventos" && plan === "Premium" && (
+      <div className="overflow-y-auto">
+        <div className="flex flex-col space-y-4">
+          {misEventos.map((evento) => (
+            <OwnedEventCard key={evento.EVENT_ID} event={evento} />
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+</div>
+
   );
 }

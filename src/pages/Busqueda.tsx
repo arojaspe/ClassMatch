@@ -128,8 +128,8 @@ export default function Busqueda() {
   };
 
   return (
-    <div className="h-screen pt-[9%] bg-mainClassMatch flex justify-center">
-      <div className="flex flex-col h-[85%] w-[90%] items-center bg-backgroundClassMatch rounded-lg">
+    <div className="h-screen pt-[9%] bg-mainClassMatch flex justify-center max-sm:h-auto">
+      <div className="flex flex-col h-[85%] w-[90%] items-center bg-backgroundClassMatch rounded-lg max-sm:mt-20 mb-32">
         <aside className="w-full bg-accentClassMatch rounded-t-lg justify-between h-[10%] flex items-center px-4">
           <h1 className="text-black text-2xl font-KhandMedium">
             ¡Veamos qué personas puedes encontrar en ClassMatch!
@@ -142,7 +142,7 @@ export default function Busqueda() {
           </button>
           {isModalOpen && (
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-              <div className="bg-white p-6 rounded-lg w-[30%]">
+              <div className="bg-white p-6 rounded-lg w-[30%] max-sm:w-[50%]">
                 <h2 className="text-xl font-KhandSemiBold mb-4">
                   Reportar al Usuario {currentUser.USER_FIRSTNAME}{" "}
                   {currentUser.USER_LASTNAME}
@@ -210,7 +210,7 @@ export default function Busqueda() {
               </button>
               {isMatchModalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                  <div className="bg-white p-6 rounded-lg w-[15%]">
+                  <div className="bg-white p-6 rounded-lg w-[15%] max-sm:w-[50%]">
                     <div className="flex justify-center space-x-4">
                       <button
                         className="bg-gray-300 hover:bg-gray-400 text-black font-semibold px-4 py-2 rounded-md mr-2"

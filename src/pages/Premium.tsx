@@ -55,8 +55,8 @@ export default function Premium() {
 
   return (
     <>
-      <div className="bg-accentClassMatch h-screen flex ">
-        <main className="max-w-6xl mx-auto px-8 flex flex-col justify-center items-center">
+      <div className="bg-accentClassMatch h-screen flex max-sm:h-auto">
+        <main className="max-w-6xl mx-auto px-8 flex flex-col justify-center items-center max-sm:mt-32 mb-24">
           <div className="max-w-5xl mx-auto mb-4 text-center">
             <p className="text-headClassMatch font-medium font-KhandSemiBold text-3xl">
               Con ClassMatch Premium, tu experiencia estará a otro nivel
