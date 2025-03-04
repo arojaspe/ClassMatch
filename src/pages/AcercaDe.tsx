@@ -57,7 +57,7 @@ export default function AcercaDe() {
             Carlos Andres Rios Rojas
           </h2>
           <a
-            href="https://github.com/dafty-punky-boy"
+            href="https://github.com/neuro-trigger"
             className="font-KhandRegular text-[2vh] text-headClassMatch"
             target="_blank"
           >
