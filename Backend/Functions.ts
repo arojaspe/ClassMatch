@@ -207,7 +207,7 @@ export async function findUsersByRating(current_user: string, totalCount: number
         where: {
             [Op.and]: [
               { USER_ID: { [Op.notIn]: [current_user] } },
-              { USER_ID: { [Op.not]: { [Op.startsWith]: "!!!" } } }
+              { USER_ID: { [Op.notLike]: "!!!%" } }
             ]
           },
         attributes: ["USER_ID", "USER_RATING", "USER_FIRSTNAME"]
