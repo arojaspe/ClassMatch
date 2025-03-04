@@ -139,7 +139,7 @@ const router = createBrowserRouter([
         element: <EsperaVerificacion />,
       },
       {
-        path: "verificaremail/:magiclink",
+        path: "api/verify/:magiclink",
         element: <VerificarEmail />,
       },
     ],
