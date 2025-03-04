@@ -2,7 +2,7 @@ export default function AcercaDe() {
   return (
     <div className="flex flex-col justify-center items-center min-h-screen bg-backgroundClassMatch">
       {/* Contenedor de las tres tarjetas con grid */}
-      <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8 p-8 ">
+      <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8 p-8 max-sm:mt-28">
         {/* Sobre nosotros */}
         <div className="p-6 bg-mainClassMatch bg-opacity-40 shadow-lg rounded-xl flex flex-col transition-transform duration-300 transform hover:scale-105 hover:shadow-2xl hover:bg-opacity-25">
           <h1 className="font-KhandBold text-[7.5vh] text-headClassMatch font-semibold">
@@ -51,7 +51,7 @@ export default function AcercaDe() {
           </p>
         </div>
       </div>
-      <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
+      <div className="w-full grid grid-cols-2 mb-20 md:grid-cols-4 gap-4 p-4">
         <div className="p-4 bg-mainClassMatch bg-opacity-40 shadow-lg rounded-xl flex flex-col items-center transition-transform duration-300 transform hover:scale-105 hover:shadow-2xl hover:bg-opacity-25">
           <h2 className="font-KhandBold text-[3vh] text-headClassMatch font-semibold">
             Carlos Andres Rios Rojas

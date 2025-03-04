@@ -14,6 +14,37 @@ export default function Appheader() {
   const [plan, setPlan] = useState("");
   const navigate = useNavigate();
 
+  const [mobileMenuVisible, setMobileMenuVisible] = useState(false); // Estado para el menú desplegable móvil
+
+  const toggleMobileMenu = () => {
+    setMobileMenuVisible(!mobileMenuVisible); // Toggle del menú móvil
+  };
+
+
+  const handleMenuClick = (event:MouseEvent) => {
+
+    const target = event.target as Node;
+    // Lógica para ocultar el menú cuando se hace clic fuera de él
+    if (
+      menuRef.current && 
+      !menuRef.current.contains(target) &&
+      buttonRef.current && 
+      !buttonRef.current.contains(target)
+    ) {
+      setMobileMenuVisible(false); // Ocultar el menú móvil
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("click", handleMenuClick); // Agregar listener para manejar clics fuera del menú
+    return () => {
+      document.removeEventListener("click", handleMenuClick); // Limpiar el listener
+    };
+  }, []);
+
+
+  
+
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
@@ -105,9 +136,9 @@ export default function Appheader() {
 
   return (
     <header className="py-4 bg-headClassMatch text-white shadow-md w-full fixed top-0 h-auto z-10">
-      <div className="mx-auto px-10">
-        <div className="flex justify-start items-center">
-          <div className="w-[20%]">
+      <div className="mx-auto px-4 sm:px-6 md:px-10">
+        <div className="flex justify-between items-center">
+          <div className="w-[30%] sm:w-[20%]">
             <Link to="/">
               <img
                 src="/img/ClassmatchTextWhite.png"
@@ -117,12 +148,13 @@ export default function Appheader() {
             </Link>
           </div>
 
+          {/* Menú para pantallas grandes */}
           {isAuthenticated ? (
             <>
-              <nav className="flex px-8 space-x-4 w-[80%] justify-start">
+              <nav className="hidden sm:flex px-8 space-x-4 w-[70%] justify-start">
                 <Link
                   to="/busqueda"
-                  className="px-8 py-2 bg-buttonClassMatch font-KhandMedium text-lg text-white rounded-md hover:bg-gray-100 hover:text-black transition font-Khand-Regular"
+                  className="px-8 py-2 bg-buttonClassMatch font-KhandMedium text-lg text-white rounded-md hover:bg-gray-100 hover:text-black transition"
                 >
                   Búsqueda
                 </Link>
@@ -148,10 +180,11 @@ export default function Appheader() {
                 )}
               </nav>
 
+              {/* Menú desplegable */}
               <div
                 className="right-4 h-10 absolute flex items-center cursor-pointer font-KhandMedium text-lg text-white hover:text-mainClassMatch transition space-x-3"
-                ref={buttonRef} // Referencia al contenedor
-                onClick={toggleMenu} // Alterna la visibilidad del menú
+                ref={buttonRef}
+                onClick={toggleMenu}
               >
                 <div
                   className={`flex items-center space-x-2 p-1 rounded-full ${
@@ -173,9 +206,7 @@ export default function Appheader() {
                     }
                   </p>
                   <img
-                    className={`h-16 w-16 object-cover rounded-full ${
-                      plan === "Premium" ? "" : ""
-                    }`}
+                    className={`h-16 w-16 object-cover rounded-full`}
                     src={userImage}
                     alt="imagen perfil"
                   />
@@ -184,9 +215,9 @@ export default function Appheader() {
                 {/* Menú desplegable */}
                 {menuVisible && (
                   <div
-                    ref={menuRef} // Referencia al menú
+                    ref={menuRef}
                     className="absolute mt-2 bg-white text-black rounded-md shadow-lg w-40 z-20"
-                    style={{ top: "140%", left: "-0%" }} // Esto asegura que el menú se muestre hacia abajo
+                    style={{ top: "140%", left: "-0%" }}
                   >
                     <Link
                       to="/miperfil"
@@ -205,10 +236,10 @@ export default function Appheader() {
               </div>
             </>
           ) : (
-            <nav className="flex w-[80%] justify-end space-x-4">
+            <nav className="flex w-[70%] sm:w-[50%] justify-end space-x-4">
               <Link
                 to="/login"
-                className="px-8 py-2 bg-buttonClassMatch font-KhandMedium text-lg text-white rounded-md hover:bg-gray-100 hover:text-black transition font-Khand-Regular"
+                className="px-8 py-2 bg-buttonClassMatch font-KhandMedium text-lg text-white rounded-md hover:bg-gray-100 hover:text-black transition"
               >
                 Ingresar
               </Link>
@@ -222,6 +253,69 @@ export default function Appheader() {
           )}
         </div>
       </div>
+
+      {/* Menú móvil */}
+      {isAuthenticated && (
+        <>
+          {/* Menú hamburguesa */}
+          <div className="sm:hidden flex justify-between items-center w-full">
+            <button
+              className="text-white hover:text-gray-200 focus:outline-none mx-auto"
+              onClick={toggleMobileMenu}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </button>
+          </div>
+
+          {/* Menú móvil */}
+          {mobileMenuVisible && (
+            <div className="sm:hidden absolute w-full bg-white text-black shadow-lg z-10">
+              <nav className="flex flex-col space-y-4 p-4">
+                <Link
+                  to="/busqueda"
+                  className="px-6 py-2 bg-buttonClassMatch font-KhandMedium text-lg text-white rounded-md hover:bg-gray-100 hover:text-black transition"
+                >
+                  Búsqueda
+                </Link>
+                <Link
+                  to="/mismatch"
+                  className="px-6 py-2 bg-buttonClassMatch font-KhandMedium text-lg text-white rounded-md hover:bg-gray-100 hover:text-black transition"
+                >
+                  Mis match
+                </Link>
+                <Link
+                  to="/eventos"
+                  className="px-6 py-2 bg-buttonClassMatch font-KhandMedium text-lg text-white rounded-md hover:bg-gray-100 hover:text-black transition"
+                >
+                  Eventos
+                </Link>
+                {plan !== "Premium" && (
+                  <Link
+                    to="/premium"
+                    className="px-6 py-2 bg-gradient-to-r from-premiumButtonClassMatch via-teal-600 to-cyan-600 font-KhandMedium text-lg text-white rounded-md hover:bg-gray-100 hover:text-black transition"
+                  >
+                    Premium
+                  </Link>
+                )}
+              </nav>
+            </div>
+          )}
+        </>
+      )}
+
     </header>
   );
 }

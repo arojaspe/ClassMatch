@@ -223,7 +223,7 @@ const ChatPage: React.FC = () => {
 
   return (
     <div className="flex items-center justify-center h-screen bg-backgroundClassMatch">
-      <div className="flex my-[12vh] mx-auto w-full max-w-5xl h-[75vh] font-KhandRegular bg-mainClassMatch rounded-xl shadow-lg overflow-hidden">
+      <div className="flex my-[12vh] mx-auto w-full max-w-5xl h-[75vh] font-KhandRegular bg-mainClassMatch rounded-xl shadow-lg overflow-hidden max-sm:w-[90%] mt-36">
         {/* Sidebar with Rooms */}
         <div className="w-1/4 bg-accentClassMatch p-6 border-r">
           {roomsLoading ? (
@@ -234,29 +234,36 @@ const ChatPage: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-3">
-              {rooms.map((room) => (
-                <div
-                  key={room.ROOM_ID}
-                  className={`p-3 rounded-lg cursor-pointer transition duration-300 flex items-center justify-between ${
-                    currentRoom === room.ROOM_ID
-                      ? "bg-mainClassMatch text-white text-lg font-KhandSemiBold shadow-md"
-                      : "bg-white text-lg font-KhandSemiBold hover:bg-gray-200"
-                  }`}
-                  onClick={() => handleRoomClick(room)}
-                >
-                  <span>{room.USER_FIRSTNAME}</span>
-                  <img
-                    className={`h-16 w-16 object-cover rounded-full ${
-                      room.NEW && currentRoom !== room.ROOM_ID
-                        ? "border-4 border-green-500"
-                        : "border-2 border-white"
-                    }`}
-                    src={room.USER_IMAGE}
-                    alt="imagen perfil"
-                  />
-                </div>
-              ))}
-            </div>
+  {rooms.map((room) => (
+    <div
+      key={room.ROOM_ID}
+      className={`p-3 rounded-lg cursor-pointer transition duration-300 flex items-center justify-between ${
+        currentRoom === room.ROOM_ID
+          ? "bg-mainClassMatch text-white text-lg font-KhandSemiBold shadow-md"
+          : "bg-white text-lg font-KhandSemiBold hover:bg-gray-200"
+      }`}
+      onClick={() => handleRoomClick(room)}
+    >
+      {/* Contenedor que usa justify-between para poner los elementos en los extremos */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center w-full sm:space-x-4 justify-between">
+        {/* Nombre del usuario */}
+        <span className="text-lg">{room.USER_FIRSTNAME}</span>
+
+        {/* Imagen de usuario */}
+        <img
+          className={`h-16 w-16 object-cover rounded-full ${
+            room.NEW && currentRoom !== room.ROOM_ID
+              ? "border-4 border-green-500"
+              : "border-2 border-white"
+          }`}
+          src={room.USER_IMAGE}
+          alt="imagen perfil"
+        />
+      </div>
+    </div>
+  ))}
+</div>
+
           )}
         </div>
 

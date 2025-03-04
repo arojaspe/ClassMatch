@@ -83,7 +83,7 @@ export default function LoginCard() {
     <>
       <main className="text-gray-900 w-lvw">
         <div className="w-full py-14">
-          <div className="w-full flex shadow-xl flex-col items-center bg-cardClassMatch rounded-2xl p-8 m-4 md:max-w-md md:mx-auto">
+          <div className="w-[80%] mx-auto flex shadow-xl flex-col items-center bg-cardClassMatch rounded-2xl p-8 m-4 md:max-w-md md:mx-auto">
             <h2 className="font-KhandSemiBold text-5xl text-headClassMatch font-bold">
               Ingresar
               {user}

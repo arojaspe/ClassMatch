@@ -1,7 +1,7 @@
 export default function TerminosYCondiciones() {
   return (
     <div className="flex justify-center items-center min-h-screen bg-backgroundClassMatch py-8 px-4">
-      <div className="w-full m-20 p-8 bg-white bg-opacity-80 shadow-lg rounded-xl">
+      <div className="w-full m-20 p-8 bg-white bg-opacity-80 shadow-lg rounded-xl max-sm:mt-28">
         {/* Título */}
         <h1 className="font-KhandBold text-4xl text-headClassMatch text-center mb-6">Términos y Condiciones</h1>
 

@@ -135,7 +135,7 @@ export default function CrearCuenta() {
   return (
     <main className="w-lvw font-KhandMedium text-xl text-headClassMatch bg-backgroundClassMatch">
       <div className="w-full pt-20 pb-14">
-        <div className="w-full flex shadow-xl flex-col items-center bg-cardClassMatch rounded-2xl p-8 m-4 md:max-w-3xl md:mx-auto">
+        <div className="w-[90%] mx-auto flex shadow-xl flex-col items-center bg-cardClassMatch rounded-2xl p-8 m-4 md:max-w-3xl md:mx-auto">
           <h2 className="font-KhandSemiBold text-5xl text-buttonClassMatch font-bold">
             Registro
           </h2>

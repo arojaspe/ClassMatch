@@ -265,7 +265,7 @@ export default function PersonalizarPerfil() {
   return (
     <main className="text-black bg-backgroundClassMatch">
       <div className="w-full pt-20 pb-14 ">
-        <div className="w-full flex shadow-xl flex-col items-center bg-cardClassMatch rounded-2xl p-8 m-4 md:max-w-6xl md:mx-auto">
+        <div className="w-full flex shadow-xl flex-col items-center bg-cardClassMatch rounded-2xl p-8 m-4 md:max-w-6xl md:mx-auto max-sm:w-[95%]">
           <h2 className="font-KhandSemiBold text-7xl text-headClassMatch font-bold">
             Personalizar perfil
           </h2>
