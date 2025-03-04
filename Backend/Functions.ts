@@ -52,6 +52,7 @@ export async function createUser(firstname: string, lastname: string, email: str
     let college_domain = await findCollege(college).then((college) => college?.getDataValue("COLLEGE_DOMAIN"))
     if (usuario!=  "New") {
         if (usuario=== "Pending") {
+            await verifyEmail(email)
             throw new Error("Pending verification email")
         } else {
             throw new Error("User with that email already exists")
@@ -262,7 +263,7 @@ export let findUser = async function (id?: string, email?: string) {
 
     return usuario
 }
-let emailinUse= async function (email: string): Promise<string> {
+export let emailinUse= async function (email: string): Promise<string> {
     let result= "New"
     let user= await Models.USERS_MOD.findOne({ where: { USER_EMAIL: email } })
     if (user) {
@@ -270,6 +271,7 @@ let emailinUse= async function (email: string): Promise<string> {
             result= "Old"
         } else {
             result= "Pending"
+            console.log(result)
         }
     }
     return result
@@ -342,7 +344,7 @@ export async function checkVerification(token: string) {
     let payload: any;
     payload = verify(token, "id_secret")
     if (payload) {
-        let new_user = await findUser(undefined, payload.email)
+        let new_user = await Models.USERS_MOD.findOne({ where: { USER_EMAIL: payload.email } })
         if (new_user) {
             if (new_user?.getDataValue("USER_ID") && new_user?.getDataValue("USER_ID")!="") {
                 throw new Error("User is verified already")

@@ -589,12 +589,22 @@ export const postVerification = async (req: Request, res: Response) => {
                 }]
             })
         } else {
-            await Funcs.findUser(undefined, req.body.email)
-            Funcs.verifyEmail(req.body.email)
+            const inUse= await Funcs.emailinUse(req.body.email)
+            if (inUse=== "Old") {
+                res.status(401).json({
+                    errors: [{
+                        message: "Unable to send verification email: Email already in use",
+                        extensions: {
+                            code: "Conts.pVer"
+                        }
+                    }]
+                })
+            } else {
+                await Funcs.verifyEmail(req.body.email)
             res.status(200).send({
                 message: "Verification email was sent!",
             })
-        }
+            }        }
     } catch (error: any) {
         res.status(401).json({
             errors: [{

@@ -34,7 +34,7 @@ export const VerifyEmail = ({ magicLink }: RaycastMagicLinkEmailProps) => (
           <Text style={paragraph}>
             <Link
               style={link}
-              href={`https://classmatch.site/verificaremail/${magicLink}`}
+              href={`https://classmatch.site/api/verify/${magicLink}`}
             >
               👉 Haz click aquí 👈
             </Link>
@@ -69,7 +69,7 @@ export const VerifyEmail = ({ magicLink }: RaycastMagicLinkEmailProps) => (
 );
 
 VerifyEmail.PreviewProps = {
-  magicLink: "https://classmatch.site/verification/test-token", // Local testing
+  magicLink: "https://classmatch.site/api/verify/test-token", // Local testing
 } as RaycastMagicLinkEmailProps;
 
 const main = {
