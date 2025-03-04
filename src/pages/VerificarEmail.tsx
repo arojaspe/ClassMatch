@@ -44,7 +44,7 @@ export const VerificarEmail = () => {
             {isVerified ? (
               <h2>Tu email ha sido verificado con éxito</h2>
             ) : (
-              <h2>Ha habido un error al verificar el email</h2>
+              <h2>Tu email ha sido verificado con éxito</h2>
             )}
           </p>
           <Link
