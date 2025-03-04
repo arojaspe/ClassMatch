@@ -34,7 +34,7 @@ export const VerifyEmail = ({ magicLink }: RaycastMagicLinkEmailProps) => (
           <Text style={paragraph}>
             <Link
               style={link}
-              href={`https://classmatch.site/api/verify/${magicLink}`}
+              href={`https://classmatch.site/verify/${magicLink}`}
             >
               👉 Haz click aquí 👈
             </Link>
