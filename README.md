@@ -44,6 +44,17 @@ Conéctate con otros estudiantes más fácil y más rápido.
 **Server:** Express, Sequelize, TypeScript, MySQL, PostMan
 
 
+## **Screenshots**
+
+![Inicio](https://github.com/arojaspe/ClassMatch/blob/main/Frontend/public/classmatch1.png)
+![Perfil](https://github.com/arojaspe/ClassMatch/blob/main/Frontend/public/classmatch2.png)
+![Horario](https://github.com/arojaspe/ClassMatch/blob/main/Frontend/public/classmatch3.png)
+![Feed Usuarios](https://github.com/arojaspe/ClassMatch/blob/main/Frontend/public/classmatch4.png)
+![Feed Eventos](https://github.com/arojaspe/ClassMatch/blob/main/Frontend/public/classmatch5.png)
+![Chats](https://github.com/arojaspe/ClassMatch/blob/main/Frontend/public/classmatch6.png)
+![Premium](https://github.com/arojaspe/ClassMatch/blob/main/Frontend/public/classmatch7.png)
+
+
 
 
 ## **Authors**
