@@ -1,0 +1,60 @@
+@import "tailwindcss/base";
+
+@import "tailwindcss/components";
+
+@import "tailwindcss/utilities";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Khand-Regular";
+  src: local(Khand-Regular),
+    url("./assets/fonts/Khand-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Khand-Bold";
+  src: local(Khand-Bold),
+    url("./assets/fonts/Khand-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Khand-Light";
+  src: local(Khand-Light),
+    url("./assets/fonts/Khand-Light.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Khand-Medium";
+  src: local(Khand-Medium),
+    url("./assets/fonts/Khand-Medium.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Khand-SemiBold";
+  src: local(Khand-SemiBold),
+    url("./assets/fonts/Khand-SemiBold.ttf") format("truetype");
+}
+
+.custom-scrollbar {
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #004954 #f1f1f1;
+}
+
+/* WebKit browsers */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #72A2A9;
+  border-radius: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #004954;
+}
