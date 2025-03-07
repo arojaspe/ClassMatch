@@ -1,0 +1,12 @@
+# Ignore all .log files
+*.log
+
+# Ignore environment variables
+.env
+
+# Folders and Files
+GCP_Secret.json
+Dist/
+Backend/test.ts
+Bulk/
+node_modules/
